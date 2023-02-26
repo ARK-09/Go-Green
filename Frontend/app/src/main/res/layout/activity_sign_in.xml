@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:context=".SignUp">
+
+        <ImageButton
+            android:id="@+id/back_btn"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="16dp"
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_back_arrow"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="TouchTargetSizeCheck" />
+
+        <TextView
+            android:id="@+id/welcome_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="70dp"
+            android:layout_marginEnd="16dp"
+            android:text="Welcome Back!"
+            android:fontFamily="@font/inter_semibold"
+            android:textColor="@color/text_primary"
+            android:textSize="35sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/back_btn" />
+
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/email_ti"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            app:boxStrokeColor="@color/primary"
+            app:errorEnabled="true"
+            app:hintTextColor="@color/text_primary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/welcome_tv">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:background="@android:color/transparent"
+                android:hint="Email"
+                android:textCursorDrawable="@null"
+                android:fontFamily="@font/inter"
+                android:inputType="textEmailAddress"
+                android:paddingStart="0dp"
+                android:paddingEnd="0dp"
+                android:textColor="@color/text_primary" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/password_ti"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:boxStrokeColor="@color/primary"
+            app:errorEnabled="true"
+            app:helperTextTextColor="@color/text_primary"
+            app:hintTextColor="@color/text_primary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/email_ti"
+            app:passwordToggleEnabled="true">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:background="@android:color/transparent"
+                android:hint="Password"
+                android:textCursorDrawable="@null"
+                android:fontFamily="@font/inter"
+                android:inputType="textEmailAddress"
+                android:paddingStart="0dp"
+                android:paddingEnd="0dp"
+                android:textColor="@color/text_primary" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <Button
+            android:id="@+id/continue_btn"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="8dp"
+            android:backgroundTint="@color/primary"
+            android:text="Log in"
+            android:textColor="@color/white"
+            app:layout_constraintBottom_toTopOf="@+id/divider"
+            app:layout_constraintEnd_toEndOf="@+id/password_ti"
+            app:layout_constraintHorizontal_bias="0.50"
+            app:layout_constraintStart_toStartOf="@+id/password_ti"
+            app:layout_constraintTop_toBottomOf="@+id/password_ti"
+            app:layout_constraintVertical_bias="1.0" />
+
+        <View
+            android:id="@+id/divider"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="10dp"
+            android:background="?android:attr/listDivider"
+            app:layout_constraintBottom_toTopOf="@+id/google_plus_ib"
+            app:layout_constraintEnd_toStartOf="@+id/or_tv"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/or_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="OR"
+            app:layout_constraintBottom_toBottomOf="@+id/divider"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.50"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/divider" />
+
+        <View
+            android:id="@+id/divider2"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="16dp"
+            android:background="?android:attr/listDivider"
+            app:layout_constraintBottom_toBottomOf="@+id/or_tv"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/or_tv"
+            app:layout_constraintTop_toTopOf="@+id/or_tv" />
+
+        <ImageButton
+            android:id="@+id/twitter_ib"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_twitter"
+            app:layout_constraintBottom_toBottomOf="@+id/google_plus_ib"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/google_plus_ib"
+            app:layout_constraintTop_toTopOf="@+id/google_plus_ib"
+            app:tint="@color/primary" />
+
+        <ImageButton
+            android:id="@+id/google_plus_ib"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginBottom="32dp"
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_google_plus"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/twitter_ib"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/facebook_ib"
+            app:tint="@color/primary" />
+
+        <ImageButton
+            android:id="@+id/facebook_ib"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_facebook"
+            app:layout_constraintBottom_toBottomOf="@+id/google_plus_ib"
+            app:layout_constraintEnd_toStartOf="@+id/google_plus_ib"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/google_plus_ib"
+            app:tint="@color/primary" />
+
+        <TextView
+            android:id="@+id/forget_password_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text="Forget Password?"
+            android:fontFamily="@font/inter_semibold"
+            app:layout_constraintStart_toStartOf="@+id/password_ti"
+            app:layout_constraintTop_toBottomOf="@+id/password_ti" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>
