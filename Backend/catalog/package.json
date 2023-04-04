@@ -1,0 +1,19 @@
+{
+  "name": "com.arkindustries",
+  "version": "1.0.0",
+  "description": "Catalog service",
+  "main": "app.js",
+  "scripts": {
+    "test": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/ARK-09/Go-Green.git"
+  },
+  "author": "Kamran Siddique [ARK]",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ARK-09/Go-Green/issues"
+  },
+  "homepage": "https://github.com/ARK-09/Go-Green#readme"
+}

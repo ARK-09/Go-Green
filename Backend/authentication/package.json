@@ -1,0 +1,23 @@
+{
+  "name": "com.arkindustries",
+  "version": "1.0.0",
+  "description": "Authentication service",
+  "main": "app.js",
+  "scripts": {
+    "test": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/ARK-09/Go-Green.git"
+  },
+  "author": "Kamran Siddique [ARK]",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ARK-09/Go-Green/issues"
+  },
+  "homepage": "https://github.com/ARK-09/Go-Green#readme",
+  "dependencies": {
+    "express": "^4.18.2",
+    "nodemon": "^2.0.20"
+  }
+}
