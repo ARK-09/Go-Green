@@ -1,4 +1,4 @@
-apiVersion: skaffold/v4beta2 latest
+apiVersion: skaffold/v4beta2
 kind: Config
 deploy:
   kubectl:
@@ -9,10 +9,10 @@ build:
     push: false
   artifacts:
     - image: ark09/authentication
-      context: authentication
+      context: .
       docker:
         dockerfile: Dockerfile
       sync:
         manual:
-          - src: "src/**/*.js"
+          - src: 'src/**/*.js'
             dest: .
