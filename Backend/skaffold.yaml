@@ -1,18 +1,17 @@
 apiVersion: skaffold/v4beta2
 kind: Config
-deploy:
-  kubectl:
-    manifests:
-      - ./infra/k8s/*
 build:
   local:
     push: false
   artifacts:
     - image: ark09/authentication
-      context: .
+      context: authentication
       docker:
         dockerfile: Dockerfile
       sync:
         manual:
           - src: 'src/**/*.js'
             dest: .
+manifests:
+  rawYaml:
+    - authentication/infra/k8s/authentication-depl.yaml

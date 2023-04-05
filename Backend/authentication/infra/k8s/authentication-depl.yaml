@@ -1,5 +1,5 @@
-apiVersion: /app/v1
-kind: Deployement
+apiVersion: apps/v1
+kind: Deployment
 metadata:
   name: authentication-depl
 spec:  
@@ -9,12 +9,12 @@ spec:
       app: authentication
   template:
     metadata:
-      lables:
+      labels:
         app: authentication
     spec:
       containers:
-       - name: authentication
-        image: ark09/authentication
+       -  name: authentication
+          image: ark09/authentication
 ---
 apiVersion: v1
 kind: Service
@@ -26,5 +26,5 @@ spec:
   ports:
     - name: authentication
       protocol: TCP
-      port: 4001
-      targetPort: 4001
+      port: 4000
+      targetPort: 4000
