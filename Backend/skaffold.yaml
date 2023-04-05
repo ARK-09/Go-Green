@@ -14,4 +14,5 @@ build:
             dest: .
 manifests:
   rawYaml:
+    - authentication/infra/k8s/ingress-srv.yaml
     - authentication/infra/k8s/authentication-depl.yaml
