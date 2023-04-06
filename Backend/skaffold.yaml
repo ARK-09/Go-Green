@@ -16,3 +16,4 @@ manifests:
   rawYaml:
     - authentication/infra/k8s/ingress-srv.yaml
     - authentication/infra/k8s/authentication-depl.yaml
+    - authentication/infra/k8s/authentication-mongo-depl.yaml

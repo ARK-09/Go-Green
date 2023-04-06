@@ -5,10 +5,11 @@ const handelProductionErrors = (err, res) => {
     err.status = "error";
     err.statusCode = 500;
     err.message = "Something went wrong...";
-  }
+  }  
 
   res.status(err.statusCode).json({
     status: err.status,
+    code: err.statusCode,
     message: err.message,
   });
 };
