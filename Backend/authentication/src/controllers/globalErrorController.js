@@ -5,7 +5,7 @@ const handelProductionErrors = (err, res) => {
     err.status = "error";
     err.statusCode = 500;
     err.message = "Something went wrong...";
-  }  
+  }
 
   res.status(err.statusCode).json({
     status: err.status,
@@ -49,7 +49,7 @@ module.exports = async (err, req, res, next) => {
   if (process.env.NODE_ENV === "development") {
     handelDevelopmentErrors(err, res);
   } else if (process.env.NODE_ENV === "production") {
-    let error = { ...err };
+    let error = { ...err, message: err.message };
 
     if (err.name === "CastError") {
       error = handelCastErrors(error);

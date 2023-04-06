@@ -1,10 +1,7 @@
 const mongoose = require("mongoose");
 const app = require("./app");
 
-const connectionString = process.env.MONGO_URI.replace(
-  "<password>",
-  process.env.PASSWORD
-);
+const connectionString = process.env.MONGO_URI;
 
 mongoose.connect(connectionString).then(() => {
   console.log("DB connection successful!");
@@ -13,10 +10,7 @@ mongoose.connect(connectionString).then(() => {
 const port = process.env.PORT || 4000;
 
 const server = app.listen(port, () => {
-  var host = server.address().address
-  var port = server.address().port
-  
-  console.log(`Listening at http://${host}:${port}`)
+  console.log(`Listening at port:${port}`);
 });
 
 process.on("uncaughtException", (err) => {

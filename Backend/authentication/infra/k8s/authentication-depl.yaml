@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: authentication-depl
-spec:  
+spec:
   replicas: 1
   selector:
     matchLabels:
@@ -13,16 +13,20 @@ spec:
         app: authentication
     spec:
       containers:
-       -  name: authentication
+        - name: authentication
           image: ark09/authentication
           env:
             - name: MONGO_URI
-              value: 'mongodb://authentication-mongo-srv:27017/authentication'
+              value: "mongodb://authentication-mongo-srv:27017/authentication"
+            - name: NODE_ENV
+              value: "production"
+            - name: JWT_EXPIRY
+              value: "86400000" # 1 day in miliseconds
             - name: JWT_KEY
               valueFrom:
                 secretKeyRef:
                   name: jwt-secret
-                  key: JWT_KEY              
+                  key: JWT_KEY
 ---
 apiVersion: v1
 kind: Service
