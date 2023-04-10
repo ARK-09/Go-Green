@@ -116,9 +116,39 @@ const userSchema = new mongoose.Schema({
 userSchema.pre("save", async function (next) {
   if (this.isModified("password")) {
     this.password = await Password.toHash(this.password);
+    this.passwordChangedAt = Date.now();
   }
   next();
 });
+
+userSchema.methods.toJSON = function () {
+  const returnedUser = this.toObject();
+  returnedUser.id = returnedUser._id;
+
+  delete returnedUser._id;
+  delete returnedUser.password;
+  delete returnedUser.resetToken;
+  delete returnedUser.resetTokenGeneratedAt;
+  delete returnedUser.otp;
+  delete returnedUser.otpGeneratedAt;
+  delete returnedUser.isActive;
+  delete returnedUser.__v;
+
+  return returnedUser;
+};
+
+userSchema.methods.checkPassword = async function (password) {
+  return await Password.compare(this.password, password);
+};
+
+userSchema.methods.changesPasswordAfter = function (JWTTimestemp) {
+  if (this.passwordChangedAt) {
+    const changedTimeStep = this.passwordChangedAt.getTime() / 1000;
+    return JWTTimestemp < changedTimeStep;
+  }
+
+  return false;
+};
 
 const User = mongoose.model("User", userSchema);
 

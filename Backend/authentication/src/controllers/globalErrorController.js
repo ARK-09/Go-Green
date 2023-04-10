@@ -31,7 +31,9 @@ const handelCastErrors = (err) => {
 
 const handelDuplicateFieldErrors = (err) => {
   const value = err.message.match(/(["'])(\\?.)*?\1/)[0];
-  const message = `Duplicate field value: ${value}. Please use another value!`;
+  const message = err.keyPattern?.email
+    ? "This email is already in use."
+    : `Duplicate field value: ${value}. Please use another value!`;
   return new AppError(message, 400);
 };
 
@@ -40,6 +42,14 @@ const handelValidateErrorDB = (err) => {
 
   const message = `Invalid input data. ${errors.join(". ")}`;
   return new AppError(message, 400);
+};
+
+const handelJsonWebTokenError = () => {
+  return new AppError("Invalid token. Please log in again", 401);
+};
+
+const handelTokenExpiredError = () => {
+  return new AppError("You'r token has been expired. Please log in again", 401);
 };
 
 module.exports = async (err, req, res, next) => {
@@ -61,6 +71,14 @@ module.exports = async (err, req, res, next) => {
 
     if (err.name === "ValidationError") {
       error = handelValidateErrorDB(error);
+    }
+
+    if (err.name === "JsonWebTokenError") {
+      error = handelJsonWebTokenError();
+    }
+
+    if (err.name === "TokenExpiredError") {
+      error = handelTokenExpiredError();
     }
 
     handelProductionErrors(error, res);
