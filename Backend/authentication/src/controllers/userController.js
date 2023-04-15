@@ -1,7 +1,11 @@
+const pug = require("pug");
 const User = require("../models/user");
 const AppError = require("../util/appError");
 const catchAsync = require("../util/catchAsync");
 const Jwt = require("../util/jwt");
+const { devTransporter } = require("../util/email/nodemailer");
+const EmailBuilder = require("../util/email/emailBuilder");
+const { encryptToken } = require("../util/resetToken");
 
 const login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
@@ -162,6 +166,89 @@ const forgetPassword = catchAsync(async (req, res, next) => {
   if (!user) {
     return next(new AppError("User with this email does not exist.", 404));
   }
+
+  const resetToken = await user.createResetToken();
+  await user.save({ validateBeforeSave: false });
+
+  try {
+    const resetUrl = `${req.protocol}://${req.get(
+      "host"
+    )}/api/v1/users/resetpassword/${resetToken}`;
+
+    const html = pug.renderFile(
+      `${__dirname}/../views/email/resetPassword.pug`,
+      {
+        userName: user.name,
+        resetUrl,
+      }
+    );
+
+    const emailUtl = new EmailBuilder()
+      .setFrom("info@gogreen.com")
+      .setTo(user.email)
+      .setSubject("Password reset request for your account")
+      .setHtml(html)
+      .setTransporter(devTransporter())
+      .build();
+
+    const info = await emailUtl.sendMail();
+    res.status(200).json({
+      status: "success",
+      message: `Reset token is sent to ${info.accepted[0]}. The token is valid for 10 mintus.`,
+    });
+  } catch (err) {
+    user.resetToken = undefined;
+    user.resetTokenExpireAt = undefined;
+    await user.save({ validateBeforeSave: false });
+
+    return next(
+      new AppError(
+        "There was an error sending the email. Try again later!",
+        500
+      )
+    );
+  }
+});
+
+const resetPassword = catchAsync(async (req, res, next) => {
+  const { resetToken } = req.params;
+  const { password } = req.body;
+
+  const hashedToken = encryptToken(resetToken);
+
+  const user = await User.findOne({
+    resetToken: hashedToken,
+    resetTokenExpireAt: { $gt: Date.now() },
+  });
+
+  if (!user) {
+    return next(new AppError("Token is invalid or has expired", 400));
+  }
+
+  user.password = password;
+  user.resetToken = undefined;
+  user.resetTokenExpireAt = undefined;
+  await user.save();
+
+  const emailUtl = new EmailBuilder()
+    .setFrom("info@gogreen.com")
+    .setTo(user.email)
+    .setSubject("Your password has ")
+    .setHtml(html)
+    .setTransporter(devTransporter())
+    .build();
+
+  const info = await emailUtl.sendMail();
+
+  const JWT = Jwt.sign({
+    id: user.id,
+    email: user.email,
+  });
+
+  res.status(200).json({
+    status: "success",
+    data: { JWT },
+  });
 });
 
 exports.login = login;
@@ -172,3 +259,4 @@ exports.getUser = getUser;
 exports.updateUser = updateUser;
 exports.deleteUser = deleteUser;
 exports.forgetPassword = forgetPassword;
+exports.resetPassword = resetPassword;

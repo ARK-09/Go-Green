@@ -25,7 +25,7 @@ module.exports = catchAsync(async (req, res, next) => {
     return next(new AppError("The user with this token no longer exist", 401));
   }
 
-  const userChagesPassword = user.changesPasswordAfter(payload.iat);
+  const userChagesPassword = await user.changesPasswordAfter(payload.iat);
 
   if (userChagesPassword) {
     return next(

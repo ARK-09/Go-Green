@@ -30,10 +30,18 @@ router
     validateRequest,
     UserController.signUp
   );
+
 router.route("/currentuser").get(requireAuth, UserController.currentUser);
+
 router
-  .route("/")
-  .get(requireAuth, restrictTo("admin"), UserController.getUsers);
+  .get("/", requireAuth, restrictTo("admin"), UserController.getUsers)
+  .post("/forgetpassword", requireAuth, UserController.forgetPassword)
+  .post(
+    "/resetpassword/:resetToken",
+    requireAuth,
+    UserController.resetPassword
+  );
+
 router
   .route("/:id")
   .get(requireAuth, restrictTo("admin"), UserController.getUser)

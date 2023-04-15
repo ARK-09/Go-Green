@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
 const Password = require("../util/password");
+const { generateResetToken } = require("../util/resetToken");
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -24,7 +25,16 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: [true, "Please provide a password"],
-    minlength: [8, "Password must be at least 8 characters long"],
+    validate: {
+      validator: function (value) {
+        const reg =
+          /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&()])[A-Za-z\d@$!%*#?&()]{8,}$/;
+        const regex = new RegExp(reg);
+        return regex.test(value);
+      },
+      message:
+        "The password should be at least 8 characters long and contain a combination of alphanumeric characters and at least one special character [@, $, !, %, *, #, ?, &, (, )].",
+    },
   },
   passwordChangedAt: {
     type: Date,
@@ -34,7 +44,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
-  resetTokenGeneratedAt: {
+  resetTokenExpireAt: {
     type: Date,
     default: null,
   },
@@ -44,7 +54,7 @@ const userSchema = new mongoose.Schema({
     max: [9999, "OTP must be a 4-digit number"],
     default: null,
   },
-  otpGeneratedAt: {
+  otpExpireAt: {
     type: Date,
     default: null,
   },
@@ -116,7 +126,7 @@ const userSchema = new mongoose.Schema({
 userSchema.pre("save", async function (next) {
   if (this.isModified("password")) {
     this.password = await Password.toHash(this.password);
-    this.passwordChangedAt = Date.now();
+    this.passwordChangedAt = Date.now() - 60 * 1000;
   }
   next();
 });
@@ -128,9 +138,9 @@ userSchema.methods.toJSON = function () {
   delete returnedUser._id;
   delete returnedUser.password;
   delete returnedUser.resetToken;
-  delete returnedUser.resetTokenGeneratedAt;
+  delete returnedUser.resetTokenExpireAt;
   delete returnedUser.otp;
-  delete returnedUser.otpGeneratedAt;
+  delete returnedUser.otpExpireAt;
   delete returnedUser.isActive;
   delete returnedUser.__v;
 
@@ -141,13 +151,22 @@ userSchema.methods.checkPassword = async function (password) {
   return await Password.compare(this.password, password);
 };
 
-userSchema.methods.changesPasswordAfter = function (JWTTimestemp) {
+userSchema.methods.changesPasswordAfter = async function (JWTTimestemp) {
   if (this.passwordChangedAt) {
     const changedTimeStep = this.passwordChangedAt.getTime() / 1000;
     return JWTTimestemp < changedTimeStep;
   }
 
   return false;
+};
+
+userSchema.methods.createResetToken = async function () {
+  const { resetToken, hashedToken } = generateResetToken();
+
+  this.resetToken = hashedToken;
+  this.resetTokenExpireAt = Date.now() + 10 * 60 * 1000;
+
+  return resetToken;
 };
 
 const User = mongoose.model("User", userSchema);
