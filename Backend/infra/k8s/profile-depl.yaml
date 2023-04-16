@@ -1,25 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: authentication-depl
+  name: profile-depl
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: authentication
+      app: profile
   template:
     metadata:
       labels:
-        app: authentication
+        app: profile
     spec:
       containers:
-        - name: authentication
-          image: ark09/authentication
+        - name: profile
+          image: ark09/profile
           env:
             - name: PORT
-              value: 4000
+              value: 4001
             - name: MONGO_URI
-              value: "mongodb://authentication-mongo-srv:27017/authentication"
+              value: "mongodb://profile-mongo-srv:27017/profile"
             - name: NODE_ENV
               value: "development"
             - name: JWT_EXPIRY
@@ -33,12 +33,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: authentication-srv
+  name: profile-srv
 spec:
   selector:
-    app: authentication
+    app: profile
   ports:
-    - name: authentication
+    - name: profile
       protocol: TCP
       port: 4000
       targetPort: 4000
