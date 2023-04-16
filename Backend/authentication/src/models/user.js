@@ -160,11 +160,13 @@ userSchema.methods.changesPasswordAfter = async function (JWTTimestemp) {
   return false;
 };
 
-userSchema.methods.createResetToken = async function () {
+userSchema.methods.createResetToken = async function (
+  expiresAt = 10 * 60 * 1000
+) {
   const { resetToken, hashedToken } = generateResetToken();
 
   this.resetToken = hashedToken;
-  this.resetTokenExpireAt = Date.now() + 10 * 60 * 1000;
+  this.resetTokenExpireAt = Date.now() + expiresAt;
 
   return resetToken;
 };

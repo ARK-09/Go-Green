@@ -42,7 +42,7 @@ const login = catchAsync(async (req, res, next) => {
 });
 
 const signUp = catchAsync(async (req, res, next) => {
-  const { name, email, password, userType, phoneNo, image } = req.body;
+  const { name, email, password, userType, phoneNo } = req.body;
 
   const newUser = await User.create({
     name,
@@ -50,7 +50,7 @@ const signUp = catchAsync(async (req, res, next) => {
     password,
     userType,
     phoneNo,
-    image,
+    image: "",
   });
 
   const JWT = Jwt.sign({
@@ -102,7 +102,7 @@ const getUser = catchAsync(async (req, res, next) => {
 
 const updateUser = catchAsync(async (req, res, next) => {
   const userId = req.params.id;
-  const { name, email, password, phoneNo, image } = req.body;
+  const { name, email, password, userType, phoneNo, image } = req.body;
 
   let user = await User.findById(userId);
 
@@ -117,6 +117,10 @@ const updateUser = catchAsync(async (req, res, next) => {
     return next(
       new AppError("You don't have permission to perform this action.", 403)
     );
+  }
+
+  if (req.currentUser.userType === "admin") {
+    user.userType = userType;
   }
 
   user.name = name ? name : user.name;
@@ -229,16 +233,6 @@ const resetPassword = catchAsync(async (req, res, next) => {
   user.resetToken = undefined;
   user.resetTokenExpireAt = undefined;
   await user.save();
-
-  const emailUtl = new EmailBuilder()
-    .setFrom("info@gogreen.com")
-    .setTo(user.email)
-    .setSubject("Your password has ")
-    .setHtml(html)
-    .setTransporter(devTransporter())
-    .build();
-
-  const info = await emailUtl.sendMail();
 
   const JWT = Jwt.sign({
     id: user.id,
