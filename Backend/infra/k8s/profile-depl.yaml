@@ -17,7 +17,7 @@ spec:
           image: ark09/profile
           env:
             - name: PORT
-              value: 4001
+              value: "4001"
             - name: MONGO_URI
               value: "mongodb://profile-mongo-srv:27017/profile"
             - name: NODE_ENV
@@ -40,5 +40,5 @@ spec:
   ports:
     - name: profile
       protocol: TCP
-      port: 4000
-      targetPort: 4000
+      port: 4001
+      targetPort: 4001

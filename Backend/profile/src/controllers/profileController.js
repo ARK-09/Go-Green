@@ -7,6 +7,10 @@ const getUserProfile = async (req, res, next) => {
 
   if (!profile) {
   }
+
+  res.status(200).json({
+    message: "Welcome",
+  });
 };
 
 exports.getUserProfile = getUserProfile;

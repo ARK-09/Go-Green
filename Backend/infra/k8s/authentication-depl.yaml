@@ -17,7 +17,7 @@ spec:
           image: ark09/authentication
           env:
             - name: PORT
-              value: 4000
+              value: "4000"
             - name: MONGO_URI
               value: "mongodb://authentication-mongo-srv:27017/authentication"
             - name: NODE_ENV

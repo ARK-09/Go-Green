@@ -1,9 +1,8 @@
-const User = require("../models/user");
 const AppError = require("../util/appError");
 const catchAsync = require("../util/catchAsync");
 const Jwt = require("../util/jwt");
 
-module.exports = catchAsync(async (req, res, next) => {
+const requireAuth = catchAsync(async (req, res, next) => {
   const headerAuthorization = req.headers.authorization;
   let token;
 
@@ -19,23 +18,14 @@ module.exports = catchAsync(async (req, res, next) => {
 
   const payload = Jwt.verify(token);
 
-  const user = await User.findById(payload.id);
-
-  if (!user) {
-    return next(new AppError("The user with this token no longer exist", 401));
-  }
-
-  const userChagesPassword = await user.changesPasswordAfter(payload.iat);
-
-  if (userChagesPassword) {
+  if (!payload) {
     return next(
-      new AppError(
-        "You have recently changed your password. Please log in again",
-        401
-      )
+      new AppError("Login token is invalid or has been expired.", 401)
     );
   }
 
-  req.currentUser = user;
+  req.payload = payload;
   next();
 });
+
+module.exports = requireAuth;

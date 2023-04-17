@@ -2,16 +2,18 @@ const mongoose = require("mongoose");
 
 const profilesSchema = new mongoose.Schema({
   about: String,
-  languages: [
-    {
-      name: String,
-      experience: String,
-      required: true,
-    },
-  ],
+  languages: {
+    type: [
+      {
+        name: String,
+        experience: String,
+      },
+    ],
+    required: [true, "Please add at least one language."],
+  },
   dob: {
     type: Date,
-    required: true,
+    required: [true, "Date of birth can't be empty."],
   },
   ranking: {
     type: String,
@@ -22,17 +24,19 @@ const profilesSchema = new mongoose.Schema({
     },
   },
   address: String,
-  location: [
-    {
-      type: {
-        type: String,
-        default: "Point",
-        enum: ["Point"],
+  location: {
+    type: [
+      {
+        type: {
+          type: String,
+          default: "Point",
+          enum: ["Point"],
+        },
+        coordinates: [Number],
       },
-      coordinates: [Number],
-      required: true,
-    },
-  ],
+    ],
+    required: [true, "Please provide your location."],
+  },
   projects: [
     {
       type: mongoose.Schema.Types.ObjectId,
@@ -43,6 +47,6 @@ const profilesSchema = new mongoose.Schema({
   userId: mongoose.Schema.Types.ObjectId,
 });
 
-const ProfilesModel = mongoose.Model("Profiles", profilesSchema);
+const ProfilesModel = mongoose.model("Profiles", profilesSchema);
 
 module.exports = ProfilesModel;

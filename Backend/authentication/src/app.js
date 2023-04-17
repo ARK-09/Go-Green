@@ -1,6 +1,8 @@
 const express = require("express");
-const AppError = require("./util/appError");
-const globalErrorController = require("./controllers/globalErrorController");
+const {
+  AppError,
+  globalErrorController,
+} = require("@ark-industries/gogreen-common");
 const userRouter = require("./routes/userRouter");
 
 const app = express();

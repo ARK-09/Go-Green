@@ -1,5 +1,5 @@
 const AppError = require("../util/appError");
-module.exports = (...roles) => {
+const restrictTo = (...roles) => {
   return (req, res, next) => {
     if (!req.currentUser) {
       return next(new AppError("You'r not loged in. Please login again.", 401));
@@ -13,3 +13,5 @@ module.exports = (...roles) => {
     next();
   };
 };
+
+module.exports = restrictTo;

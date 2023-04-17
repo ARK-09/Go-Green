@@ -1,7 +1,6 @@
 const pug = require("pug");
 const User = require("../models/user");
-const AppError = require("../util/appError");
-const catchAsync = require("../util/catchAsync");
+const { AppError, catchAsync } = require("@ark-industries/gogreen-common");
 const Jwt = require("../util/jwt");
 const { devTransporter } = require("../util/email/nodemailer");
 const EmailBuilder = require("../util/email/emailBuilder");
