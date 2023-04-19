@@ -3,6 +3,10 @@ const ProfileController = require("../controllers/profileController");
 
 const router = express.Router();
 
-router.get("/users/:id", ProfileController.getUserProfile);
+router
+  .route("/users/:id")
+  .get(ProfileController.getUserProfile)
+  .patch(ProfileController.updateUserProfile)
+  .delete(ProfileController.deleteUserProfile);
 
 module.exports = router;

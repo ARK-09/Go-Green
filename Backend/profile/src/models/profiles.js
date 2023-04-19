@@ -45,6 +45,10 @@ const profilesSchema = new mongoose.Schema({
   ],
   skills: [String],
   userId: mongoose.Schema.Types.ObjectId,
+  active: {
+    type: Boolean,
+    default: true,
+  },
 });
 
 const ProfilesModel = mongoose.model("Profiles", profilesSchema);
