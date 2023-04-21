@@ -1,6 +1,6 @@
 const express = require("express");
 const { body, check, param } = require("express-validator");
-
+const currentUser = require("../middlewares/currentUser");
 const {
   requireAuth,
   restrictTo,
@@ -8,10 +8,18 @@ const {
 } = require("@ark-industries/gogreen-common");
 const UserController = require("../controllers/userController");
 
+const JWT_KEY = process.env.JWT_KEY;
+
 const router = express.Router();
 
 router
-  .get("/", requireAuth, restrictTo("admin"), UserController.getUsers)
+  .get(
+    "/",
+    requireAuth(JWT_KEY),
+    currentUser,
+    restrictTo("admin"),
+    UserController.getUsers
+  )
   .post(
     "/login",
     check("email")
@@ -69,7 +77,12 @@ router
     validateRequest,
     UserController.signUp
   )
-  .get("/currentuser", requireAuth, UserController.currentUser)
+  .get(
+    "/currentuser",
+    requireAuth(JWT_KEY),
+    currentUser,
+    UserController.currentUser
+  )
   .post(
     "/forgetpassword",
     check("email")
@@ -79,7 +92,8 @@ router
       .withMessage("Please provide a valid email address")
       .normalizeEmail(),
     validateRequest,
-    requireAuth,
+    requireAuth(JWT_KEY),
+    currentUser,
     UserController.forgetPassword
   )
   .post(
@@ -92,7 +106,8 @@ router
         "The password should be at least 8 characters long and contain a combination of alphanumeric characters and at least one special character [@, $, !, %, *, #, ?, &, (, )]."
       ),
     validateRequest,
-    requireAuth,
+    requireAuth(JWT_KEY),
+    currentUser,
     UserController.resetPassword
   );
 
@@ -101,11 +116,12 @@ router
   .get(
     param("id").isMongoId().withMessage("Please provide a valid id."),
     validateRequest,
-    requireAuth,
+    requireAuth(JWT_KEY),
+    currentUser,
     restrictTo("admin"),
     UserController.getUser
   )
-  .patch(requireAuth, UserController.updateUser)
-  .delete(requireAuth, UserController.deleteUser);
+  .patch(requireAuth(JWT_KEY), currentUser, UserController.updateUser)
+  .delete(requireAuth(JWT_KEY), currentUser, UserController.deleteUser);
 
 module.exports = router;

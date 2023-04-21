@@ -1,7 +1,17 @@
 const mongoose = require("mongoose");
 const app = require("./app");
+const { natsWrapper } = require("@ark-industries/gogreen-common");
 
 const connectionString = process.env.MONGO_URI;
+
+await natsWrapper.connect("gogreen", "1234", "http://nats-srv:4222");
+natsWrapper.client.on("close", () => {
+  console.log("NATAS connection closed!");
+  process.exit();
+});
+
+process.on("SIGINT", () => natsWrapper.client.close());
+process.on("SIGTERM", () => natsWrapper.client.close());
 
 mongoose.connect(connectionString).then(() => {
   console.log("DB connection successful!");

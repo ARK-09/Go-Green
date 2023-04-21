@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
-const Password = require("../util/password");
+const { Password } = require("@ark-industries/gogreen-common");
 const { generateResetToken } = require("../util/resetToken");
 
 const userSchema = new mongoose.Schema({
@@ -153,8 +153,10 @@ userSchema.methods.checkPassword = async function (password) {
 
 userSchema.methods.changesPasswordAfter = async function (JWTTimestemp) {
   if (this.passwordChangedAt) {
-    const changedTimeStep = this.passwordChangedAt.getTime() / 1000;
-    return JWTTimestemp < changedTimeStep;
+    const passwordChangedAtTimestamp = Math.floor(
+      this.passwordChangedAt.getTime() / 1000
+    );
+    return JWTTimestemp < passwordChangedAtTimestamp;
   }
 
   return false;

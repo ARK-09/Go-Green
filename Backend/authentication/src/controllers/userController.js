@@ -1,7 +1,12 @@
 const pug = require("pug");
 const User = require("../models/user");
-const { AppError, catchAsync } = require("@ark-industries/gogreen-common");
-const Jwt = require("../util/jwt");
+const {
+  AppError,
+  catchAsync,
+  JWT,
+  natsWrapper,
+  userCreatedPublisher,
+} = require("@ark-industries/gogreen-common");
 const { devTransporter } = require("../util/email/nodemailer");
 const EmailBuilder = require("../util/email/emailBuilder");
 const { encryptToken } = require("../util/resetToken");
@@ -29,14 +34,21 @@ const login = catchAsync(async (req, res, next) => {
     return next(new AppError("Invalid email or password", 400));
   }
 
-  const JWT = Jwt.sign({
-    id: user.id,
-    email: user.email,
-  });
+  const JWT_KEY = process.env.JWT_KEY;
+  const JWT_EXPIRY = parseInt(process.env.JWT_EXPIRY) / (24 * 60 * 60) + "d"; // recieving 10 days in seconds converting to 10 day
+
+  const Jwt = JWT.sign(
+    {
+      id: user.id,
+      email: user.email,
+    },
+    JWT_KEY,
+    JWT_EXPIRY
+  );
 
   res.status(200).json({
     status: "success",
-    data: { JWT },
+    data: { Jwt },
   });
 });
 
@@ -52,14 +64,23 @@ const signUp = catchAsync(async (req, res, next) => {
     image: "",
   });
 
-  const JWT = Jwt.sign({
-    id: newUser.id,
-    email: newUser.email,
-  });
+  await new userCreatedPublisher(natsWrapper.client).publish(newUser);
+
+  const JWT_KEY = process.env.JWT_KEY;
+  const JWT_EXPIRY = parseInt(process.env.JWT_EXPIRY) / (24 * 60 * 60) + "d"; // recieving 10 days in seconds converting to 10 day
+
+  const Jwt = JWT.sign(
+    {
+      id: newUser.id,
+      email: newUser.email,
+    },
+    JWT_KEY,
+    JWT_EXPIRY
+  );
 
   res.status(200).json({
     status: "success",
-    data: { JWT, user: newUser },
+    data: { Jwt, user: newUser },
   });
 });
 
@@ -119,14 +140,13 @@ const updateUser = catchAsync(async (req, res, next) => {
   }
 
   if (req.currentUser.userType === "admin") {
-    user.userType = userType;
+    user.userType = userType ? userType : user.userType;
   }
 
   user.name = name ? name : user.name;
   user.email = email ? email : user.email;
   user.password = password ? password : user.password;
   user.phoneNo = phoneNo ? phoneNo : user.phoneNo;
-  user.image = image ? image : user.image;
 
   user = await user.save();
 
@@ -154,7 +174,7 @@ const deleteUser = catchAsync(async (req, res, next) => {
     );
   }
 
-  await user.update({ isActive: false, userStatus: "Offline" });
+  await user.updateOne({ isActive: false, userStatus: "Offline" });
 
   res.status(404).json({
     status: "success",
@@ -233,14 +253,21 @@ const resetPassword = catchAsync(async (req, res, next) => {
   user.resetTokenExpireAt = undefined;
   await user.save();
 
-  const JWT = Jwt.sign({
-    id: user.id,
-    email: user.email,
-  });
+  const JWT_KEY = process.env.JWT_KEY;
+  const JWT_EXPIRY = parseInt(process.env.JWT_EXPIRY) / (24 * 60 * 60) + "d"; // recieving 10 days in seconds converting to 10 day
+
+  const Jwt = JWT.sign(
+    {
+      id: user.id,
+      email: user.email,
+    },
+    JWT_KEY,
+    JWT_EXPIRY
+  );
 
   res.status(200).json({
     status: "success",
-    data: { JWT },
+    data: { Jwt },
   });
 });
 
