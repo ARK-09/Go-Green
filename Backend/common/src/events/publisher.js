@@ -1,14 +1,14 @@
 class Publisher {
-  subejct;
+  subject;
   #client;
 
   constructor(client) {
     this.#client = client;
   }
 
-  publish(data) {
+  publish = (data) => {
     return new Promise((resolve, rejects) => {
-      this.#client.publish(this.subejct, JSON.stringify(data), (err) => {
+      this.#client.publish(this.subject, JSON.stringify(data), (err) => {
         if (err) {
           return rejects(err);
         }
@@ -17,7 +17,7 @@ class Publisher {
         resolve();
       });
     });
-  }
+  };
 }
 
 module.exports = Publisher;

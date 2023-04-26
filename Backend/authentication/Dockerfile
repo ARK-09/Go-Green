@@ -7,7 +7,6 @@ WORKDIR /usr/app
 # Copying required files
 COPY package.json .
 RUN npm install
-RUN npm audit fix --force
 COPY . .
 
 CMD ["npm", "start"]

@@ -9,20 +9,23 @@ class Listener {
     this.#client = client;
   }
 
-  subsriptionOptions() {
+  subscriptionOptions = () => {
     return this.#client
-      .subsriptionOptions()
+      .subscriptionOptions()
       .setDeliverAllAvailable()
-      .setManualAckMod(true)
       .setAckWait(this.ackWait)
       .setDurableName(this.queueGroupName);
-  }
+  };
 
-  listen() {
+  listen = () => {
+    if (!this.subject) {
+      throw new Error("Subject must be supplied.");
+    }
+
     const subsription = this.#client.subscribe(
       this.subject,
       this.queueGroupName,
-      this.subsriptionOptions()
+      this.subscriptionOptions()
     );
 
     subsription.on("message", (msg) => {
@@ -31,17 +34,17 @@ class Listener {
       const parsedData = this.parseMessage(msg);
       this.onMessage(parsedData, msg);
     });
-  }
+  };
 
-  parseMessage(message) {
+  parseMessage = (message) => {
     const data = msg.getData();
 
     return typeof data === "string"
       ? JSON.parse(data)
       : JSON.parse(data.toString("utf8"));
-  }
+  };
 
-  onMessage(parsedData, message) {}
+  onMessage = async (parsedData, message) => {};
 }
 
 module.exports = Listener;

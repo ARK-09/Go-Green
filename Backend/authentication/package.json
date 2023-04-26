@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/ARK-09/Go-Green#readme",
   "dependencies": {
-    "@ark-industries/gogreen-common": "^1.0.7",
+    "@ark-industries/gogreen-common": "^1.2.6",
     "date-and-time": "^2.4.3",
     "dateformat": "^5.0.3",
     "dotenv": "^16.0.3",

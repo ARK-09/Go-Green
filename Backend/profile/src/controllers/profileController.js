@@ -1,4 +1,5 @@
 const Profile = require("../models/profiles");
+const { catchAsync, AppError } = require("@ark-industries/gogreen-common");
 
 const getUserProfile = catchAsync(async (req, res, next) => {
   const userId = req.params.id;

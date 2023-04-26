@@ -13,8 +13,6 @@ const natsWrapper = require("./natsWrapper");
 const Listener = require("./events/listener");
 const Publisher = require("./events/publisher");
 const Subjects = require("./events/subjects");
-const userCreatedListener = require("./events/userCreatedListener");
-const userCreatedPublisher = require("./events/userCreatedPublisher");
 
 module.exports = {
   globalErrorController,
@@ -29,6 +27,4 @@ module.exports = {
   Listener,
   Publisher,
   Subjects,
-  userCreatedListener,
-  userCreatedPublisher,
 };

@@ -1,5 +1,21 @@
+// require("dotenv").config({ path: "./config.env" });
+
 const mongoose = require("mongoose");
 const app = require("./app");
+const { natsWrapper } = require("@ark-industries/gogreen-common");
+const UserCreatedListener = require("./events/userCreatedListener");
+
+natsWrapper.connect("gogreen", "12345", "http://nats-srv:4222").then(() => {
+  new UserCreatedListener(natsWrapper.client).listen();
+});
+
+natsWrapper.client.on("close", () => {
+  console.log("NATAS connection closed!");
+  process.exit();
+});
+
+process.on("SIGINT", () => natsWrapper.client.close());
+process.on("SIGTERM", () => natsWrapper.client.close());
 
 const connectionString = process.env.MONGO_URI;
 

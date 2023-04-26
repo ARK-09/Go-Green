@@ -5,11 +5,11 @@ const {
   catchAsync,
   JWT,
   natsWrapper,
-  userCreatedPublisher,
 } = require("@ark-industries/gogreen-common");
 const { devTransporter } = require("../util/email/nodemailer");
 const EmailBuilder = require("../util/email/emailBuilder");
 const { encryptToken } = require("../util/resetToken");
+const UserCreatedPublisher = require("../events/userCreatedPublisher");
 
 const login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
@@ -64,7 +64,7 @@ const signUp = catchAsync(async (req, res, next) => {
     image: "",
   });
 
-  await new userCreatedPublisher(natsWrapper.client).publish(newUser);
+  await new UserCreatedPublisher(natsWrapper.client).publish(newUser);
 
   const JWT_KEY = process.env.JWT_KEY;
   const JWT_EXPIRY = parseInt(process.env.JWT_EXPIRY) / (24 * 60 * 60) + "d"; // recieving 10 days in seconds converting to 10 day
