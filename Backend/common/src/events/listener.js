@@ -37,7 +37,7 @@ class Listener {
   };
 
   parseMessage = (message) => {
-    const data = msg.getData();
+    const data = message.getData();
 
     return typeof data === "string"
       ? JSON.parse(data)

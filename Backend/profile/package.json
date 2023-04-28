@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/ARK-09/Go-Green#readme",
   "dependencies": {
-    "@ark-industries/gogreen-common": "^1.2.6",
+    "@ark-industries/gogreen-common": "^1.2.8",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "express-validator": "^7.0.0",

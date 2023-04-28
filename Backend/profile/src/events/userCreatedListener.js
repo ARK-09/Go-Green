@@ -9,12 +9,14 @@ class UserCreatedListener extends Listener {
     super(client);
   }
 
+  // name, email, password, passwordChangedAt, resetTokken, resetTokkenGeneratedAt, otp, otpGeneratedAt, isActive, invalidLoginCount,
+  // userType, phoneNo, image, userStatus, verified, joinedDate, financeAllowed, blocked
   onMessage = async (data, message) => {
     return new Promise((resolve, reject) => {
-      console.log(data);
-      message.ack();
-      resolve(data);
       if (data) {
+        console.log(data);
+        message.ack();
+        resolve(data);
       }
     });
   };
