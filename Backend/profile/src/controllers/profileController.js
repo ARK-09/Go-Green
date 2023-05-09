@@ -4,12 +4,17 @@ const { catchAsync, AppError } = require("@ark-industries/gogreen-common");
 const getUserProfile = catchAsync(async (req, res, next) => {
   const userId = req.params.id;
 
-  const profile = await Profile.findOne({ userId });
+  const profile = await Profile.findOne({
+    userId: userId,
+    active: { $ne: false },
+  })
+    .populate("projects")
+    .lean();
 
   if (!profile) {
     return next(
       new AppError(`No profile found with matching user id: ${userId}`),
-      404
+      204
     );
   }
 
@@ -31,19 +36,27 @@ const updateUserProfile = catchAsync(async (req, res, next) => {
     );
   }
 
-  const profile = await Profile.findOne({ userId, active: { $ne: false } });
+  let profile = await Profile.findOne({ userId, active: { $ne: false } });
 
   if (!profile) {
     return next(
       new AppError(`No profile found with matching user id: ${userId}`),
-      404
+      204
     );
   }
 
   const { about, languages, dob, gender, address, location, skills } = req.body;
 
   profile.about = about ? about : profile.about;
-  profile.languages = languages ? languages : profile.languages;
+
+  if (languages) {
+    if (Array.isArray(languages)) {
+      profile.languages.push(...languages);
+    } else if (typeof languages === "object") {
+      profile.languages.push(languages);
+    }
+  }
+
   profile.dob = dob ? dob : profile.dob;
   profile.gender = gender ? gender : profile.gender;
   profile.address = address ? address : profile.address;
@@ -51,6 +64,8 @@ const updateUserProfile = catchAsync(async (req, res, next) => {
   profile.skills = skills ? skills : profile.skills;
 
   profile = await profile.save();
+
+  await profile.populate("projects");
 
   res.status(200).json({
     status: "success",
@@ -61,12 +76,12 @@ const updateUserProfile = catchAsync(async (req, res, next) => {
 const deleteUserProfile = catchAsync(async (req, res, next) => {
   const userId = req.params.id;
 
-  const profile = await Profile.findOne({ userId, active: { $ne: false } });
+  let profile = await Profile.findOne({ userId, active: { $ne: false } });
 
   if (!profile) {
     return next(
       new AppError(`No profile found with matching user id: ${userId}`),
-      404
+      204
     );
   }
 
@@ -74,7 +89,7 @@ const deleteUserProfile = catchAsync(async (req, res, next) => {
 
   profile = await profile.save();
 
-  res.status(404).json({
+  res.status(204).json({
     status: "success",
     data: { profile: null },
   });

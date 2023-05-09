@@ -1,5 +1,6 @@
 const { Listener, Subjects } = require("@ark-industries/gogreen-common");
 const User = require("../models/user");
+const Profile = require("../models/profiles");
 
 class UserCreatedListener extends Listener {
   subject = Subjects.userCreated;
@@ -9,16 +10,40 @@ class UserCreatedListener extends Listener {
     super(client);
   }
 
-  // name, email, password, passwordChangedAt, resetTokken, resetTokkenGeneratedAt, otp, otpGeneratedAt, isActive, invalidLoginCount,
-  // userType, phoneNo, image, userStatus, verified, joinedDate, financeAllowed, blocked
   onMessage = async (data, message) => {
-    return new Promise((resolve, reject) => {
-      if (data) {
-        console.log(data);
-        message.ack();
-        resolve(data);
-      }
-    });
+    if (data) {
+      const {
+        id,
+        name,
+        email,
+        password,
+        userType,
+        phoneNo,
+        image,
+        passwordChangedAt,
+        joinedDate,
+      } = data;
+
+      await User.create(
+        [
+          {
+            _id: id,
+            name,
+            email,
+            password,
+            userType,
+            phoneNo,
+            image,
+            passwordChangedAt,
+            joinedDate,
+          },
+        ],
+        { validateBeforeSave: false }
+      );
+      await Profile.create([{ userId: id }], { validateBeforeSave: false });
+
+      message.ack();
+    }
   };
 }
 

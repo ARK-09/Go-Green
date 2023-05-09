@@ -6,7 +6,7 @@ class Publisher {
     this.#client = client;
   }
 
-  publish = (data) => {
+  publish(data) {
     return new Promise((resolve, rejects) => {
       this.#client.publish(this.subject, JSON.stringify(data), (err) => {
         if (err) {
@@ -17,7 +17,7 @@ class Publisher {
         resolve();
       });
     });
-  };
+  }
 }
 
 module.exports = Publisher;

@@ -9,15 +9,15 @@ class Listener {
     this.#client = client;
   }
 
-  subscriptionOptions = () => {
+  subscriptionOptions() {
     return this.#client
       .subscriptionOptions()
       .setDeliverAllAvailable()
       .setAckWait(this.ackWait)
       .setDurableName(this.queueGroupName);
-  };
+  }
 
-  listen = () => {
+  listen() {
     if (!this.subject) {
       throw new Error("Subject must be supplied.");
     }
@@ -34,17 +34,17 @@ class Listener {
       const parsedData = this.parseMessage(msg);
       this.onMessage(parsedData, msg);
     });
-  };
+  }
 
-  parseMessage = (message) => {
+  parseMessage(message) {
     const data = message.getData();
 
     return typeof data === "string"
       ? JSON.parse(data)
       : JSON.parse(data.toString("utf8"));
-  };
+  }
 
-  onMessage = async (parsedData, message) => {};
+  async onMessagec(parsedData, message) {}
 }
 
 module.exports = Listener;

@@ -14,7 +14,14 @@ spec:
     spec:
       containers:
        -  name: authentication-mongo
-          image: mongo              
+          image: mongo  
+          volumeMounts:
+            - name: authentication-mongo-volume
+              mountPath: /data/db
+      volumes:
+        - name: authentication-mongo-volume
+          persistentVolumeClaim:
+              claimName: authentication-mongo-volume           
 ---
 apiVersion: v1
 kind: Service

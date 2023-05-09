@@ -10,6 +10,10 @@ const { devTransporter } = require("../util/email/nodemailer");
 const EmailBuilder = require("../util/email/emailBuilder");
 const { encryptToken } = require("../util/resetToken");
 const UserCreatedPublisher = require("../events/userCreatedPublisher");
+const UserUpdatedPublisher = require("../events/userUpdatedPublisher");
+const UserDeletedPublisher = require("../events/userDeletedPublisher");
+const UserForgetPasswordPublisher = require("../events/userForgetPasswordPublisher");
+const UserResetPasswordPublisher = require("../events/userResetPasswordPublisher");
 
 const login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
@@ -64,7 +68,11 @@ const signUp = catchAsync(async (req, res, next) => {
     image: "",
   });
 
-  await new UserCreatedPublisher(natsWrapper.client).publish(newUser);
+  await new UserCreatedPublisher(natsWrapper.client)
+    .publish(newUser)
+    .catch(() => {
+      return next(new AppError("Something went wrong...", 500));
+    });
 
   const JWT_KEY = process.env.JWT_KEY;
   const JWT_EXPIRY = parseInt(process.env.JWT_EXPIRY) / (24 * 60 * 60) + "d"; // recieving 10 days in seconds converting to 10 day
@@ -150,6 +158,10 @@ const updateUser = catchAsync(async (req, res, next) => {
 
   user = await user.save();
 
+  await new UserUpdatedPublisher(natsWrapper.client).publish(user).catch(() => {
+    return next(new AppError("Something went wrong...", 500));
+  });
+
   res.status(200).json({
     status: "success",
     data: { user },
@@ -175,6 +187,12 @@ const deleteUser = catchAsync(async (req, res, next) => {
   }
 
   await user.updateOne({ isActive: false, userStatus: "Offline" });
+
+  await new UserDeletedPublisher(natsWrapper.client)
+    .publish({ id: user.id })
+    .catch(() => {
+      return next(new AppError("Something went wrong...", 500));
+    });
 
   res.status(404).json({
     status: "success",
@@ -215,6 +233,17 @@ const forgetPassword = catchAsync(async (req, res, next) => {
       .build();
 
     const info = await emailUtl.sendMail();
+
+    await new UserForgetPasswordPublisher(natsWrapper.client)
+      .publish({
+        id: user.id,
+        resetToken: user.resetToken,
+        resetTokenExpireAt: user.resetTokenExpireAt,
+      })
+      .catch(() => {
+        return next(new AppError("Something went wrong...", 500));
+      });
+
     res.status(200).json({
       status: "success",
       message: `Reset token is sent to ${info.accepted[0]}. The token is valid for 10 mintus.`,
@@ -249,9 +278,19 @@ const resetPassword = catchAsync(async (req, res, next) => {
   }
 
   user.password = password;
-  user.resetToken = undefined;
-  user.resetTokenExpireAt = undefined;
+  user.resetToken = null;
+  user.resetTokenExpireAt = null;
   await user.save();
+
+  await new UserResetPasswordPublisher(natsWrapper.client)
+    .publish({
+      id: user.id,
+      newPassword: user.password,
+      passwordChangedAt: user.passwordChangedAt,
+    })
+    .catch(() => {
+      return next(new AppError("Something went wrong...", 500));
+    });
 
   const JWT_KEY = process.env.JWT_KEY;
   const JWT_EXPIRY = parseInt(process.env.JWT_EXPIRY) / (24 * 60 * 60) + "d"; // recieving 10 days in seconds converting to 10 day

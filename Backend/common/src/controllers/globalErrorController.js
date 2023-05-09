@@ -15,9 +15,9 @@ const handelProductionErrors = (err, res) => {
 };
 
 const handelDevelopmentErrors = (err, res) => {
-  res.status(err.statusCode).json({
+  res.status(err.statusCode || 500).json({
     status: err.status,
-    statusCode: err.statusCode,
+    statusCode: err.statusCode || 500,
     message: err.message,
     stack: err.stack,
     error: err,

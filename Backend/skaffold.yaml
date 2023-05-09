@@ -25,6 +25,8 @@ manifests:
     - infra/k8s/ingress-srv.yaml
     - infra/k8s/nats-depl.yaml
     - infra/k8s/authentication-depl.yaml
+    # - infra/k8s/authentication-mongo-volume.yaml
     - infra/k8s/authentication-mongo-depl.yaml
-    - infra/k8s/profile-mongo-depl.yaml
     - infra/k8s/profile-depl.yaml
+    # - infra/k8s/profile-mongo-volume.yaml
+    - infra/k8s/profile-mongo-depl.yaml

@@ -135,16 +135,14 @@ userSchema.methods.toJSON = function () {
   returnedUser.id = returnedUser._id;
 
   delete returnedUser._id;
-  delete returnedUser.password;
-  delete returnedUser.resetToken;
-  delete returnedUser.resetTokenExpireAt;
-  delete returnedUser.otp;
-  delete returnedUser.otpExpireAt;
-  delete returnedUser.isActive;
-  delete returnedUser.__v;
 
   return returnedUser;
 };
+
+userSchema.pre(/^find/, function (next) {
+  this.select("-resetToken -resetTokenExpireAt -otp -otpExpireAt -__v");
+  next();
+});
 
 userSchema.methods.checkPassword = async function (password) {
   return await Password.compare(this.password, password);
@@ -152,12 +150,14 @@ userSchema.methods.checkPassword = async function (password) {
 
 userSchema.methods.changesPasswordAfter = async function (JWTTimestemp) {
   if (this.passwordChangedAt) {
-    const passwordChangedAtTimestamp = Math.floor(
-      this.passwordChangedAt.getTime() / 1000
+    const changedTimestamp = parseInt(
+      this.passwordChangedAt.getTime() / 1000,
+      10
     );
-    return JWTTimestemp < passwordChangedAtTimestamp;
+    return JWTTimestemp < changedTimestamp;
   }
 
+  // False means NOT changed
   return false;
 };
 

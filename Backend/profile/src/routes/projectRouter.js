@@ -1,13 +1,24 @@
 const express = require("express");
 const ProjectController = require("../controllers/projectsController");
+const currentUser = require("../middelwares/currentUser");
+const { requireAuth } = require("@ark-industries/gogreen-common");
 
-const router = express.Router();
+const JWT_KEY = process.env.JWT_KEY;
+
+const router = express.Router({ mergeParams: true });
 
 router
   .route("/")
-  .post(ProjectController.createProject)
-  .get(ProjectController.getProjects);
+  .post(requireAuth(JWT_KEY), currentUser, ProjectController.createProject)
+  .get(requireAuth(JWT_KEY), currentUser, ProjectController.getProjects);
 
-router.route("/:projectid").get(ProjectController.getProjectById);
+router
+  .route("/:projectid")
+  .get(requireAuth(JWT_KEY), currentUser, ProjectController.getProjectById)
+  .delete(
+    requireAuth(JWT_KEY),
+    currentUser,
+    ProjectController.deleteProjectById
+  );
 
 module.exports = router;

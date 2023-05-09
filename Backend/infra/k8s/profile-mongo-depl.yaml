@@ -14,7 +14,14 @@ spec:
     spec:
       containers:
        -  name: profile-mongo
-          image: mongo              
+          image: mongo 
+          volumeMounts:
+            - name: profile-mongo-volume
+              mountPath: /data/db
+      volumes:
+        - name: profile-mongo-volume
+          persistentVolumeClaim:
+              claimName: profile-mongo-volume               
 ---
 apiVersion: v1
 kind: Service
