@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: job-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: job
+  template:
+    metadata:
+      labels:
+        app: job
+    spec:
+      containers:
+        - name: job
+          image: ark09/job
+          env:
+            - name: PORT
+              value: "4003"
+            - name: MONGO_URI
+              value: "mongodb://job-mongo-srv:27017/job"
+            - name: NODE_ENV
+              value: "development"
+            - name: JWT_EXPIRY
+              value: "864000" # 10 day in seconds
+            - name: JWT_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: JWT_KEY
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: job-srv
+spec:
+  selector:
+    app: job
+  ports:
+    - name: job
+      protocol: TCP
+      port: 4003
+      targetPort: 4003

@@ -4,7 +4,7 @@ const Profile = require("../models/profiles");
 
 class UserDeletedListener extends Listener {
   subject = Subjects.userDeleted;
-  queueGroupName = "auth-service-queue-group";
+  queueGroupName = "profile-service-queue-group";
 
   constructor(client) {
     super(client);

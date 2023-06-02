@@ -1,10 +1,9 @@
 const { Listener, Subjects } = require("@ark-industries/gogreen-common");
 const User = require("../models/user");
-const Profile = require("../models/profiles");
 
 class UserCreatedListener extends Listener {
   subject = Subjects.userCreated;
-  queueGroupName = "profile-service-queue-group";
+  queueGroupName = "job-service-queue-group";
 
   constructor(client) {
     super(client);
@@ -40,7 +39,6 @@ class UserCreatedListener extends Listener {
         ],
         { validateBeforeSave: false }
       );
-      await Profile.create([{ userId: id }], { validateBeforeSave: false });
 
       message.ack();
     }

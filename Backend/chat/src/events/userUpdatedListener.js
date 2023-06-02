@@ -3,7 +3,7 @@ const User = require("../models/user");
 
 class UserUpdatedListener extends Listener {
   subject = Subjects.userUpdated;
-  queueGroupName = "profile-service-queue-group";
+  queueGroupName = "job-service-queue-group";
 
   constructor(client) {
     super(client);

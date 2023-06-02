@@ -3,7 +3,7 @@ const User = require("../models/user");
 
 class UserResetPasswordListener extends Listener {
   subject = Subjects.userResetPassword;
-  queueGroupName = "profile-service-queue-group";
+  queueGroupName = "job-service-queue-group";
 
   constructor(client) {
     super(client);

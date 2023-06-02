@@ -3,8 +3,8 @@ const {
   globalErrorController,
   AppError,
 } = require("@ark-industries/gogreen-common");
-const profileRouter = require("./routes/profileRouter");
-const projectRouter = require("./routes/projectRouter");
+const profileRouter = require("./routers/profileRouter");
+const projectRouter = require("./routers/projectRouter");
 
 const app = express();
 

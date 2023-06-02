@@ -1,9 +1,9 @@
 const { Listener, Subjects } = require("@ark-industries/gogreen-common");
 const User = require("../models/user");
 
-class UserForgetPasswordListener extends Listener {
-  subject = Subjects.userForgetPassword;
-  queueGroupName = "profile-service-queue-group";
+class UserDeletedListener extends Listener {
+  subject = Subjects.userDeleted;
+  queueGroupName = "job-service-queue-group";
 
   constructor(client) {
     super(client);
@@ -11,14 +11,11 @@ class UserForgetPasswordListener extends Listener {
 
   onMessage = async (data, message) => {
     if (data) {
-      const { id, resetToken, resetTokenExpireAt } = data;
+      const { id } = data;
 
       await User.findByIdAndUpdate(
         id,
-        {
-          resetToken,
-          resetTokenExpireAt,
-        },
+        { isActive: false, userStatus: "Offline" },
         { runValidators: false }
       );
 
@@ -27,4 +24,4 @@ class UserForgetPasswordListener extends Listener {
   };
 }
 
-module.exports = UserForgetPasswordListener;
+module.exports = UserDeletedListener;

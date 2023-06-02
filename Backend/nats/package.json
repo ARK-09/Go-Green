@@ -1,5 +1,0 @@
-{
-  "dependencies": {
-    "node-nats-streaming": "^0.3.2"
-  }
-}
