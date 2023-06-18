@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: file-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: file
+  template:
+    metadata:
+      labels:
+        app: file
+    spec:
+      containers:
+        - name: file
+          image: ark09/file
+          env:
+            - name: PORT
+              value: "4006"
+            - name: MONGO_URI
+              value: "mongodb://file-mongo-srv:27017/file"
+            - name: NODE_ENV
+              value: "development"
+            - name: JWT_EXPIRY
+              value: "864000" # 10 day in seconds
+            - name: JWT_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: JWT_KEY
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: file-srv
+spec:
+  selector:
+    app: file
+  ports:
+    - name: file
+      protocol: TCP
+      port: 4006
+      targetPort: 4006

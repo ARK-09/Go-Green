@@ -12,6 +12,38 @@ build:
         manual:
           - src: 'src/**/*.js'
             dest: .
+    - image: ark09/catalog
+      context: catalog
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: 'src/**/*.js'
+            dest: .
+    - image: ark09/chat
+      context: chat
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: 'src/**/*.js'
+            dest: . 
+    - image: ark09/file
+      context: file
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: 'src/**/*.js'
+            dest: .  
+    - image: ark09/job
+      context: job
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: 'src/**/*.js'
+            dest: .         
     - image: ark09/profile
       context: profile
       docker:
@@ -19,14 +51,26 @@ build:
       sync:
         manual:
           - src: 'src/**/*.js'
-            dest: .            
+            dest: .
 manifests:
   rawYaml:
     - infra/k8s/ingress-srv.yaml
     - infra/k8s/nats-depl.yaml
     - infra/k8s/authentication-depl.yaml
-    # - infra/k8s/authentication-mongo-volume.yaml
     - infra/k8s/authentication-mongo-depl.yaml
+    # - infra/k8s/authentication-mongo-volume.yaml
+    - infra/k8s/catalog-depl.yaml
+    - infra/k8s/catalog-mongo-depl.yaml
+    # - infra/k8s/catalog-mongo-volume.yaml
+    - infra/k8s/chat-depl.yaml
+    - infra/k8s/chat-mongo-depl.yaml
+    # - infra/k8s/chat-mongo-volume.yaml
+    - infra/k8s/file-depl.yaml
+    - infra/k8s/file-mongo-depl.yaml
+    # - infra/k8s/file-mongo-volume.yaml
+    - infra/k8s/job-depl.yaml
+    - infra/k8s/job-mongo-depl.yaml
+    # - infra/k8s/job-mongo-volume.yaml
     - infra/k8s/profile-depl.yaml
-    # - infra/k8s/profile-mongo-volume.yaml
     - infra/k8s/profile-mongo-depl.yaml
+    # - infra/k8s/profile-mongo-volume.yaml

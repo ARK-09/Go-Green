@@ -2,9 +2,9 @@
   "name": "com.arkindustries",
   "version": "1.0.0",
   "description": "Catalog service",
-  "main": "app.js",
+  "main": "./src/app.js",
   "scripts": {
-    "test": "nodemon server.js"
+    "start": "nodemon ./src/server.js"
   },
   "repository": {
     "type": "git",

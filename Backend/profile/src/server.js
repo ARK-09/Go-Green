@@ -9,7 +9,7 @@ const UserDeletedListener = require("./events/userDeletedListener");
 const UserForgetPasswordListener = require("./events/userForgetPasswordListener");
 const UserResetPasswordListener = require("./events/userResetPasswordListener");
 
-natsWrapper.connect("gogreen", "12345", "http://nats-srv:4222").then(() => {
+natsWrapper.connect("gogreen", "1114", "http://nats-srv:4222").then(() => {
   new UserCreatedListener(natsWrapper.client).listen();
   new UserUpdatedListener(natsWrapper.client).listen();
   new UserDeletedListener(natsWrapper.client).listen();
@@ -31,7 +31,7 @@ mongoose.connect(connectionString).then(() => {
   console.log("DB connection successful!");
 });
 
-const port = parseInt(process.env.PORT) || 4002;
+const port = parseInt(process.env.PORT) || 4001;
 
 const server = app.listen(port, () => {
   console.log(`Listening at port:${port}`);

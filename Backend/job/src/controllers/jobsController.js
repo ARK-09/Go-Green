@@ -1,5 +1,12 @@
 const Job = require("../models/jobs");
-const { catchAsync, AppError } = require("@ark-industries/gogreen-common");
+const {
+  catchAsync,
+  AppError,
+  natsWrapper,
+} = require("@ark-industries/gogreen-common");
+const JobCreatedPublisher = require("../events/jobCreatedPublisher");
+const JobUpdatedPublisher = require("../events/jobUpdatedPublisher");
+const JobDeletedPublisher = require("../events/jobDeletedPublisher");
 
 const createJob = catchAsync(async (req, res, next) => {
   const {
@@ -28,6 +35,10 @@ const createJob = catchAsync(async (req, res, next) => {
     expactedDuration,
     paymentType,
     attachments,
+  });
+
+  await new JobCreatedPublisher(natsWrapper.client).publish(job).catch(() => {
+    return next(new AppError("Something went wrong...", 500));
   });
 
   res.status(201).json({
@@ -59,7 +70,7 @@ const searchJobs = catchAsync(async (req, res, next) => {
     query = "",
     limit = 10,
     offset = 1,
-    location = "",
+    location = {},
     price = 9,
   } = req.params;
 
@@ -68,7 +79,7 @@ const searchJobs = catchAsync(async (req, res, next) => {
   };
 
   if (location) {
-    const [latitude, longitude] = location.split(",");
+    const { latitude, longitude } = location;
     const maxDistanceInKilometers = 500;
 
     searchQuery.location = {
@@ -154,6 +165,10 @@ const updateJob = catchAsync(async (req, res, next) => {
 
   await job.save();
 
+  await new JobUpdatedPublisher(natsWrapper.client).publish(job).catch(() => {
+    return next(new AppError("Something went wrong...", 500));
+  });
+
   res.status(200).json({
     status: "success",
     data: {
@@ -180,6 +195,12 @@ const deleteJob = catchAsync(async (req, res, next) => {
       new AppError("You don't have permission to perform this action.", 403)
     );
   }
+
+  await new JobDeletedPublisher(natsWrapper.client)
+    .publish({ id: job._id })
+    .catch(() => {
+      return next(new AppError("Something went wrong...", 500));
+    });
 
   res.status(204).json({
     status: "success",
@@ -209,6 +230,10 @@ const createJobAttachment = catchAsync(async (req, res, next) => {
   job.attachments.push(...attachments);
 
   await job.save();
+
+  await new JobUpdatedPublisher(natsWrapper.client).publish(job).catch(() => {
+    return next(new AppError("Something went wrong...", 500));
+  });
 
   res.status(200).json({
     status: "success",
@@ -284,6 +309,10 @@ const deleteJobAttachment = catchAsync(async (req, res, next) => {
   job.attachments.splice(attachmentIndex, 1);
   await job.save();
 
+  await new JobUpdatedPublisher(natsWrapper.client).publish(job).catch(() => {
+    return next(new AppError("Something went wrong...", 500));
+  });
+
   res.status(204).json({
     status: "success",
     data: {
@@ -311,6 +340,10 @@ const deleteJobAttachments = catchAsync(async (req, res, next) => {
 
   job.attachments = [];
   await job.save();
+
+  await new JobUpdatedPublisher(natsWrapper.client).publish(job).catch(() => {
+    return next(new AppError("Something went wrong...", 500));
+  });
 
   res.status(204).json({
     status: "success",

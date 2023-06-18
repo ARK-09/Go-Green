@@ -155,6 +155,7 @@ const updateUser = catchAsync(async (req, res, next) => {
   user.email = email ? email : user.email;
   user.password = password ? password : user.password;
   user.phoneNo = phoneNo ? phoneNo : user.phoneNo;
+  user.image = image || user.image;
 
   user = await user.save();
 

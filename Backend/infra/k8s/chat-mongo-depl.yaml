@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chat-mongo-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: chat-mongo
+  template:
+    metadata:
+      labels:
+        app: chat-mongo
+    spec:
+      containers:
+        - name: chat-mongo
+          image: mongo
+          volumeMounts:
+            - name: chat-mongo-volume
+              mountPath: /data/db
+      volumes:
+        - name: chat-mongo-volume
+          persistentVolumeClaim:
+            claimName: chat-mongo-volume
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: chat-mongo-srv
+spec:
+  selector:
+    app: chat-mongo
+  ports:
+    - name: mongodb
+      protocol: TCP
+      port: 27017
+      targetPort: 27017

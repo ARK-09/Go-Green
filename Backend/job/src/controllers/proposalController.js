@@ -4,8 +4,14 @@ const {
   checkUserPermission,
   updateProposalStatus,
 } = require("../utils/proposalUtil");
-
-const { catchAsync, AppError } = require("@ark-industries/gogreen-common");
+const {
+  catchAsync,
+  AppError,
+  natsWrapper,
+} = require("@ark-industries/gogreen-common");
+const ProposalCreatedPublisher = require("../events/proposalCreatedPublisher");
+const ProposalUpdatedPublisher = require("../events/proposalUpdatedPublisher");
+const ProposalDeletedPublisher = require("../events/proposalDeletedPublisher");
 
 const createJobProposal = catchAsync(async (req, res, next) => {
   const jobId = req.params.id;
@@ -18,6 +24,15 @@ const createJobProposal = catchAsync(async (req, res, next) => {
 
   const { bidAmmount, coverLetter, proposedDuration, attachments } = req.body;
 
+  if (bidAmmount > job.budget) {
+    next(
+      new AppError(
+        "Bid amount should be less then or equal to the job budget.",
+        400
+      )
+    );
+  }
+
   const proposal = await Proposal.create({
     refId: jobId,
     bidAmmount,
@@ -26,6 +41,12 @@ const createJobProposal = catchAsync(async (req, res, next) => {
     attachments,
     type: "job",
   });
+
+  await new ProposalCreatedPublisher(natsWrapper.client)
+    .publish(proposal)
+    .catch(() => {
+      return next(new AppError("Something went wrong...", 500));
+    });
 
   res.status(200).json({
     status: "success",
@@ -46,6 +67,15 @@ const createServiceProposal = catchAsync(async (req, res, next) => {
 
   const { bidAmmount, coverLetter, proposedDuration, attachments } = req.body;
 
+  if (bidAmmount > service.budget) {
+    next(
+      new AppError(
+        "Bid amount should be less then or equal to the service budget.",
+        400
+      )
+    );
+  }
+
   const proposal = await Proposal.create({
     refId: serviceId,
     bidAmmount,
@@ -54,6 +84,12 @@ const createServiceProposal = catchAsync(async (req, res, next) => {
     attachments,
     type: "service",
   });
+
+  await new ProposalCreatedPublisher(natsWrapper.client)
+    .publish(proposal)
+    .catch(() => {
+      return next(new AppError("Something went wrong...", 500));
+    });
 
   res.status(200).json({
     status: "success",
@@ -167,6 +203,12 @@ const deleteProposal = catchAsync(async (req, res, next) => {
     await updateProposalStatus(proposal, "Declined");
   }
 
+  await new ProposalDeletedPublisher(natsWrapper.client)
+    .publish({ id: proposal._id })
+    .catch(() => {
+      return next(new AppError("Something went wrong...", 500));
+    });
+
   res.status(200).json({
     status: "success",
     data: {
@@ -199,6 +241,12 @@ const createProposalAttachment = catchAsync(async (req, res, next) => {
   proposal.attachments.push(...attachments);
 
   await proposal.save();
+
+  await new ProposalUpdatedPublisher(natsWrapper.client)
+    .publish(proposal)
+    .catch(() => {
+      return next(new AppError("Something went wrong...", 500));
+    });
 
   res.status(200).json({
     status: "success",
@@ -294,6 +342,12 @@ const deleteProposalAttachment = catchAsync(async (req, res, next) => {
   proposal.attachments.splice(attachmentIndex, 1);
   await proposal.save();
 
+  await new ProposalUpdatedPublisher(natsWrapper.client)
+    .publish(proposal)
+    .catch(() => {
+      return next(new AppError("Something went wrong...", 500));
+    });
+
   res.status(204).json({
     status: "success",
     data: {
@@ -321,6 +375,12 @@ const deleteProposalAttachments = catchAsync(async (req, res, next) => {
 
   proposal.attachments = [];
   await proposal.save();
+
+  await new ProposalUpdatedPublisher(natsWrapper.client)
+    .publish(proposal)
+    .catch(() => {
+      return next(new AppError("Something went wrong...", 500));
+    });
 
   res.status(204).json({
     status: "success",

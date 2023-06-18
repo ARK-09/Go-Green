@@ -9,7 +9,7 @@ const UserDeletedListener = require("./events/userDeletedListener");
 const UserForgetPasswordListener = require("./events/userForgetPasswordListener");
 const UserResetPasswordListener = require("./events/userResetPasswordListener");
 
-natsWrapper.connect("gogreen", "12346", "http://nats-srv:4222").then(() => {
+natsWrapper.connect("gogreen", "1113", "http://nats-srv:4222").then(() => {
   new UserCreatedListener(natsWrapper.client).listen();
   new UserUpdatedListener(natsWrapper.client).listen();
   new UserDeletedListener(natsWrapper.client).listen();

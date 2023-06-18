@@ -1,7 +1,14 @@
 const Contract = require("../models/contracts");
 const Job = require("../models/jobs");
 const Proposal = require("../models/proposals");
-const { catchAsync, AppError } = require("@ark-industries/gogreen-common");
+const {
+  catchAsync,
+  AppError,
+  natsWrapper,
+} = require("@ark-industries/gogreen-common");
+const ContractCreatedPublisher = require("../events/contractCreatedPublisher");
+const ContractUpdatedPublisher = require("../events/contractUpdatedPublisher");
+const ContractDeletedPublisher = require("../events/contractDeletedPublisher");
 
 const createContract = catchAsync(async (req, res, next) => {
   const { proposalid, ammount } = req.body;
@@ -28,6 +35,12 @@ const createContract = catchAsync(async (req, res, next) => {
     proposalId: proposalid,
     ammount,
   }).lean();
+
+  await new ContractCreatedPublisher(natsWrapper.client)
+    .publish(contract)
+    .catch(() => {
+      return next(new AppError("Something went wrong...", 500));
+    });
 
   res.status(200).json({
     status: "success",
@@ -99,6 +112,12 @@ const updateContract = catchAsync(async (req, res, next) => {
   contract.status = status || contract.status;
   await contract.save();
 
+  await new ContractUpdatedPublisher(natsWrapper.client)
+    .publish(contract)
+    .catch(() => {
+      return next(new AppError("Something went wrong...", 500));
+    });
+
   res.status(200).json({
     status: "success",
     data: {
@@ -127,6 +146,12 @@ const deleteContract = catchAsync(async (req, res, next) => {
   }
 
   await Contract.findByIdAndDelete(contract._id);
+
+  await new ContractDeletedPublisher(natsWrapper.client)
+    .publish({ id: contract._id })
+    .catch(() => {
+      return next(new AppError("Something went wrong...", 500));
+    });
 
   res.status(200).json({
     status: "success",

@@ -3,7 +3,7 @@ const User = require("../models/user");
 
 class UserDeletedListener extends Listener {
   subject = Subjects.userDeleted;
-  queueGroupName = "job-service-queue-group";
+  queueGroupName = "chat-service-queue-group";
 
   constructor(client) {
     super(client);

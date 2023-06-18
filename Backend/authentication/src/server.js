@@ -5,7 +5,7 @@ const app = require("./app");
 const { natsWrapper } = require("@ark-industries/gogreen-common");
 
 const connectionString = process.env.MONGO_URI;
-natsWrapper.connect("gogreen", "1234", "http://nats-srv:4222").then(() => {
+natsWrapper.connect("gogreen", "1111", "http://nats-srv:4222").then(() => {
   natsWrapper.client.on("close", () => {
     console.log("NATAS connection closed!");
     process.exit();

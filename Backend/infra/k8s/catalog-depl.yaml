@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: catalog-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: catalog
+  template:
+    metadata:
+      labels:
+        app: catalog
+    spec:
+      containers:
+        - name: catalog
+          image: ark09/catalog
+          env:
+            - name: PORT
+              value: "4002"
+            - name: MONGO_URI
+              value: "mongodb://catalog-mongo-srv:27017/catalog"
+            - name: NODE_ENV
+              value: "development"
+            - name: JWT_EXPIRY
+              value: "864000" # 10 day in seconds
+            - name: JWT_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: JWT_KEY
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: catalog-srv
+spec:
+  selector:
+    app: catalog
+  ports:
+    - name: catalog
+      protocol: TCP
+      port: 4002
+      targetPort: 4002

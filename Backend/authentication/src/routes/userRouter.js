@@ -1,5 +1,5 @@
 const express = require("express");
-const { body, check, param } = require("express-validator");
+const { body, check, param, sanitizeBody } = require("express-validator");
 const currentUser = require("../middlewares/currentUser");
 const {
   requireAuth,
@@ -67,7 +67,7 @@ router
     check("userType")
       .notEmpty()
       .withMessage("user type can't be empty.")
-      .isIn(["talent", "client", "admin"])
+      .isIn(["talent", "client"])
       .withMessage(
         "Invalid user type. Allowed values are: 'talent', 'client'."
       ),
@@ -121,7 +121,51 @@ router
     restrictTo("admin"),
     UserController.getUser
   )
-  .patch(requireAuth(JWT_KEY), currentUser, UserController.updateUser)
-  .delete(requireAuth(JWT_KEY), currentUser, UserController.deleteUser);
+  .patch(
+    param("id")
+      .isMongoId()
+      .withMessage("Invalid user ID. Please provide a valid MongoDB ID."),
+    check("name")
+      .isString()
+      .withMessage("Name should be of type string.")
+      .trim()
+      .notEmpty()
+      .withMessage("Name field is required."),
+    check("email")
+      .isEmail()
+      .withMessage("Please provide a valid email address.")
+      .normalizeEmail(),
+    check("password")
+      .matches(
+        /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&()])[A-Za-z\d@$!%*#?&()]{8,}$/
+      )
+      .withMessage(
+        "Password must contain at least 8 characters, one letter, one number, and one special character."
+      )
+      .notEmpty()
+      .withMessage("Password field is required."),
+    check("phoneNo")
+      .isMobilePhone()
+      .withMessage("Please provide a valid phone number.")
+      .optional(),
+    check("image")
+      .isURL()
+      .withMessage("Please provide a valid image URL.")
+      .optional(),
+    sanitizeBody("*").escape(),
+    validateRequest,
+    requireAuth(JWT_KEY),
+    currentUser,
+    UserController.updateUser
+  )
+  .delete(
+    param("id")
+      .isMongoId()
+      .withMessage("Invalid user ID. Please provide a valid MongoDB ID."),
+    validateRequest,
+    requireAuth(JWT_KEY),
+    currentUser,
+    UserController.deleteUser
+  );
 
 module.exports = router;
