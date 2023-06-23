@@ -275,14 +275,16 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/job_images_container"
+            android:id="@+id/proposal_images_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
             android:background="@drawable/border_rounded"
             android:backgroundTint="@color/white"
-            app:layout_constraintTop_toBottomOf="@+id/cover_letter_container"
-            tools:layout_editor_absoluteX="8dp">
+            android:maxHeight="200dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/cover_letter_container">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/image_container_header"
@@ -295,7 +297,7 @@
                 app:layout_constraintTop_toTopOf="parent">
 
                 <ImageView
-                    android:id="@+id/job_images_iv"
+                    android:id="@+id/proposal_images_iv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:src="@drawable/ic_image"
@@ -314,7 +316,7 @@
                     android:textSize="17sp"
                     android:textStyle="bold"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/job_images_iv"
+                    app:layout_constraintStart_toEndOf="@+id/proposal_images_iv"
                     app:layout_constraintTop_toTopOf="parent" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
@@ -323,12 +325,27 @@
                 android:id="@+id/attachment_gv"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:maxHeight="200dp"
                 android:padding="8dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/image_container_header"
                 tools:listitem="@layout/attachment_list_item" />
         </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <Button
+            android:id="@+id/submit"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:text="Submit"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/proposal_images_container"
+            app:layout_constraintVertical_bias="0.94" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>

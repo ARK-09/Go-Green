@@ -12,6 +12,15 @@
         android:theme="@style/Theme.GoGreen.White"
         tools:targetApi="31">
         <activity
+            android:name=".Profile"
+            android:exported="false" />
+        <activity
+            android:name=".Bid"
+            android:exported="false" />
+        <activity
+            android:name=".Notification"
+            android:exported="false" />
+        <activity
             android:name=".ViewJob"
             android:exported="false" />
         <activity
