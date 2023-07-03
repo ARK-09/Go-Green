@@ -24,6 +24,20 @@ spec:
               value: "development"
             - name: JWT_EXPIRY
               value: "864000" # 10 day in seconds
+            - name: BUCKET_NAME
+              value: "gogreen-files-bucket"
+            - name: BUCKET_REGION
+              value: "ap-south-1"
+            - name: ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: access-key-secret
+                  key: ACCESS_KEY
+            - name: SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: secret-access-key-secret
+                  key: SECRET_ACCESS_KEY
             - name: JWT_KEY
               valueFrom:
                 secretKeyRef:

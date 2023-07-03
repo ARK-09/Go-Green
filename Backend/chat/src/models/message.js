@@ -7,7 +7,9 @@ const messageSchema = new mongoose.Schema({
   },
   attachments: [
     {
-      id: mongoose.Schema.Types.ObjectId,
+      id: {
+        type: String,
+      },
       mimeType: {
         type: String,
         enum: {
@@ -26,6 +28,7 @@ const messageSchema = new mongoose.Schema({
       originalName: String,
       url: String,
       createdDate: { type: Date, default: Date.now },
+      _id: false,
     },
   ],
   roomId: {

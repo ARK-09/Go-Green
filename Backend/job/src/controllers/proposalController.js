@@ -19,13 +19,13 @@ const createJobProposal = catchAsync(async (req, res, next) => {
   const job = await Job.findById(jobId);
 
   if (!job) {
-    next(new AppError(`No job found with id: ${jobId}`, 204));
+    return next(new AppError(`No job found with id: ${jobId}`, 204));
   }
 
-  const { bidAmmount, coverLetter, proposedDuration, attachments } = req.body;
+  const { bidAmount, coverLetter, proposedDuration, attachments } = req.body;
 
-  if (bidAmmount > job.budget) {
-    next(
+  if (bidAmount > job.budget) {
+    return next(
       new AppError(
         "Bid amount should be less then or equal to the job budget.",
         400
@@ -33,13 +33,34 @@ const createJobProposal = catchAsync(async (req, res, next) => {
     );
   }
 
+  const isAllowed =
+    req.currentUser.userType === "talent" &&
+    job.userId.toString() != req.currentUser.id;
+
+  if (!isAllowed) {
+    return next(new AppError("You'r not allowed to perform this action.", 403));
+  }
+
+  const isAlreadyApplied = await Proposal.findOne({
+    userId: req.currentUser.id,
+  });
+
+  if (isAlreadyApplied) {
+    return next(new AppError("Already applied.", 409));
+  }
+
+  if (job.status != "Open") {
+    return next(new AppError("The job is closed.", 410));
+  }
+
   const proposal = await Proposal.create({
     refId: jobId,
-    bidAmmount,
+    bidAmount,
     coverLetter,
     proposedDuration,
     attachments,
     type: "job",
+    userId: req.currentUser.id,
   });
 
   await new ProposalCreatedPublisher(natsWrapper.client)
@@ -62,13 +83,29 @@ const createServiceProposal = catchAsync(async (req, res, next) => {
   const service = await Job.findById(serviceId);
 
   if (!service) {
-    next(new AppError(`No service found with id: ${serviceId}`, 204));
+    return next(new AppError(`No service found with id: ${serviceId}`, 204));
   }
 
-  const { bidAmmount, coverLetter, proposedDuration, attachments } = req.body;
+  const isAllowed =
+    req.currentUser.userType === "client" &&
+    service.userId.toString() != req.currentUser.id;
 
-  if (bidAmmount > service.budget) {
-    next(
+  if (!isAllowed) {
+    return next(new AppError("You'r not allowed to perform this action.", 403));
+  }
+
+  const isAlreadyApplied = await Proposal.findOne({
+    userId: req.currentUser.id,
+  });
+
+  if (isAlreadyApplied) {
+    return next(new AppError("Already applied.", 409));
+  }
+
+  const { bidAmount, coverLetter, proposedDuration, attachments } = req.body;
+
+  if (bidAmount > service.budget) {
+    return next(
       new AppError(
         "Bid amount should be less then or equal to the service budget.",
         400
@@ -78,11 +115,12 @@ const createServiceProposal = catchAsync(async (req, res, next) => {
 
   const proposal = await Proposal.create({
     refId: serviceId,
-    bidAmmount,
+    bidAmount,
     coverLetter,
     proposedDuration,
     attachments,
     type: "service",
+    userId: req.currentUser.id,
   });
 
   await new ProposalCreatedPublisher(natsWrapper.client)
@@ -105,19 +143,28 @@ const getJobProposals = catchAsync(async (req, res, next) => {
   const job = await Job.findById(jobId);
 
   if (!job) {
-    next(new AppError(`No job found with id: ${jobId}`, 204));
+    return next(new AppError(`No job found with id: ${jobId}`, 204));
   }
 
-  const isAllowed = req.currentUser.id === job.userId.toString();
+  const isJobOwner = req.currentUser.id === job.userId.toString();
 
-  if (!isAllowed) {
-    next(
-      new AppError("You don't have permission to perform this operation.", 403)
-    );
+  if (isJobOwner) {
+    const proposals = await Proposal.find({
+      $and: [{ type: "job" }, { refId: jobId }],
+    });
+
+    return res.status(200).json({
+      status: "success",
+      data: {
+        proposals,
+      },
+    });
   }
 
   const proposal = await Proposal.find({
-    $and: [{ type: "job" }, { refId: jobId }],
+    type: "job",
+    refId: jobId,
+    userId: req.currentUser.id,
   });
 
   res.status(200).json({
@@ -134,25 +181,25 @@ const getServiceProposals = catchAsync(async (req, res, next) => {
   const service = await Job.findById(serviceId);
 
   if (!service) {
-    next(new AppError(`No service found with id: ${serviceId}`, 204));
+    return next(new AppError(`No service found with id: ${serviceId}`, 204));
   }
 
   const isAllowed = req.currentUser.id === service.userId.toString();
 
   if (!isAllowed) {
-    next(
+    return next(
       new AppError("You don't have permission to perform this operation.", 403)
     );
   }
 
-  const proposal = await Proposal.find({
+  const proposals = await Proposal.find({
     $and: [{ type: "service" }, { refId: serviceId }],
   });
 
   res.status(200).json({
     status: "success",
     data: {
-      proposal,
+      proposals,
     },
   });
 });
@@ -163,13 +210,15 @@ const getProposal = catchAsync(async (req, res, next) => {
   const proposal = await Proposal.findById(id);
 
   if (!proposal) {
-    next(new AppError(`No proposal found with id: ${id}`, 204));
+    return next(new AppError(`No proposal found with id: ${id}`, 204));
   }
 
   let isAllowed = await checkUserPermission(req.currentUser, proposal);
 
   if (!isAllowed) {
-    next(new AppError("Your are not allowed to perform this action.", 403));
+    return next(
+      new AppError("Your are not allowed to perform this action.", 403)
+    );
   }
 
   res.status(200).json({
@@ -186,13 +235,15 @@ const deleteProposal = catchAsync(async (req, res, next) => {
   const proposal = await Proposal.findById(id);
 
   if (!proposal) {
-    next(new AppError(`No proposal found with id: ${id}`, 204));
+    return next(new AppError(`No proposal found with id: ${id}`, 204));
   }
 
-  let isAllowed = checkUserPermission(req.currentUser, proposal);
+  let isAllowed = await checkUserPermission(req.currentUser, proposal);
 
   if (!isAllowed) {
-    next(new AppError("Your are not allowed to perform this action.", 403));
+    return next(
+      new AppError("Your are not allowed to perform this action.", 403)
+    );
   }
 
   const isProposalOwner = req.currentUser.id === proposal.userId.toString();
@@ -225,6 +276,14 @@ const createProposalAttachment = catchAsync(async (req, res, next) => {
   if (!proposal) {
     return next(
       new AppError(`No proposal found with matching id: ${proposalId}`, 204)
+    );
+  }
+
+  if (proposal.status === "Withdraw" || proposal.status === "Declined") {
+    return next(
+      new AppError(
+        "Cant't add attachment to a proposal that has been withdrawn or declined."
+      )
     );
   }
 
@@ -270,7 +329,9 @@ const getProposalAttachments = catchAsync(async (req, res, next) => {
   const isAllowed = await checkUserPermission(req.currentUser, proposal);
 
   if (!isAllowed) {
-    next(new AppError("You dont have permission to perform this action.", 403));
+    return next(
+      new AppError("You dont have permission to perform this action.", 403)
+    );
   }
 
   res.status(200).json({
@@ -293,11 +354,13 @@ const getProposalAttachment = catchAsync(async (req, res, next) => {
   const isAllowed = await checkUserPermission(req.currentUser, proposal);
 
   if (!isAllowed) {
-    next(new AppError("Your are not allowed to perform this action.", 403));
+    return next(
+      new AppError("Your are not allowed to perform this action.", 403)
+    );
   }
 
   const attachment = proposal.attachments.find(
-    (attachment) => attachment._id.toString() === attachmentid
+    (attachment) => attachment.id.toString() === attachmentid
   );
 
   if (!attachment) {
@@ -323,14 +386,24 @@ const deleteProposalAttachment = catchAsync(async (req, res, next) => {
     return next(new AppError(`No proposal found with matching id: ${id}`, 204));
   }
 
+  if (proposal.status === "Withdraw" || proposal.status === "Declined") {
+    return next(
+      new AppError(
+        "Cant't add attachment to a proposal that has been withdrawn or declined."
+      )
+    );
+  }
+
   const isAllowed = req.currentUser.id === proposal.userId.toString();
 
   if (!isAllowed) {
-    next(new AppError("You dont have permission to perform this action.", 403));
+    return next(
+      new AppError("You dont have permission to perform this action.", 403)
+    );
   }
 
   const attachmentIndex = proposal.attachments.findIndex(
-    (attachment) => attachment._id.toString() === attachmentid
+    (attachment) => attachment.id.toString() === attachmentid
   );
 
   if (attachmentIndex === -1) {
@@ -363,6 +436,14 @@ const deleteProposalAttachments = catchAsync(async (req, res, next) => {
 
   if (!proposal) {
     return next(new AppError(`No proposal found with matching id: ${id}`, 204));
+  }
+
+  if (proposal.status === "Withdraw" || proposal.status === "Declined") {
+    return next(
+      new AppError(
+        "Cant't add attachment to a proposal that has been withdrawn or declined."
+      )
+    );
   }
 
   const isAllowed = req.currentUser.id === proposal.userId.toString();

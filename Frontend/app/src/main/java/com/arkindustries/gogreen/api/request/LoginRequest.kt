@@ -1,4 +1,4 @@
-package com.arkindustries.gogreen.api.response
+package com.arkindustries.gogreen.api.request
 
 import com.google.gson.annotations.SerializedName
 

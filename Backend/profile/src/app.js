@@ -14,7 +14,7 @@ app.use("/api/v1/profiles", profileRouter);
 app.use("/api/v1/profiles/:id/projects", projectRouter);
 
 app.use("*", (req, res, next) => {
-  next(new AppError(`Can't find path: ${req.path} on this server`, 404));
+  return next(new AppError(`Can't find path: ${req.path} on this server`, 404));
 });
 
 app.use(globalErrorController);

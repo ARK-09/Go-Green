@@ -1,5 +1,5 @@
 const express = require("express");
-const { check, param, sanitizeBody } = require("express-validator");
+const { check, param } = require("express-validator");
 const {
   requireAuth,
   validateRequest,
@@ -22,56 +22,61 @@ router
       .withMessage("Bid amount should be a number having min value 5."),
     check("coverLetter")
       .notEmpty()
-      .withMessage("Cover letter field is required."),
+      .withMessage("Cover letter field is required.")
+      .escape(),
     check("proposedDuration")
       .notEmpty()
       .withMessage("Proposed duration field is required.")
-      .isIn(
+      .isIn([
         "Less than 1 month",
         "1 to 3 months",
         "3 to 6 months",
-        "More than 6 months"
-      )
+        "More than 6 months",
+      ])
       .withMessage(
         "Please provide a valid proposed duration. Valid options: 'Less than 1 month', '1 to 3 months', '3 to 6 months', 'More than 6 months'."
       ),
-    check("attachments.mimeType")
+    check("attachments")
       .optional()
-      .custom((value, { req }) => {
-        if (value && !req.body.attachments.file) {
-          throw new Error(
-            "If mimeType is provided, file url should also be given."
-          );
-        }
-        return true;
-      })
-      .isString()
-      .withMessage("Attachments mimeType should be of type string.")
-      .isIn(
+      .isArray({ min: 1 })
+      .withMessage("Attachments should be an array with min 1 attachment."),
+    check("attachments.*.id")
+      .notEmpty()
+      .withMessage("Attachment ID is required")
+      .isMongoId()
+      .withMessage("Attachment ID should be a valid MongoDB ID"),
+
+    check("attachments.*.mimeType")
+      .notEmpty()
+      .withMessage("Attachment MIME type is required")
+      .isIn([
         "image/jpeg",
         "image/png",
         "image/gif",
         "video/mp4",
         "video/mpeg",
-        "video/quicktime"
-      )
+        "video/quicktime",
+      ])
       .withMessage(
-        "Invalid MIME type provided. Only the following MIME types are allowed: image/jpeg, image/png, image/gif, video/mp4, video/quicktime."
+        "Invalid Attachment MIME type provided. Only the following MIME types are allowed: image/jpeg, image/png, image/gif, video/mp4, video/quicktime."
       ),
-    check("attachments.file")
-      .optional()
-      .custom((value, { req }) => {
-        if (value && !req.body.attachments.mimeType) {
-          throw new Error(
-            "If file is provided, mimeType should also be given."
-          );
-        }
-        return true;
-      })
+
+    check("attachments.*.originalName")
+      .notEmpty()
+      .withMessage("Attachment Original name is required"),
+
+    check("attachments.*.url")
+      .notEmpty()
+      .withMessage("Attachment URL is required")
       .isURL()
-      .withMessage("Attachments file should be a valid URL."),
+      .withMessage("Please provide a valid url."),
+
+    check("attachments.*.createdDate")
+      .notEmpty()
+      .withMessage("Attachment Created date is required")
+      .isISO8601()
+      .withMessage("Attachment Created date should be in ISO 8601 format"),
     validateRequest,
-    sanitizeBody("*").escape(),
     requireAuth(JWT_KEY),
     currentUser,
     ProposalController.createJobProposal
@@ -95,45 +100,51 @@ router
     check("bidAmount").notEmpty().withMessage("Bid amount field is required."),
     check("coverLetter")
       .notEmpty()
-      .withMessage("Cover letter field is required."),
+      .withMessage("Cover letter field is required.")
+      .escape(),
     check("proposedDuration")
       .notEmpty()
       .withMessage("Proposed duration field is required."),
-    check("attachments.mimeType")
+    check("attachments")
       .optional()
-      .custom((value, { req }) => {
-        if (value && !req.body.attachments.file) {
-          throw new Error(
-            "If mimeType is provided, file url should also be given."
-          );
-        }
-        return true;
-      })
-      .isString()
-      .withMessage("Attachments mimeType should be of type string.")
-      .isIn(
+      .isArray({ min: 1 })
+      .withMessage("Attachments should be an array with min 1 attachment."),
+    check("attachments.*.id")
+      .notEmpty()
+      .withMessage("Attachment ID is required")
+      .isMongoId()
+      .withMessage("Attachment ID should be a valid MongoDB ID"),
+
+    check("attachments.*.mimeType")
+      .notEmpty()
+      .withMessage("Attachment MIME type is required")
+      .isIn([
         "image/jpeg",
         "image/png",
         "image/gif",
         "video/mp4",
         "video/mpeg",
-        "video/quicktime"
-      )
+        "video/quicktime",
+      ])
       .withMessage(
-        "Invalid MIME type provided. Only the following MIME types are allowed: image/jpeg, image/png, image/gif, video/mp4, video/quicktime."
+        "Invalid Attachment MIME type provided. Only the following MIME types are allowed: image/jpeg, image/png, image/gif, video/mp4, video/quicktime."
       ),
-    check("attachments.file")
-      .optional()
-      .custom((value, { req }) => {
-        if (value && !req.body.attachments.mimeType) {
-          throw new Error(
-            "If file is provided, mimeType should also be given."
-          );
-        }
-        return true;
-      })
+
+    check("attachments.*.originalName")
+      .notEmpty()
+      .withMessage("Attachment Original name is required"),
+
+    check("attachments.*.url")
+      .notEmpty()
+      .withMessage("Attachment URL is required")
       .isURL()
-      .withMessage("Attachments file should be a valid URL."),
+      .withMessage("Please provide a valid url."),
+
+    check("attachments.*.createdDate")
+      .notEmpty()
+      .withMessage("Attachment Created date is required")
+      .isISO8601()
+      .withMessage("Attachment Created date should be in ISO 8601 format"),
     validateRequest,
     requireAuth(JWT_KEY),
     currentUser,
@@ -173,41 +184,45 @@ router
 router
   .route("/:id/attachments")
   .post(
-    check("attachments.mimeType")
-      .optional()
-      .custom((value, { req }) => {
-        if (value && !req.body.attachments.file) {
-          throw new Error(
-            "If mimeType is provided, file url should also be given."
-          );
-        }
-        return true;
-      })
-      .isString()
-      .withMessage("Attachments mimeType should be of type string.")
-      .isIn(
+    check("attachments")
+      .isArray({ min: 1 })
+      .withMessage("Attachments should be an array with min 1 attachment."),
+    check("attachments.*.id")
+      .notEmpty()
+      .withMessage("Attachment ID is required")
+      .isMongoId()
+      .withMessage("Attachment ID should be a valid MongoDB ID"),
+
+    check("attachments.*.mimeType")
+      .notEmpty()
+      .withMessage("Attachment MIME type is required")
+      .isIn([
         "image/jpeg",
         "image/png",
         "image/gif",
         "video/mp4",
         "video/mpeg",
-        "video/quicktime"
-      )
+        "video/quicktime",
+      ])
       .withMessage(
-        "Invalid MIME type provided. Only the following MIME types are allowed: image/jpeg, image/png, image/gif, video/mp4, video/quicktime."
+        "Invalid Attachment MIME type provided. Only the following MIME types are allowed: image/jpeg, image/png, image/gif, video/mp4, video/quicktime."
       ),
-    check("attachments.file")
-      .optional()
-      .custom((value, { req }) => {
-        if (value && !req.body.attachments.mimeType) {
-          throw new Error(
-            "If file is provided, mimeType should also be given."
-          );
-        }
-        return true;
-      })
+
+    check("attachments.*.originalName")
+      .notEmpty()
+      .withMessage("Attachment Original name is required"),
+
+    check("attachments.*.url")
+      .notEmpty()
+      .withMessage("Attachment URL is required")
       .isURL()
-      .withMessage("Attachments file should be a valid URL."),
+      .withMessage("Please provide a valid url."),
+
+    check("attachments.*.createdDate")
+      .notEmpty()
+      .withMessage("Attachment Created date is required")
+      .isISO8601()
+      .withMessage("Attachment Created date should be in ISO 8601 format"),
     validateRequest,
     requireAuth(JWT_KEY),
     currentUser,

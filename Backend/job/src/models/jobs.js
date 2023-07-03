@@ -9,10 +9,13 @@ const jobsSchema = new mongoose.Schema({
     type: String,
     required: [true, "Please provide a valid job description."],
   },
-  categories: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: [true, "Please provide a valid category id."],
-  },
+  categories: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Categories",
+      required: [true, "Please provide a valid category id."],
+    },
+  ],
   budget: {
     type: Number,
     required: [true, "Please provide a valid job budget."],
@@ -33,7 +36,7 @@ const jobsSchema = new mongoose.Schema({
       message:
         "Status must be one of: Draft, Open, In Review, Assigned, Completed, Canceled, Disputed.",
     },
-    default: "Draft",
+    default: "Open",
   },
   expactedDuration: {
     type: String,
@@ -49,7 +52,9 @@ const jobsSchema = new mongoose.Schema({
   },
   attachments: [
     {
-      id: mongoose.Schema.Types.ObjectId,
+      id: {
+        type: String,
+      },
       mimeType: {
         type: String,
         enum: {
@@ -68,11 +73,12 @@ const jobsSchema = new mongoose.Schema({
       originalName: String,
       url: String,
       createdDate: { type: Date, default: Date.now },
+      _id: false,
     },
   ],
   skills: [
     {
-      id: mongoose.Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "Skills",
     },
   ],

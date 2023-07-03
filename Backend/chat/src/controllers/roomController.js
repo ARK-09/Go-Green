@@ -17,7 +17,7 @@ const createRoom = catchAsync(async (req, res, next) => {
 });
 
 const getRooms = catchAsync(async (req, res, next) => {
-  const { offset = 1, limit = 10 } = req.body;
+  const { offset = 1, limit = 10 } = req.query;
   const currentUser = req.currentUser.id;
 
   const filterQuery = {
@@ -41,13 +41,13 @@ const getRooms = catchAsync(async (req, res, next) => {
 });
 
 const getRoom = catchAsync(async (req, res, next) => {
-  const { id } = req.body;
+  const { id } = req.params;
   const currentUser = req.currentUser.id;
 
   const room = await Room.findById(id);
 
   if (!room) {
-    next(AppError(`No room found with id: ${id}`, 204));
+    return next(new AppError(`No room found with id: ${id}`, 200));
   }
 
   const isAllowed = room.members.some(
@@ -55,7 +55,9 @@ const getRoom = catchAsync(async (req, res, next) => {
   );
 
   if (!isAllowed) {
-    next(new AppError("You'r are not allowed to access this room.", 403));
+    return next(
+      new AppError("You'r are not allowed to access this room.", 403)
+    );
   }
 
   res.status(200).json({
@@ -67,13 +69,14 @@ const getRoom = catchAsync(async (req, res, next) => {
 });
 
 const createRoomMessage = catchAsync(async (req, res, next) => {
-  const { id, text, attachments } = req.body;
+  const { text, attachments } = req.body;
+  const { id } = req.params;
   const currentUser = req.currentUser.id;
 
   const room = await Room.findById(id);
 
   if (!room) {
-    next(AppError(`No room found with id: ${id}`, 204));
+    return next(new AppError(`No room found with id: ${id}`, 204));
   }
 
   const isAllowed = room.members.some(
@@ -81,7 +84,9 @@ const createRoomMessage = catchAsync(async (req, res, next) => {
   );
 
   if (!isAllowed) {
-    next(new AppError("You'r are not allowed to access this room.", 403));
+    return next(
+      new AppError("You'r are not allowed to access this room.", 403)
+    );
   }
 
   const message = new Message();
@@ -104,13 +109,14 @@ const createRoomMessage = catchAsync(async (req, res, next) => {
 });
 
 const getRoomMessages = catchAsync(async (req, res, next) => {
-  const { id, offset = 1, limit = 10 } = req.body;
+  const { offset = 1, limit = 10 } = req.query;
+  const { id } = req.params;
   const currentUser = req.currentUser.id;
 
   const room = await Room.findById(id);
 
   if (!room) {
-    next(new AppError(`No room found with id: ${id}`, 204));
+    return next(new AppError(`No room found with id: ${id}`, 204));
   }
 
   const isAllowed = room.members.some(
@@ -118,7 +124,9 @@ const getRoomMessages = catchAsync(async (req, res, next) => {
   );
 
   if (!isAllowed) {
-    next(new AppError("You'r are not allowed to access this room.", 403));
+    return next(
+      new AppError("You'r are not allowed to access this room.", 403)
+    );
   }
 
   const filterQuery = {
@@ -144,13 +152,14 @@ const getRoomMessages = catchAsync(async (req, res, next) => {
 });
 
 const addRoomMembers = catchAsync(async (req, res, next) => {
-  const { id, members } = req.body;
+  const { members } = req.body;
+  const { id } = req.params;
   const currentUser = req.currentUser.id;
 
   const room = await Room.findById(id);
 
   if (!room) {
-    next(new AppError(`No room found with id ${id}`, 204));
+    return next(new AppError(`No room found with id ${id}`, 204));
   }
 
   const isAllowed = room.members.some(
@@ -158,7 +167,9 @@ const addRoomMembers = catchAsync(async (req, res, next) => {
   );
 
   if (!isAllowed) {
-    next(new AppError("You'r are not allowed to access this room.", 403));
+    return next(
+      new AppError("You'r are not allowed to access this room.", 403)
+    );
   }
 
   room.members.push(...members);
@@ -173,13 +184,13 @@ const addRoomMembers = catchAsync(async (req, res, next) => {
 });
 
 const getRoomMembers = catchAsync(async (req, res, next) => {
-  const { id } = req.body;
+  const { id } = req.params;
   const currentUser = req.currentUser.id;
 
   const room = await Room.findById(id);
 
   if (!room) {
-    next(new AppError(`No room found with id ${id}`, 204));
+    return next(new AppError(`No room found with id ${id}`, 204));
   }
 
   const isAllowed = room.members.some(
@@ -187,7 +198,9 @@ const getRoomMembers = catchAsync(async (req, res, next) => {
   );
 
   if (!isAllowed) {
-    next(new AppError("You'r are not allowed to access this room.", 403));
+    return next(
+      new AppError("You'r are not allowed to access this room.", 403)
+    );
   }
 
   res.status(200).json({
@@ -199,13 +212,14 @@ const getRoomMembers = catchAsync(async (req, res, next) => {
 });
 
 const getRoomMember = catchAsync(async (req, res, next) => {
-  const { id, memberid } = req.body;
+  const { memberid } = req.body;
+  const { id } = req.params;
   const currentUser = req.currentUser.id;
 
   const room = await Room.findById(id);
 
   if (!room) {
-    next(new AppError(`No room found with id ${id}`, 204));
+    return next(new AppError(`No room found with id ${id}`, 204));
   }
 
   const isAllowed = room.members.some(
@@ -213,15 +227,17 @@ const getRoomMember = catchAsync(async (req, res, next) => {
   );
 
   if (!isAllowed) {
-    next(new AppError("You'r are not allowed to access this room.", 403));
+    return next(
+      new AppError("You'r are not allowed to access this room.", 403)
+    );
   }
 
   const member = room.members.find(
-    (member) => member.memberId.toString() === memberid
+    (member) => member._id.toString() === memberid
   );
 
   if (!member) {
-    next(new AppError(`No member found with id: ${memberid}`, 204));
+    return next(new AppError(`No member found with id: ${memberid}`, 204));
   }
 
   res.status(200).json({
@@ -233,13 +249,13 @@ const getRoomMember = catchAsync(async (req, res, next) => {
 });
 
 const deleteRoomMember = catchAsync(async (req, res, next) => {
-  const { id, memberid } = req.body;
+  const { id, memberid } = req.params;
   const currentUser = req.currentUser.id;
 
   const room = await Room.findById(id);
 
   if (!room) {
-    next(new AppError(`No room found with id ${id}`, 204));
+    return next(new AppError(`No room found with id ${id}`, 204));
   }
 
   const isAllowed = room.members.some(
@@ -247,15 +263,17 @@ const deleteRoomMember = catchAsync(async (req, res, next) => {
   );
 
   if (!isAllowed) {
-    next(new AppError("You'r are not allowed to access this room.", 403));
+    return next(
+      new AppError("You'r are not allowed to access this room.", 403)
+    );
   }
 
   const memberIndex = room.members.findIndex(
-    (member) => member.memberId.toString() === memberid
+    (member) => member._id.toString() === memberid
   );
 
   if (memberIndex === -1) {
-    next(new AppError(`No member found with id: ${memberid}`, 204));
+    return next(new AppError(`No member found with id: ${memberid}`, 204));
   }
 
   room.members.splice(memberIndex, 1);

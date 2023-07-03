@@ -6,7 +6,7 @@
     <data>
         <variable
             name="job"
-            type="com.arkindustries.gogreen.models.Job" />
+            type="com.arkindustries.gogreen.database.models.Job" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

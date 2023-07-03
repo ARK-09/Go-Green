@@ -1,4 +1,4 @@
-package com.arkindustries.gogreen.api
+package com.arkindustries.gogreen.api.response
 
 data class Response<T>(
     val status: String,

@@ -7,7 +7,7 @@ const handelProductionErrors = (err, res) => {
     err.message = "Something went wrong...";
   }
 
-  res.status(err.statusCode).json({
+  return res.status(err.statusCode).json({
     status: err.status,
     code: err.statusCode,
     message: err.message,
@@ -15,7 +15,7 @@ const handelProductionErrors = (err, res) => {
 };
 
 const handelDevelopmentErrors = (err, res) => {
-  res.status(err.statusCode || 500).json({
+  return res.status(err.statusCode || 500).json({
     status: err.status,
     statusCode: err.statusCode || 500,
     message: err.message,

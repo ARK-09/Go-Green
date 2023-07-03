@@ -1,4 +1,4 @@
-package com.arkindustries.gogreen.models
+package com.arkindustries.gogreen.database.models
 
 class Job {
 }

@@ -1,5 +1,5 @@
 const express = require("express");
-const { body, check, param, sanitizeBody } = require("express-validator");
+const { body, check, param } = require("express-validator");
 const currentUser = require("../middlewares/currentUser");
 const {
   requireAuth,
@@ -72,6 +72,7 @@ router
         "Invalid user type. Allowed values are: 'talent', 'client'."
       ),
     check("phoneNo")
+      .optional()
       .isMobilePhone("en-PK")
       .withMessage("Please provide a valid Pakistani mobile number."),
     validateRequest,
@@ -130,7 +131,8 @@ router
       .withMessage("Name should be of type string.")
       .trim()
       .notEmpty()
-      .withMessage("Name field is required."),
+      .withMessage("Name field is required.")
+      .escape(),
     check("email")
       .isEmail()
       .withMessage("Please provide a valid email address.")
@@ -152,7 +154,6 @@ router
       .isURL()
       .withMessage("Please provide a valid image URL.")
       .optional(),
-    sanitizeBody("*").escape(),
     validateRequest,
     requireAuth(JWT_KEY),
     currentUser,

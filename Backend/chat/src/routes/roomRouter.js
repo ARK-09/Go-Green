@@ -1,5 +1,5 @@
 const express = require("express");
-const { sanitizeBody, check, param } = require("express-validator");
+const { check, param, query } = require("express-validator");
 const RoomController = require("../controllers/roomController");
 const {
   requireAuth,
@@ -18,6 +18,7 @@ router
       .isString()
       .withMessage("Name should be of type string.")
       .trim()
+      .escape()
       .notEmpty()
       .withMessage("Name field is required."),
     check("members")
@@ -25,7 +26,7 @@ router
       .withMessage(
         "Members should be provided as an array with at least one user ID."
       ),
-    check("members.*")
+    check("members.*.userId")
       .isMongoId()
       .withMessage("Invalid member ID. Please provide a valid MongoDB ID."),
     validateRequest,
@@ -36,12 +37,12 @@ router
   .get(
     query("offset")
       .optional()
-      .isInt()
-      .withMessage("Offset should be an integer."),
+      .isInt({ min: 1 })
+      .withMessage("Offset should be an integer with min value 1."),
     query("limit")
       .optional()
-      .isInt()
-      .withMessage("Limit should be an integer."),
+      .isInt({ min: 1 })
+      .withMessage("Limit should be an integer with min value 1."),
     validateRequest,
     requireAuth(JWT_KEY),
     currentUser,
@@ -57,7 +58,7 @@ router
     validateRequest,
     requireAuth(JWT_KEY),
     currentUser,
-    RoomController.getRoomById
+    RoomController.getRoom
   );
 
 router
@@ -70,17 +71,19 @@ router
       .isString()
       .withMessage("Text should be of type string.")
       .trim()
+      .escape()
       .notEmpty()
       .withMessage("Text field is required."),
     check("attachments.mimeType")
       .optional()
+      .escape()
       .isString()
       .withMessage("Attachments mimeType should be of type string."),
     check("attachments.file")
       .optional()
+      .escape()
       .isObject()
       .withMessage("Attachments file should be provided as an object."),
-    sanitizeBody("*").escape(),
     validateRequest,
     requireAuth(JWT_KEY),
     currentUser,
@@ -91,13 +94,13 @@ router
       .isMongoId()
       .withMessage("Invalid room ID. Please provide a valid MongoDB ID."),
     query("offset")
-      .optional()
+      .optional({ min: 1 })
       .isInt()
-      .withMessage("Offset should be an integer."),
+      .withMessage("Offset should be an integer with min value 1."),
     query("limit")
       .optional()
-      .isInt()
-      .withMessage("Limit should be an integer."),
+      .isInt({ min: 1 })
+      .withMessage("Limit should be an integer with min value 1."),
     validateRequest,
     requireAuth(JWT_KEY),
     currentUser,
@@ -115,9 +118,10 @@ router
       .withMessage(
         "Members should be provided as an array with at least one user ID."
       ),
-    check("members.*")
+    check("members.*.userId")
       .isMongoId()
       .withMessage("Invalid member ID. Please provide a valid MongoDB ID."),
+    validateRequest,
     requireAuth(JWT_KEY),
     currentUser,
     RoomController.addRoomMembers
@@ -138,7 +142,7 @@ router
     param("id")
       .isMongoId()
       .withMessage("Invalid room ID. Please provide a valid MongoDB ID."),
-    param("memberId")
+    param("memberid")
       .isMongoId()
       .withMessage("Invalid member ID. Please provide a valid MongoDB ID."),
     validateRequest,
@@ -150,7 +154,7 @@ router
     param("id")
       .isMongoId()
       .withMessage("Invalid room ID. Please provide a valid MongoDB ID."),
-    param("memberId")
+    param("memberid")
       .isMongoId()
       .withMessage("Invalid member ID. Please provide a valid MongoDB ID."),
     validateRequest,

@@ -38,7 +38,9 @@ const proposalSchema = new mongoose.Schema({
   },
   attachments: [
     {
-      id: mongoose.Schema.Types.ObjectId,
+      id: {
+        type: String,
+      },
       mimeType: {
         type: String,
         enum: {
@@ -57,6 +59,7 @@ const proposalSchema = new mongoose.Schema({
       originalName: String,
       url: String,
       createdDate: { type: Date, default: Date.now },
+      _id: false,
     },
   ],
   clientFeedback: {

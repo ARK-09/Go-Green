@@ -6,4 +6,92 @@
     android:layout_height="match_parent"
     tools:context=".Chat">
 
+    <include
+        android:id="@+id/appbar_include"
+        layout="@layout/app_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/messages"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        tools:listitem="@layout/message_sent"
+        app:layout_constraintBottom_toTopOf="@+id/constraintLayout10"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/appbar_include">
+
+    </androidx.recyclerview.widget.RecyclerView>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayout10"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/border_top"
+        android:backgroundTint="@color/white"
+        android:maxHeight="50dp"
+        android:minHeight="50dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <ImageView
+            android:id="@+id/imageView3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_attachment" />
+
+        <View
+            android:id="@+id/divider5"
+            android:layout_width="1dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="8dp"
+            android:background="?android:attr/listDivider"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/imageView3"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.5" />
+
+        <EditText
+            android:id="@+id/editTextTextMultiLine2"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@color/white"
+            android:ems="10"
+            android:foregroundGravity="center_vertical"
+            android:gravity="start|center_vertical"
+            android:hint="Type a message"
+            android:inputType="textMultiLine"
+            android:paddingStart="5dp"
+            android:paddingEnd="5dp"
+            android:textColor="@color/text_primary"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/send"
+            app:layout_constraintStart_toEndOf="@+id/divider5"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.5" />
+
+        <ImageButton
+            android:id="@+id/send"
+            android:layout_width="50dp"
+            android:layout_height="0dp"
+            android:adjustViewBounds="true"
+            android:background="@color/primary"
+            app:tint="@color/white"
+            android:scaleType="center"
+            android:src="@drawable/ic_send"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

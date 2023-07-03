@@ -1,6 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/border_bottom"
+    android:backgroundTint="@color/white"
+    android:maxHeight="155dp"
+    android:minHeight="155dp"
+    android:padding="8dp">
+
+
+    <TextView
+        android:id="@+id/work_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:fontFamily="@font/inter_medium"
+        android:maxLines="2"
+        android:textColor="@color/text_primary"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="CSS/Javascript Development to Hide Elements" />
+
+    <RatingBar
+        android:id="@+id/work_ratting"
+        style="@style/Widget.AppCompat.RatingBar.Small"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:numStars="5"
+        android:progressBackgroundTint="#a8a8a8"
+        android:progressTint="#FFF9C817"
+        android:rating="4.5"
+        android:stepSize="0.5"
+        app:layout_constraintStart_toStartOf="@+id/work_title"
+        app:layout_constraintTop_toBottomOf="@+id/work_title"
+        tools:textAlignment="textStart" />
+
+    <TextView
+        android:id="@+id/start_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        app:layout_constraintBottom_toBottomOf="@+id/work_ratting"
+        app:layout_constraintStart_toEndOf="@+id/work_ratting"
+        app:layout_constraintTop_toTopOf="@+id/work_ratting"
+        tools:text="Nov 18, 2022 - " />
+
+    <TextView
+        android:id="@+id/end_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="@+id/start_date"
+        app:layout_constraintStart_toEndOf="@+id/start_date"
+        app:layout_constraintTop_toTopOf="@+id/start_date"
+        tools:text="Nov 18, 2022" />
+
+    <TextView
+        android:id="@+id/feedback"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        android:ellipsize="end"
+        android:fontFamily="@font/inter_medium"
+        android:maxLines="5"
+        android:textColor="@color/text_primary"
+        android:textStyle="italic"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/work_ratting"
+        app:layout_constraintTop_toBottomOf="@+id/work_ratting"
+        tools:text="Once again, Kamran completed the task with dedication and persistence. He was helpful, positive and determined to do a good job. Once again, Kamran completed the task with dedication and persistence. He was helpful, positive and determined to do a good job. Once again, Kamran completed the task with dedication and persistence. He was helpful, positive and determined to do a good job." />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

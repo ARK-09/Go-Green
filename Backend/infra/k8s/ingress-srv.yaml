@@ -24,3 +24,24 @@ spec:
                 name: profile-srv
                 port:
                   number: 4001
+          - path: /api/v1/(jobs|contracts|proposals|skills|categories)(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: job-srv
+                port:
+                  number: 4003
+          - path: /api/v1/chats(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: chat-srv
+                port:
+                  number: 4005
+          - path: /api/v1/files(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: file-srv
+                port:
+                  number: 4006

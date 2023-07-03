@@ -7,7 +7,13 @@ const updateMessage = catchAsync(async (req, res, next) => {
   const message = await Message.findById(id);
 
   if (!message) {
-    next(new AppError(`No message found with id: ${id}`, 204));
+    return next(new AppError(`No message found with id: ${id}`, 204));
+  }
+
+  const isAllowed = req.currentUser.id === message.senderId.toString();
+
+  if (!isAllowed) {
+    return next(new AppError("You'r not allowed to perform this action.", 403));
   }
 
   const { text } = req.body;
@@ -26,11 +32,19 @@ const updateMessage = catchAsync(async (req, res, next) => {
 const deleteMessage = catchAsync(async (req, res, next) => {
   const { id } = req.params;
 
-  const message = await Message.findByIdAndDelete(id);
+  const message = await Message.findById(id);
 
   if (!message) {
-    next(new AppError(`No message found with id: ${id}`, 204));
+    return next(new AppError(`No message found with id: ${id}`, 204));
   }
+
+  const isAllowed = req.currentUser.id === message.senderId.toString();
+
+  if (!isAllowed) {
+    return next(new AppError("You'r not allowed to perform this action.", 403));
+  }
+
+  await Message.findByIdAndDelete(id);
 
   res.status(200).json({
     status: "success",

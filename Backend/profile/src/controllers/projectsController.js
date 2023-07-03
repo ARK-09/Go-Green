@@ -1,6 +1,7 @@
 const { catchAsync, AppError } = require("@ark-industries/gogreen-common");
 const Project = require("../models/projects");
 const Profile = require("../models/profiles");
+const mongoose = require("mongoose");
 
 const createProject = catchAsync(async (req, res, next) => {
   const profileId = req.params.id;
@@ -41,8 +42,15 @@ const createProject = catchAsync(async (req, res, next) => {
     contractId,
   });
 
-  project.attachments.push(...attachments);
-  project.skills.push(...skills);
+  if (attachments.length > 0) {
+    console.dir(req.body, { depth: null });
+    project.attachments.push(...attachments);
+  }
+
+  if (skills.length > 0) {
+    project.skills.push(...skills);
+  }
+
   await project.save();
 
   profile.projects.push(project._id);

@@ -10,7 +10,7 @@ build:
         dockerfile: Dockerfile
       sync:
         manual:
-          - src: 'src/**/*.js'
+          - src: "src/**/*.js"
             dest: .
     - image: ark09/catalog
       context: catalog
@@ -18,7 +18,7 @@ build:
         dockerfile: Dockerfile
       sync:
         manual:
-          - src: 'src/**/*.js'
+          - src: "src/**/*.js"
             dest: .
     - image: ark09/chat
       context: chat
@@ -26,31 +26,31 @@ build:
         dockerfile: Dockerfile
       sync:
         manual:
-          - src: 'src/**/*.js'
-            dest: . 
+          - src: "src/**/*.js"
+            dest: .
     - image: ark09/file
       context: file
       docker:
         dockerfile: Dockerfile
       sync:
         manual:
-          - src: 'src/**/*.js'
-            dest: .  
+          - src: "src/**/*.js"
+            dest: .
     - image: ark09/job
       context: job
       docker:
         dockerfile: Dockerfile
       sync:
         manual:
-          - src: 'src/**/*.js'
-            dest: .         
+          - src: "src/**/*.js"
+            dest: .
     - image: ark09/profile
       context: profile
       docker:
         dockerfile: Dockerfile
       sync:
         manual:
-          - src: 'src/**/*.js'
+          - src: "src/**/*.js"
             dest: .
 manifests:
   rawYaml:
@@ -59,8 +59,8 @@ manifests:
     - infra/k8s/authentication-depl.yaml
     - infra/k8s/authentication-mongo-depl.yaml
     # - infra/k8s/authentication-mongo-volume.yaml
-    - infra/k8s/catalog-depl.yaml
-    - infra/k8s/catalog-mongo-depl.yaml
+    # - infra/k8s/catalog-depl.yaml
+    # - infra/k8s/catalog-mongo-depl.yaml
     # - infra/k8s/catalog-mongo-volume.yaml
     - infra/k8s/chat-depl.yaml
     - infra/k8s/chat-mongo-depl.yaml

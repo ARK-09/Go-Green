@@ -7,6 +7,7 @@ const contractSchema = new mongoose.Schema({
   },
   proposalId: {
     type: mongoose.Schema.Types.ObjectId,
+    ref: "Proposals",
     required: [true, "Please provide a valid proposal ID."],
   },
   startTime: {
@@ -17,7 +18,7 @@ const contractSchema = new mongoose.Schema({
   endTime: {
     type: Date,
   },
-  ammount: {
+  amount: {
     type: Number,
     required: [true, "Please provide an amount."],
   },
