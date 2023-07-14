@@ -22,18 +22,18 @@ class MainActivity : AppCompatActivity() {
         // status bar is hidden, so hide that too if necessary.
         supportActionBar?.hide()
 
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_home)
 
-        signIn = findViewById(R.id.sign_in_btn)
-        signIn.setOnClickListener {
-            val intent = Intent(this, Home::class.java)
-            startActivity(intent)
-        }
-
-        createAccount = findViewById(R.id.create_account_btn)
-        createAccount.setOnClickListener {
-            val intent = Intent(this, SignUp::class.java)
-            startActivity(intent)
-        }
+//        signIn = findViewById(R.id.sign_in_btn)
+//        signIn.setOnClickListener {
+//            val intent = Intent(this, Home::class.java)
+//            startActivity(intent)
+//        }
+//
+//        createAccount = findViewById(R.id.create_account_btn)
+//        createAccount.setOnClickListener {
+//            val intent = Intent(this, SignUp::class.java)
+//            startActivity(intent)
+//        }
     }
 }

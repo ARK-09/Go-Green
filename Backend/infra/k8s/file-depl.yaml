@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: file
-          image: ark09/file
+          image: registry.digitalocean.com/gogreen-repo/file
           env:
             - name: PORT
               value: "4006"

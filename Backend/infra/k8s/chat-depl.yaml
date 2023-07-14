@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: chat
-          image: ark09/chat
+          image: registry.digitalocean.com/gogreen-repo/chat
           env:
             - name: PORT
               value: "4005"

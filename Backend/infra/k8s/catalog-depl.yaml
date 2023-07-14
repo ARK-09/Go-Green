@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: catalog
-          image: ark09/catalog
+          image: registry.digitalocean.com/gogreen-repo/catalog
           env:
             - name: PORT
               value: "4002"

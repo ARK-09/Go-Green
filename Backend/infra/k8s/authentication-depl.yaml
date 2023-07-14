@@ -2,19 +2,26 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: authentication-depl
+  namespace: default
+  labels:
+    k8s-app: authentication-depl
 spec:
+  minReadySeconds: 9
   replicas: 1
   selector:
     matchLabels:
-      app: authentication
+      k8s-app: authentication-depl
   template:
     metadata:
+      name: authentication-depl
       labels:
-        app: authentication
+        k8s-app: authentication-depl
     spec:
       containers:
-        - name: authentication
-          image: ark09/authentication
+        - name: authentication-depl
+          image: registry.digitalocean.com/gogreen-repo/authentication
+          securityContext:
+            privileged: false
           env:
             - name: PORT
               value: "4000"
@@ -36,7 +43,7 @@ metadata:
   name: authentication-srv
 spec:
   selector:
-    app: authentication
+    k8s-app: authentication-depl
   ports:
     - name: authentication
       protocol: TCP

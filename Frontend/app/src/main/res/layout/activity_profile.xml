@@ -10,7 +10,6 @@
         android:layout_height="wrap_content"
         tools:context=".Profile">
 
-
         <include
             android:id="@+id/appbar_include"
             layout="@layout/app_bar"

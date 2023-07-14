@@ -4,7 +4,7 @@ build:
   local:
     push: false
   artifacts:
-    - image: ark09/authentication
+    - image: registry.digitalocean.com/gogreen-repo/authentication
       context: authentication
       docker:
         dockerfile: Dockerfile
@@ -12,7 +12,7 @@ build:
         manual:
           - src: "src/**/*.js"
             dest: .
-    - image: ark09/catalog
+    - image: registry.digitalocean.com/gogreen-repo/catalog
       context: catalog
       docker:
         dockerfile: Dockerfile
@@ -20,7 +20,7 @@ build:
         manual:
           - src: "src/**/*.js"
             dest: .
-    - image: ark09/chat
+    - image: registry.digitalocean.com/gogreen-repo/chat
       context: chat
       docker:
         dockerfile: Dockerfile
@@ -28,7 +28,7 @@ build:
         manual:
           - src: "src/**/*.js"
             dest: .
-    - image: ark09/file
+    - image: registry.digitalocean.com/gogreen-repo/file
       context: file
       docker:
         dockerfile: Dockerfile
@@ -36,7 +36,7 @@ build:
         manual:
           - src: "src/**/*.js"
             dest: .
-    - image: ark09/job
+    - image: registry.digitalocean.com/gogreen-repo/job
       context: job
       docker:
         dockerfile: Dockerfile
@@ -44,7 +44,7 @@ build:
         manual:
           - src: "src/**/*.js"
             dest: .
-    - image: ark09/profile
+    - image: registry.digitalocean.com/gogreen-repo/profile
       context: profile
       docker:
         dockerfile: Dockerfile

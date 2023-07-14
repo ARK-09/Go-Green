@@ -2,6 +2,14 @@
 
 const mongoose = require("mongoose");
 const app = require("./app");
+const http = require("http").createServer(app);
+const io = require("socket.io")(http, {
+  path: "/api/v1/chats",
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+  },
+});
 const { natsWrapper } = require("@ark-industries/gogreen-common");
 const UserCreatedListener = require("./events/userCreatedListener");
 const UserUpdatedListener = require("./events/userUpdatedListener");
@@ -31,9 +39,15 @@ mongoose.connect(connectionString).then(() => {
   console.log("DB connection successful!");
 });
 
+io.on("connection", (socket) => {
+  console.log("User connected.", socket.id);
+});
+
+io.on("send:message", () => {});
+
 const port = parseInt(process.env.PORT) || 4005;
 
-const server = app.listen(port, () => {
+const server = http.listen(port, () => {
   console.log(`Listening at port:${port}`);
 });
 

@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: job
-          image: ark09/job
+          image: registry.digitalocean.com/gogreen-repo/job
           env:
             - name: PORT
               value: "4003"

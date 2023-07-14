@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: profile
-          image: ark09/profile
+          image: registry.digitalocean.com/gogreen-repo/profile
           env:
             - name: PORT
               value: "4001"
