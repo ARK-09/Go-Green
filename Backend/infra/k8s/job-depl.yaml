@@ -22,6 +22,12 @@ spec:
               value: "mongodb://job-mongo-srv:27017/job"
             - name: NODE_ENV
               value: "development"
+            - name: BODY_SIZE
+              value: "300kb"
+            - name: REQUEST_RATE_WINDOW
+              value: "3600000" # 1 hour
+            - name: MAX_REQUEST
+              value: "100"
             - name: JWT_EXPIRY
               value: "864000" # 10 day in seconds
             - name: JWT_KEY
@@ -29,6 +35,8 @@ spec:
                 secretKeyRef:
                   name: jwt-secret
                   key: JWT_KEY
+            - name: ALLOWED_ORIGINS
+              value: "https://www.gogreen.rizsoft.online, https://www.gogreen.com"
 ---
 apiVersion: v1
 kind: Service

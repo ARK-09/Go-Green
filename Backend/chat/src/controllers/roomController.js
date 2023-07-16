@@ -68,46 +68,6 @@ const getRoom = catchAsync(async (req, res, next) => {
   });
 });
 
-const createRoomMessage = catchAsync(async (req, res, next) => {
-  const { text, attachments } = req.body;
-  const { id } = req.params;
-  const currentUser = req.currentUser.id;
-
-  const room = await Room.findById(id);
-
-  if (!room) {
-    return next(new AppError(`No room found with id: ${id}`, 204));
-  }
-
-  const isAllowed = room.members.some(
-    (member) => member.userId.toString() === currentUser
-  );
-
-  if (!isAllowed) {
-    return next(
-      new AppError("You'r are not allowed to access this room.", 403)
-    );
-  }
-
-  const message = new Message();
-  message.text = text;
-  message.roomId = id;
-  message.senderId = currentUser;
-
-  if (attachments) {
-    message.attachments.push(...attachments);
-  }
-
-  await message.save();
-
-  res.status(200).json({
-    status: "success",
-    data: {
-      message,
-    },
-  });
-});
-
 const getRoomMessages = catchAsync(async (req, res, next) => {
   const { offset = 1, limit = 10 } = req.query;
   const { id } = req.params;
@@ -288,7 +248,6 @@ const deleteRoomMember = catchAsync(async (req, res, next) => {
 exports.createRoom = createRoom;
 exports.getRooms = getRooms;
 exports.getRoom = getRoom;
-exports.createRoomMessage = createRoomMessage;
 exports.getRoomMessages = getRoomMessages;
 exports.addRoomMembers = addRoomMembers;
 exports.getRoomMembers = getRoomMembers;

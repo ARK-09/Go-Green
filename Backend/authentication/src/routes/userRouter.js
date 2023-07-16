@@ -75,6 +75,13 @@ router
       .optional()
       .isMobilePhone("en-PK")
       .withMessage("Please provide a valid Pakistani mobile number."),
+    check("image")
+      .optional()
+      .isURL({
+        protocols: ["https"],
+        host_whitelist: ["gogreen-files-bucket.s3.ap-south-1.amazonaws.com"],
+      })
+      .withMessage("Please provide a valid image url."),
     validateRequest,
     UserController.signUp
   )
@@ -151,9 +158,12 @@ router
       .withMessage("Please provide a valid phone number.")
       .optional(),
     check("image")
-      .isURL()
-      .withMessage("Please provide a valid image URL.")
-      .optional(),
+      .optional()
+      .isURL({
+        protocols: ["https"],
+        host_whitelist: ["gogreen-files-bucket.s3.ap-south-1.amazonaws.com"],
+      })
+      .withMessage("Please provide a valid image url."),
     validateRequest,
     requireAuth(JWT_KEY),
     currentUser,

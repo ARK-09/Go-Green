@@ -63,32 +63,6 @@ router
 
 router
   .route("/:id/messages")
-  .post(
-    param("id")
-      .isMongoId()
-      .withMessage("Invalid room ID. Please provide a valid MongoDB ID."),
-    check("text")
-      .isString()
-      .withMessage("Text should be of type string.")
-      .trim()
-      .escape()
-      .notEmpty()
-      .withMessage("Text field is required."),
-    check("attachments.mimeType")
-      .optional()
-      .escape()
-      .isString()
-      .withMessage("Attachments mimeType should be of type string."),
-    check("attachments.file")
-      .optional()
-      .escape()
-      .isObject()
-      .withMessage("Attachments file should be provided as an object."),
-    validateRequest,
-    requireAuth(JWT_KEY),
-    currentUser,
-    RoomController.createRoomMessage
-  )
   .get(
     param("id")
       .isMongoId()

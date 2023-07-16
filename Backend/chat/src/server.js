@@ -2,14 +2,10 @@
 
 const mongoose = require("mongoose");
 const app = require("./app");
-const http = require("http").createServer(app);
-const io = require("socket.io")(http, {
-  path: "/api/v1/chats",
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"],
-  },
-});
+const SocketServer = require("./socket/socketServer");
+const socketAuth = require("./middelwares/socketAuth");
+const socketCurrentUser = require("./middelwares/socketCurrentUser");
+const Listeners = require("./socket/events/listeners/listener");
 const { natsWrapper } = require("@ark-industries/gogreen-common");
 const UserCreatedListener = require("./events/userCreatedListener");
 const UserUpdatedListener = require("./events/userUpdatedListener");
@@ -39,15 +35,24 @@ mongoose.connect(connectionString).then(() => {
   console.log("DB connection successful!");
 });
 
-io.on("connection", (socket) => {
-  console.log("User connected.", socket.id);
+const socketServer = SocketServer.getInstance(app, {
+  path: "/api/v1/chats",
+  cors: {
+    origin: "https://www.gogreen.com",
+    methods: ["GET", "POST"],
+  },
 });
 
-io.on("send:message", () => {});
+socketServer.use(socketAuth, socketCurrentUser);
+
+const httpServer = socketServer.listen((socket) => {
+  // Listeners.init();
+  console.log(socketServer.socket);
+});
 
 const port = parseInt(process.env.PORT) || 4005;
 
-const server = http.listen(port, () => {
+const server = httpServer.listen(port, () => {
   console.log(`Listening at port:${port}`);
 });
 

@@ -36,32 +36,18 @@ router
         "Invalid end date. Please provide a valid date in ISO 8601 format."
       ),
     check("attachments")
-      .isArray()
-      .withMessage("Attachment should be an array."),
-    check("attachments.id")
       .optional()
-      .custom((value, { req }) => {
-        if (value && !req.body.attachments.file) {
-          throw new Error(
-            "If mimeType is provided, mimeType should also be given."
-          );
-        }
-        return true;
-      })
+      .isArray({ min: 1 })
+      .withMessage("Attachments should be an array with min 1 attachment."),
+    check("attachments.*.id")
+      .notEmpty()
+      .withMessage("Attachment ID is required")
       .isMongoId()
-      .withMessage("Attachments id should be valid id."),
-    check("attachments.mimeType")
-      .optional()
-      .custom((value, { req }) => {
-        if (value && !req.body.attachments.file) {
-          throw new Error(
-            "If mimeType is provided, file url should also be given."
-          );
-        }
-        return true;
-      })
-      .isString()
-      .withMessage("Attachments mimeType should be of type string.")
+      .withMessage("Attachment ID should be a valid MongoDB ID"),
+
+    check("attachments.*.mimeType")
+      .notEmpty()
+      .withMessage("Attachment MIME type is required")
       .isIn([
         "image/jpeg",
         "image/png",
@@ -71,20 +57,27 @@ router
         "video/quicktime",
       ])
       .withMessage(
-        "Invalid MIME type provided. Only the following MIME types are allowed: image/jpeg, image/png, image/gif, video/mp4, video/quicktime."
+        "Invalid Attachment MIME type provided. Only the following MIME types are allowed: image/jpeg, image/png, image/gif, video/mp4, video/quicktime."
       ),
-    check("attachments.file")
-      .optional()
-      .custom((value, { req }) => {
-        if (value && !req.body.attachments.mimeType) {
-          throw new Error(
-            "If file is provided, mimeType should also be given."
-          );
-        }
-        return true;
+
+    check("attachments.*.originalName")
+      .notEmpty()
+      .withMessage("Attachment Original name is required"),
+
+    check("attachments.*.url")
+      .isURL({
+        protocols: ["https"],
+        host_whitelist: ["gogreen-files-bucket.s3.ap-south-1.amazonaws.com"],
       })
-      .isURL()
-      .withMessage("Attachments file should be a valid URL."),
+      .withMessage("Please provide a valid image url.")
+      .notEmpty()
+      .withMessage("Attachment URL is required"),
+
+    check("attachments.*.createdDate")
+      .notEmpty()
+      .withMessage("Attachment Created date is required")
+      .isISO8601()
+      .withMessage("Attachment Created date should be in ISO 8601 format"),
     check("skills").isArray().withMessage("Skills field should be an array."),
     check("skills.*")
       .isMongoId()
@@ -139,18 +132,19 @@ router
       .withMessage(
         "Invalid end date. Please provide a valid date in ISO 8601 format."
       ),
-    check("attachments.mimeType")
+    check("attachments")
       .optional()
-      .custom((value, { req }) => {
-        if (value && !req.body.attachments.file) {
-          throw new Error(
-            "If mimeType is provided, file url should also be given."
-          );
-        }
-        return true;
-      })
-      .isString()
-      .withMessage("Attachments mimeType should be of type string.")
+      .isArray({ min: 1 })
+      .withMessage("Attachments should be an array with min 1 attachment."),
+    check("attachments.*.id")
+      .notEmpty()
+      .withMessage("Attachment ID is required")
+      .isMongoId()
+      .withMessage("Attachment ID should be a valid MongoDB ID"),
+
+    check("attachments.*.mimeType")
+      .notEmpty()
+      .withMessage("Attachment MIME type is required")
       .isIn([
         "image/jpeg",
         "image/png",
@@ -160,20 +154,27 @@ router
         "video/quicktime",
       ])
       .withMessage(
-        "Invalid MIME type provided. Only the following MIME types are allowed: image/jpeg, image/png, image/gif, video/mp4, video/quicktime."
+        "Invalid Attachment MIME type provided. Only the following MIME types are allowed: image/jpeg, image/png, image/gif, video/mp4, video/quicktime."
       ),
-    check("attachments.file")
-      .optional()
-      .custom((value, { req }) => {
-        if (value && !req.body.attachments.mimeType) {
-          throw new Error(
-            "If file is provided, mimeType should also be given."
-          );
-        }
-        return true;
+
+    check("attachments.*.originalName")
+      .notEmpty()
+      .withMessage("Attachment Original name is required"),
+
+    check("attachments.*.url")
+      .isURL({
+        protocols: ["https"],
+        host_whitelist: ["gogreen-files-bucket.s3.ap-south-1.amazonaws.com"],
       })
-      .isURL()
-      .withMessage("Attachments file should be a valid URL."),
+      .withMessage("Please provide a valid image url.")
+      .notEmpty()
+      .withMessage("Attachment URL is required"),
+
+    check("attachments.*.createdDate")
+      .notEmpty()
+      .withMessage("Attachment Created date is required")
+      .isISO8601()
+      .withMessage("Attachment Created date should be in ISO 8601 format"),
     check("skills").isArray().withMessage("Skills field should be an array."),
     check("skills.*")
       .isMongoId()
