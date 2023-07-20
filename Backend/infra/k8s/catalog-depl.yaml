@@ -21,7 +21,7 @@ spec:
             - name: MONGO_URI
               value: "mongodb://catalog-mongo-srv:27017/catalog"
             - name: NODE_ENV
-              value: "development"
+              value: "production"
             - name: BODY_SIZE
               value: "10kb"
             - name: REQUEST_RATE_WINDOW

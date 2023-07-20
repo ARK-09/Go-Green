@@ -1,9 +1,7 @@
 const { AppError, JWT } = require("@ark-industries/gogreen-common");
-const catchAsyncSocketError = require("../socket/util/catchAsyncSocketError");
-
 const JWT_KEY = process.env.JWT_KEY;
 
-const socketAuth = catchAsyncSocketError(async (socket, next) => {
+const socketAuth = async (socket, next) => {
   const headerAuthorization = socket.handshake.headers.authorization;
   let token;
 
@@ -22,8 +20,8 @@ const socketAuth = catchAsyncSocketError(async (socket, next) => {
     );
   }
 
-  socket.payload = payload;
+  socket.currentUser = payload;
   next();
-});
+};
 
 module.exports = socketAuth;

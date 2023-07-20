@@ -28,7 +28,7 @@ spec:
             - name: MONGO_URI
               value: "mongodb://authentication-mongo-srv:27017/authentication"
             - name: NODE_ENV
-              value: "development"
+              value: "production"
             - name: BODY_SIZE
               value: "10kb"
             - name: REQUEST_RATE_WINDOW

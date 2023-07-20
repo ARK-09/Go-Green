@@ -1,31 +1,34 @@
-const mongoose = require("mongoose");
 const { AppError } = require("@ark-industries/gogreen-common");
+const validator = require("validator");
 const catchAsyncSocketError = require("../util/catchAsyncSocketError");
 const Room = require("../../models/room");
 const Message = require("../../models/message");
+const SocketServer = require("../socketServer");
 
-const joinRoom = catchAsyncSocketError(async (socket) => {
-  const roomId = socket.data.roomId;
+const joinRoom = catchAsyncSocketError(async () => {
+  const socket = SocketServer.getSocket();
 
-  // if (!mongoose.Types.ObjectId.isValid(roomId)) {
-  //   throw new AppError(`Invalid room id: ${roomId}`, 400);
-  // }
+  const { roomId } = socket.data;
 
-  // const room = await Room.findById(roomId);
+  if (!validator.isMongoId(roomId)) {
+    throw new AppError(`Invalid room id: ${roomId}`, 400);
+  }
 
-  // if (!room) {
-  //   throw new AppError(`No room found with matching id: ${roomId}`, 404);
-  // }
+  const room = await Room.findById(roomId);
 
-  // const currentUser = socket.payload.id;
+  if (!room) {
+    throw new AppError(`No room found with matching id: ${roomId}`, 404);
+  }
 
-  // const isRoomMember = room.members.some((member) => {
-  //   member.userId.toString() === currentUser;
-  // });
+  const currentUser = socket.currentUser.id;
 
-  // if (!isRoomMember) {
-  //   throw new AppError(`You are not allowed to join this room.`, 403);
-  // }
+  const isRoomMember = room.members.some((member) => {
+    member.userId.toString() === currentUser;
+  });
+
+  if (!isRoomMember) {
+    throw new AppError(`You are not allowed to join this room.`, 403);
+  }
 
   socket.join(roomId);
   socket.emit("room:join", {
@@ -35,38 +38,45 @@ const joinRoom = catchAsyncSocketError(async (socket) => {
   });
 });
 
-const sendMessage = catchAsyncSocketError(async (socket) => {
+const sendMessage = catchAsyncSocketError(async () => {
+  const socket = SocketServer.getSocket();
+
   const { roomId, message, attachments } = socket.data;
-  const currentUser = socket.payload.id;
 
-  // if (!mongoose.Types.ObjectId.isValid(roomId)) {
-  //   throw new AppError(`Invalid room id: ${roomId}`, 400);
-  // }
+  const currentUser = socket.currentUser.id;
 
-  // const room = await Room.findById(roomId);
+  if (!validator.isMongoId(roomId)) {
+    throw new AppError(`Invalid room id: ${roomId}`, 400);
+  }
 
-  // if (!room) {
-  //   throw new AppError(`No room found with matching id: ${roomId}`, 404);
-  // }
+  const room = await Room.findById(roomId);
 
-  // const isRoomMember = room.members.some((member) => {
-  //   member.userId.toString() === currentUser;
-  // });
+  if (!room) {
+    throw new AppError(`No room found with matching id: ${roomId}`, 404);
+  }
 
-  // if (!isRoomMember) {
-  //   throw new AppError(`You are not allowed to join this room.`, 403);
-  // }
+  const isRoomMember = room.members.some((member) => {
+    member.userId.toString() === currentUser;
+  });
 
-  // const messageDb = new Message();
-  // message.text = message;
-  // message.roomId = roomId;
-  // message.senderId = currentUser;
+  if (!isRoomMember) {
+    throw new AppError(`You are not allowed to join this room.`, 403);
+  }
 
-  // if (attachments) {
-  //   message.attachments.push(...attachments);
-  // }
+  if (typeof message != "string") {
+    throw new AppError("Please provide a valid message.", 400);
+  }
 
-  // await messageDb.save();
+  const messageDb = new Message();
+  message.text = message;
+  message.roomId = roomId;
+  message.senderId = currentUser;
+
+  if (attachments) {
+    message.attachments.push(...attachments);
+  }
+
+  await messageDb.save();
 
   const response = {
     message: {
@@ -80,27 +90,29 @@ const sendMessage = catchAsyncSocketError(async (socket) => {
   socket.to(roomId).emit("message:receive", response);
 });
 
-const deleteMessage = catchAsyncSocketError(async (socket) => {
+const deleteMessage = catchAsyncSocketError(async () => {
+  const socket = SocketServer.getSocket();
+
   const { roomId, messageId } = socket.data;
-  const currentUser = socket.payload.id;
+  const currentUser = socket.currentUser.id;
 
-  // if (!mongoose.Types.ObjectId.isValid(roomId)) {
-  //   throw new AppError(`Invalid room id: ${roomId}`, 400);
-  // }
+  if (!validator.isMongoId(roomId)) {
+    throw new AppError(`Invalid room id: ${roomId}`, 400);
+  }
 
-  // const room = await Room.findById(roomId);
+  const room = await Room.findById(roomId);
 
-  // if (!room) {
-  //   throw new AppError(`No room found with matching id: ${roomId}`, 404);
-  // }
+  if (!room) {
+    throw new AppError(`No room found with matching id: ${roomId}`, 404);
+  }
 
-  // const isRoomMember = room.members.some((member) => {
-  //   member.userId.toString() === currentUser;
-  // });
+  const isRoomMember = room.members.some((member) => {
+    member.userId.toString() === currentUser;
+  });
 
-  // if (!isRoomMember) {
-  //   throw new AppError(`You are not allowed to join this room.`, 403);
-  // }
+  if (!isRoomMember) {
+    throw new AppError(`You are not allowed to join this room.`, 403);
+  }
 
   const message = await Message.findByIdAndUpdate(messageId, {
     status: "deleted",
@@ -119,14 +131,58 @@ const deleteMessage = catchAsyncSocketError(async (socket) => {
   socket.to(roomId).emit("message:delete", response);
 });
 
-const typingStart = catchAsyncSocketError(async (socket) => {
+const typingStart = catchAsyncSocketError(async () => {
+  const socket = SocketServer.getSocket();
+
   const { roomId } = socket.data;
-  socket.to(roomId).emit("typing:start", { roomId, userId: socket.payload.id });
+
+  if (!validator.isMongoId(roomId)) {
+    throw new AppError(`Invalid room id: ${roomId}`, 400);
+  }
+
+  const room = await Room.findById(roomId);
+
+  if (!room) {
+    throw new AppError(`No room found with matching id: ${roomId}`, 404);
+  }
+
+  const isRoomMember = room.members.some((member) => {
+    member.userId.toString() === currentUser;
+  });
+
+  if (!isRoomMember) {
+    throw new AppError(`You are not allowed to perform this action.`, 403);
+  }
+
+  socket
+    .to(roomId)
+    .emit("typing:start", { roomId, userId: socket.currentUser.id });
 });
 
-const typingStop = catchAsyncSocketError(async (socket) => {
+const typingStop = catchAsyncSocketError(async () => {
   const { roomId } = socket.data;
-  socket.to(roomId).emit("typing:stop", { roomId, userId: socket.payload.id });
+
+  if (!validator.isMongoId(roomId)) {
+    throw new AppError(`Invalid room id: ${roomId}`, 400);
+  }
+
+  const room = await Room.findById(roomId);
+
+  if (!room) {
+    throw new AppError(`No room found with matching id: ${roomId}`, 404);
+  }
+
+  const isRoomMember = room.members.some((member) => {
+    member.userId.toString() === currentUser;
+  });
+
+  if (!isRoomMember) {
+    throw new AppError(`You are not allowed to perform this action.`, 403);
+  }
+
+  socket
+    .to(roomId)
+    .emit("typing:stop", { roomId, userId: socket.currentUser.id });
 });
 
 exports.joinRoom = joinRoom;

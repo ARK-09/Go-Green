@@ -1,9 +1,8 @@
 const { AppError } = require("@ark-industries/gogreen-common");
-const catchAsyncSocketError = require("../socket/util/catchAsyncSocketError");
 const User = require("../models/user");
 
-const socketCurrentUser = catchAsyncSocketError(async (socket, next) => {
-  const user = await User.findById(socket.payload.id);
+const socketCurrentUser = async (socket, next) => {
+  const user = await User.findById(socket.currentUser.id);
 
   if (!user) {
     return next(new AppError("The user with this token no longer exist", 204));
@@ -19,7 +18,7 @@ const socketCurrentUser = catchAsyncSocketError(async (socket, next) => {
   }
 
   const userChagesPassword = await user.changesPasswordAfter(
-    socket.payload.iat
+    socket.currentUser.iat
   );
 
   if (userChagesPassword) {
@@ -32,6 +31,6 @@ const socketCurrentUser = catchAsyncSocketError(async (socket, next) => {
   }
 
   next();
-});
+};
 
 module.exports = socketCurrentUser;

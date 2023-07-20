@@ -21,7 +21,7 @@ spec:
             - name: MONGO_URI
               value: "mongodb://profile-mongo-srv:27017/profile"
             - name: NODE_ENV
-              value: "development"
+              value: "production"
             - name: BODY_SIZE
               value: "150kb"
             - name: REQUEST_RATE_WINDOW

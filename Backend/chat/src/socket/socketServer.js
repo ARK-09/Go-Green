@@ -3,27 +3,17 @@ const io = require("socket.io");
 
 class SocketServer {
   static instance = null;
-  server = null;
   io = null;
   socket = null;
+  server = null;
 
-  static getInstance(server, options = {}) {
+  constructor(server, options) {
     if (!SocketServer.instance) {
-      SocketServer.instance = new SocketServer(server, options);
+      this.server = createServer(server);
+      this.io = io(this.server, options);
+      this.socket = null;
+      SocketServer.instance = this;
     }
-    return SocketServer.instance;
-  }
-
-  constructor(server, options = {}) {
-    if (SocketServer.instance) {
-      throw new Error(
-        "Singleton class, use getInstance() to get the instance."
-      );
-    }
-    this.server = createServer(server);
-    this.io = io(this.server, options);
-    this.socket = null;
-    SocketServer.instance = this;
   }
 
   use(...middlewares) {
@@ -47,6 +37,22 @@ class SocketServer {
     });
 
     return this.server;
+  }
+
+  static getSocket() {
+    if (!SocketServer.instance) {
+      throw new Error("Can't get socket before initialization.");
+    }
+
+    return this.instance.socket;
+  }
+
+  static getIo() {
+    if (!SocketServer.instance) {
+      throw new Error("Can't get io before initialization.");
+    }
+
+    return this.instance.io;
   }
 }
 

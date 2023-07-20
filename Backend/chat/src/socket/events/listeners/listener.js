@@ -6,31 +6,19 @@ const {
   typingStop,
 } = require("../../controllers/roomController");
 const SocketServer = require("../../socketServer");
-
-const socket = new SocketServer().socket;
+const { validatePayload } = require("../../util/validator");
 
 const init = () => {
-  socket
-    .on("room:join", (data) => {
-      socket.data = data;
-      joinRoom(socket);
+  SocketServer.getSocket()
+    .onAny(async (...args) => {
+      SocketServer.getSocket().data = args[1];
+      validatePayload();
     })
-    .on("message:send", (data) => {
-      socket.data = data;
-      sendMessage(socket);
-    })
-    .on("message:delete", (data) => {
-      socket.data = data;
-      deleteMessage(socket);
-    })
-    .on("typing:start", (data) => {
-      socket.data = data;
-      typingStart(socket);
-    })
-    .on("typing:stop", (data) => {
-      socket.data = data;
-      typingStop(socket);
-    });
+    .on("room:join", joinRoom)
+    .on("message:send", sendMessage)
+    .on("message:delete", deleteMessage)
+    .on("typing:start", typingStart)
+    .on("typing:stop", typingStop);
 };
 
 exports.init = init;

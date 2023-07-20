@@ -35,7 +35,7 @@ mongoose.connect(connectionString).then(() => {
   console.log("DB connection successful!");
 });
 
-const socketServer = SocketServer.getInstance(app, {
+const socketServer = new SocketServer(app, {
   path: "/api/v1/chats",
   cors: {
     origin: "https://www.gogreen.com",
@@ -45,9 +45,8 @@ const socketServer = SocketServer.getInstance(app, {
 
 socketServer.use(socketAuth, socketCurrentUser);
 
-const httpServer = socketServer.listen((socket) => {
-  // Listeners.init();
-  console.log(socketServer.socket);
+const httpServer = socketServer.listen(() => {
+  Listeners.init();
 });
 
 const port = parseInt(process.env.PORT) || 4005;
@@ -57,7 +56,7 @@ const server = httpServer.listen(port, () => {
 });
 
 process.on("uncaughtException", (err) => {
-  console.log(err.name, err.message);
+  console.log(err, err.name, err.message);
   console.log("uncaughtException! Shutting down...");
 
   server.close(() => {

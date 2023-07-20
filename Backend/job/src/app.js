@@ -1,4 +1,5 @@
 const rateLimit = require("express-rate-limit");
+const morgan = require("morgan");
 const helmet = require("helmet");
 const mongoSanitize = require("express-mongo-sanitize");
 const hpp = require("hpp");
@@ -35,6 +36,10 @@ app.use(
 
 app.options("*", cors());
 app.use(helmet());
+
+if (process.env.NODE_ENV === "development") {
+  app.use(morgan("tiny"));
+}
 
 const requestRateWindow =
   parseInt(process.env.REQUEST_RATE_WINDOW) || undefined;

@@ -3,6 +3,7 @@ const Room = require("../models/room");
 const Message = require("../models/message");
 
 const createRoom = catchAsync(async (req, res, next) => {
+  console.log("request");
   const { name, members } = req.body;
 
   const room = await Room.create({
