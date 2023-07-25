@@ -13,15 +13,21 @@ const socketAuth = async (socket, next) => {
     return next(new AppError("Authorization header is missing.", 401));
   }
 
-  const payload = JWT.verify(token, JWT_KEY);
-  if (!payload) {
+  try {
+    const payload = JWT.verify(token, JWT_KEY);
+    if (!payload) {
+      return next(
+        new AppError("Login token is invalid or has been expired.", 401)
+      );
+    }
+  
+    socket.currentUser = payload;
+    next();
+  } catch (err) {
     return next(
       new AppError("Login token is invalid or has been expired.", 401)
     );
   }
-
-  socket.currentUser = payload;
-  next();
 };
 
 module.exports = socketAuth;

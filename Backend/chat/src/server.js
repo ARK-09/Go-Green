@@ -35,10 +35,12 @@ mongoose.connect(connectionString).then(() => {
   console.log("DB connection successful!");
 });
 
+const allowedOrigins = process.env.ALLOWED_ORIGINS.split(",");
+
 const socketServer = new SocketServer(app, {
   path: "/api/v1/chats",
   cors: {
-    origin: "https://www.gogreen.com",
+    origin: allowedOrigins,
     methods: ["GET", "POST"],
   },
 });
