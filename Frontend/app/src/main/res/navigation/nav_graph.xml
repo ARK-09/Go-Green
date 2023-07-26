@@ -7,14 +7,17 @@
 
     <activity
         android:id="@+id/signUp"
-        android:name="com.arkindustries.gogreen.SignUp"
+        android:name="com.arkindustries.gogreen.ui.views.SignUp"
+        tools:layout="@layout/activity_sign_in"
         android:label="SignUp" />
     <activity
         android:id="@+id/signIn"
-        android:name="com.arkindustries.gogreen.SignIn"
+        android:name="com.arkindustries.gogreen.ui.views.SignIn"
+        tools:layout="@layout/activity_sign_up"
         android:label="SignIn" />
     <fragment
         android:id="@+id/jobsFragment"
-        android:name="com.arkindustries.gogreen.JobsFragment"
+        android:name="com.arkindustries.gogreen.ui.views.JobsFragment"
+        tools:layout="@layout/fragment_jobs"
         android:label="JobsFragment" />
 </navigation>

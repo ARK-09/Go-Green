@@ -82,8 +82,9 @@ const jobsSchema = new mongoose.Schema({
       ref: "Skills",
     },
   ],
-  userId: {
+  user: {
     type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
     required: [true, "Please provide a valid user ID."],
   },
 });

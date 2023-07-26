@@ -4,6 +4,7 @@ const catchAsyncSocketError = require("../util/catchAsyncSocketError");
 const Room = require("../../models/room");
 const Message = require("../../models/message");
 const SocketServer = require("../socketServer");
+const currentUser = require("../../middelwares/currentUser");
 
 const joinRoom = catchAsyncSocketError(async () => {
   const socket = SocketServer.getSocket();
@@ -22,9 +23,10 @@ const joinRoom = catchAsyncSocketError(async () => {
 
   const currentUser = socket.currentUser.id;
 
-  const isRoomMember = room.members.some((member) => {
-    member.userId.toString() === currentUser;
-  });
+  const isRoomMember =
+    room.members.some((member) => {
+      member === currentUser;
+    }) || room.ownerId.toString() === currentUser;
 
   if (!isRoomMember) {
     throw new AppError(`You are not allowed to join this room.`, 403);
@@ -55,9 +57,10 @@ const sendMessage = catchAsyncSocketError(async () => {
     throw new AppError(`No room found with matching id: ${roomId}`, 404);
   }
 
-  const isRoomMember = room.members.some((member) => {
-    member.userId.toString() === currentUser;
-  });
+  const isRoomMember =
+    room.members.some((member) => {
+      member === currentUser;
+    }) || room.ownerId.toString() === currentUser;
 
   if (!isRoomMember) {
     throw new AppError(`You are not allowed to join this room.`, 403);
@@ -106,20 +109,23 @@ const deleteMessage = catchAsyncSocketError(async () => {
     throw new AppError(`No room found with matching id: ${roomId}`, 404);
   }
 
-  const isRoomMember = room.members.some((member) => {
-    member.userId.toString() === currentUser;
-  });
+  const isRoomMember =
+    room.members.some((member) => {
+      member === currentUser;
+    }) || room.ownerId.toString() === currentUser;
 
   if (!isRoomMember) {
     throw new AppError(`You are not allowed to join this room.`, 403);
   }
 
-  const message = await Message.findByIdAndUpdate(messageId, {
-    status: "deleted",
-  });
+  const message = await Message.findById(messageId);
 
   if (!message) {
     throw new AppError(`No message found with id: ${messageId}`, 404);
+  }
+
+  if (message.senderId.toString() !== currentUser) {
+    throw new AppError("You'r not allowed to perform this action", 403);
   }
 
   const response = {
@@ -146,9 +152,10 @@ const typingStart = catchAsyncSocketError(async () => {
     throw new AppError(`No room found with matching id: ${roomId}`, 404);
   }
 
-  const isRoomMember = room.members.some((member) => {
-    member.userId.toString() === currentUser;
-  });
+  const isRoomMember =
+    room.members.some((member) => {
+      member === currentUser;
+    }) || room.ownerId.toString() === currentUser;
 
   if (!isRoomMember) {
     throw new AppError(`You are not allowed to perform this action.`, 403);
@@ -172,9 +179,10 @@ const typingStop = catchAsyncSocketError(async () => {
     throw new AppError(`No room found with matching id: ${roomId}`, 404);
   }
 
-  const isRoomMember = room.members.some((member) => {
-    member.userId.toString() === currentUser;
-  });
+  const isRoomMember =
+    room.members.some((member) => {
+      member === currentUser;
+    }) || room.ownerId.toString() === currentUser;
 
   if (!isRoomMember) {
     throw new AppError(`You are not allowed to perform this action.`, 403);

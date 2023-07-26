@@ -135,6 +135,15 @@ userSchema.methods.toJSON = function () {
   returnedUser.id = returnedUser._id;
 
   delete returnedUser._id;
+  delete returnedUser.email;
+  delete returnedUser.blocked;
+  delete returnedUser.password;
+  delete returnedUser.isActive;
+  delete returnedUser.invalidLoginCount;
+  delete returnedUser.userType;
+  delete returnedUser.phoneNo;
+  delete returnedUser.financeAllowed;
+  delete returnedUser.passwordChangedAt;
 
   return returnedUser;
 };

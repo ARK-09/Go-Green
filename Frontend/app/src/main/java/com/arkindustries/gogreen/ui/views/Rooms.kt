@@ -1,11 +1,12 @@
-package com.arkindustries.gogreen
+package com.arkindustries.gogreen.ui.views
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import com.arkindustries.gogreen.R
 
-class Proposal : AppCompatActivity() {
+class Rooms : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_proposal)
+        setContentView(R.layout.activity_rooms)
     }
 }

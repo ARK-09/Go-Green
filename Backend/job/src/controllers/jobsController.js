@@ -1,4 +1,6 @@
 const Job = require("../models/jobs");
+const Skill = require("../models/skills");
+const Category = require("../models/categories");
 const {
   catchAsync,
   AppError,
@@ -9,23 +11,81 @@ const JobUpdatedPublisher = require("../events/jobUpdatedPublisher");
 const JobDeletedPublisher = require("../events/jobDeletedPublisher");
 const Proposal = require("../models/proposals");
 
+const fieldsToExclude = [
+  "password",
+  "isActive",
+  "userType",
+  "invalidLoginCount",
+  "phoneNo",
+  "financeAllowed",
+  "passwordChangedAt",
+  "resetToken",
+  "resetTokenExpireAt",
+  "otp",
+  "otpExpireAt",
+  "blocked",
+  "__v",
+];
+
 const createJob = catchAsync(async (req, res, next) => {
   const {
     title,
     description,
-    skills,
-    categories,
     budget,
     expactedDuration,
     paymentType,
     attachments,
   } = req.body;
 
+  let { skills, categories } = req.body;
+
   const isAllowed = req.currentUser.userType === "client";
 
   if (!isAllowed) {
     return next(
       new AppError("You don't have permission to perform this action.", 403)
+    );
+  }
+
+  skills = Array.from(new Set(skills));
+  categories = Array.from(new Set(categories));
+
+  const validSkills = await Skill.find({ _id: { $in: skills } });
+  const validCategories = await Category.find({ _id: { $in: categories } });
+
+  const invalidSkills = skills.filter((skillId) => {
+    return !validSkills.some((skill) => {
+      return skill._id.toString() === skillId;
+    });
+  });
+
+  const invalidCategories = categories.filter((categoryId) => {
+    return !validCategories.some((category) => {
+      return category._id.toString() === categoryId;
+    });
+  });
+
+  if (validSkills.length == 0 || invalidSkills.length > 0) {
+    return next(
+      new AppError(
+        `The following skills not exist: ${
+          validSkills.length == 0 ? skills.join(", ") : invalidSkills.join(", ")
+        }`,
+        404
+      )
+    );
+  }
+
+  if (validCategories.length == 0 || invalidCategories.length > 0) {
+    return next(
+      new AppError(
+        `The following categories not exist: ${
+          validCategories.length == 0
+            ? categories.join(", ")
+            : invalidCategories.join(", ")
+        }`,
+        404
+      )
     );
   }
 
@@ -38,27 +98,38 @@ const createJob = catchAsync(async (req, res, next) => {
     expactedDuration,
     paymentType,
     attachments,
-    userId: req.currentUser.id,
+    user: req.currentUser.id,
   });
 
   await new JobCreatedPublisher(natsWrapper.client).publish(job).catch(() => {
     return next(new AppError("Something went wrong...", 500));
   });
 
+  const jobPopulated = await job.populate([
+    { path: "user", select: `-${fieldsToExclude.join(" -")}` },
+    { path: "categories", select: "-__v" },
+    { path: "skills", select: "-__v" },
+  ]);
+
   res.status(201).json({
     status: "success",
-    data: { job },
+    data: { job: jobPopulated },
   });
 });
 
 const getJobs = catchAsync(async (req, res, next) => {
   const { limit = 10, offset = 1 } = req.params;
 
-  const totalJobs = await Job.countDocuments({ userId: req.currentUser.id });
+  const totalJobs = await Job.countDocuments({ user: req.currentUser.id });
   const totalPages = Math.ceil(totalJobs / limit);
   const skip = (offset - 1) * limit;
 
-  const jobs = await Job.find({ userId: req.currentUser.id })
+  const jobs = await Job.find({ user: req.currentUser.id })
+    .populate([
+      { path: "user", select: `-${fieldsToExclude.join(" -")}` },
+      { path: "categories", select: "-__v" },
+      { path: "skills", select: "-__v" },
+    ])
     .skip(skip)
     .limit(limit)
     .lean();
@@ -116,7 +187,15 @@ const searchJobs = catchAsync(async (req, res, next) => {
   const totalPages = Math.ceil(totalJobs / limit);
   const skip = (offset - 1) * limit;
 
-  const jobs = await Job.find(searchQuery).skip(skip).limit(limit).lean();
+  const jobs = await Job.find(searchQuery)
+    .populate([
+      { path: "user", select: `-${fieldsToExclude.join(" -")}` },
+      { path: "categories", select: "-__v" },
+      { path: "skills", select: "-__v" },
+    ])
+    .skip(skip)
+    .limit(limit)
+    .lean();
 
   res.status(200).json({
     status: "success",
@@ -137,7 +216,7 @@ const isAlreadyApplied = catchAsync(async (req, res, next) => {
   }
 
   const proposal = await Proposal.findOne({
-    userId: req.currentUser.id,
+    user: req.currentUser.id,
     type: "job",
     refId: job._id.toString(),
   });
@@ -191,10 +270,7 @@ const hire = catchAsync(async (req, res, next) => {
     );
   }
 
-  const isAllowed =
-    (proposal.userId.toString() === req.currentUser.id &&
-      proposal.status === "Hired") ||
-    job.userId.toString() === req.currentUser.id;
+  const isAllowed = job.user.toString() === req.currentUser.id;
 
   if (!isAllowed) {
     return next(new AppError("You'r not allowed to perform this action.", 403));
@@ -216,7 +292,11 @@ const hire = catchAsync(async (req, res, next) => {
 const getJob = catchAsync(async (req, res, next) => {
   const { id } = req.params;
 
-  const job = await Job.findById(id);
+  const job = await Job.findById(id).populate([
+    { path: "user", select: `-${fieldsToExclude.join(" -")}` },
+    { path: "categories", select: "-__v" },
+    { path: "skills", select: "-__v" },
+  ]);
 
   if (!job) {
     return next(new AppError(`No job found with matching id: ${id}`, 404));
@@ -232,15 +312,10 @@ const getJob = catchAsync(async (req, res, next) => {
 
 const updateJob = catchAsync(async (req, res, next) => {
   const { id } = req.params;
-  const {
-    title,
-    description,
-    categories,
-    budget,
-    status,
-    expactedDuration,
-    paymentType,
-  } = req.body;
+  const { title, description, budget, status, expactedDuration, paymentType } =
+    req.body;
+
+  let { skills, categories } = req.body;
 
   const job = await Job.findById(id);
 
@@ -248,7 +323,7 @@ const updateJob = catchAsync(async (req, res, next) => {
     return next(new AppError(`No job found with matching id: ${id}`, 404));
   }
 
-  const isAllowed = req.currentUser.id === job.userId.toString();
+  const isAllowed = req.currentUser.id === job.user.toString();
 
   if (!isAllowed) {
     return next(
@@ -256,9 +331,79 @@ const updateJob = catchAsync(async (req, res, next) => {
     );
   }
 
+  skills = Array.from(new Set(skills));
+  categories = Array.from(new Set(categories));
+
+  const validSkills = await Skill.find({ _id: { $in: skills } });
+  const validCategories = await Category.find({ _id: { $in: categories } });
+
+  const invalidSkills = skills.filter((skillId) => {
+    return !validSkills.some((skill) => {
+      return skill._id.toString() === skillId;
+    });
+  });
+
+  const invalidCategories = categories.filter((categoryId) => {
+    return !validCategories.some((category) => {
+      return category._id.toString() === categoryId;
+    });
+  });
+
+  if (
+    (skills.length > 0 && validSkills.length == 0) ||
+    invalidSkills.length > 0
+  ) {
+    return next(
+      new AppError(
+        `The following skills not exist: ${
+          validSkills.length == 0 ? skills.join(", ") : invalidSkills.join(", ")
+        }`,
+        404
+      )
+    );
+  }
+
+  if (
+    (categories.length > 0 && validCategories.length == 0) ||
+    invalidCategories.length > 0
+  ) {
+    return next(
+      new AppError(
+        `The following categories not exist: ${
+          validCategories.length == 0
+            ? categories.join(", ")
+            : invalidCategories.join(", ")
+        }`,
+        404
+      )
+    );
+  }
+
+  const skillsParsent = skills.filter((skill) => job.skills.includes(skill));
+
+  const categoryParsent = categories.filter((category) =>
+    job.categories.includes(category)
+  );
+
+  if (skillsParsent.length > 0) {
+    return next(
+      new AppError(`The job has already these skills: ${skillsParsent}`, 401)
+    );
+  }
+
+  if (categoryParsent.length > 0) {
+    return next(
+      new AppError(
+        `The job has already these category: ${categoryParsent}`,
+        401
+      )
+    );
+  }
+
   job.title = title || job.title;
   job.description = description || job.description;
-  job.categories = categories || job.categories;
+  job.skills = skills.length > 0 ? skills : job.skills;
+  job.categories = categories.length > 0 ? categories : job.categories;
   job.budget = budget || job.budget;
   job.status = status || job.status;
   job.expactedDuration = expactedDuration || job.expactedDuration;
@@ -270,10 +415,16 @@ const updateJob = catchAsync(async (req, res, next) => {
     return next(new AppError("Something went wrong...", 500));
   });
 
+  const jobPopulated = await job.populate([
+    { path: "user", select: `-${fieldsToExclude.join(" -")}` },
+    { path: "categories", select: "-__v" },
+    { path: "skills", select: "-__v" },
+  ]);
+
   res.status(200).json({
     status: "success",
     data: {
-      job,
+      job: jobPopulated,
     },
   });
 });
@@ -288,7 +439,7 @@ const deleteJob = catchAsync(async (req, res, next) => {
   }
 
   const isAllowed =
-    req.currentUser.id === job.userId.toString() ||
+    req.currentUser.id === job.user.toString() ||
     req.currentUser.userType === "admin";
 
   if (!isAllowed) {
@@ -317,10 +468,10 @@ const createJobAttachment = catchAsync(async (req, res, next) => {
   const job = await Job.findById(id);
 
   if (!job) {
-    return next(new AppError(`No job found with matching id: ${id}`, 204));
+    return next(new AppError(`No job found with matching id: ${id}`, 404));
   }
 
-  const isAllowed = req.currentUser.id === job.userId.toString();
+  const isAllowed = req.currentUser.id === job.user.toString();
 
   if (!isAllowed) {
     return next(
@@ -338,10 +489,15 @@ const createJobAttachment = catchAsync(async (req, res, next) => {
     return next(new AppError("Something went wrong...", 500));
   });
 
+  const jobPopulated = await job.populate(
+    "user",
+    `-${fieldsToExclude.join(" -")}`
+  );
+
   res.status(200).json({
     status: "success",
     data: {
-      job,
+      job: jobPopulated,
     },
   });
 });
@@ -352,7 +508,7 @@ const getJobAttachments = catchAsync(async (req, res, next) => {
   const job = await Job.findById(id);
 
   if (!job) {
-    return next(new AppError(`No job found with matching id: ${id}`, 204));
+    return next(new AppError(`No job found with matching id: ${id}`, 404));
   }
 
   res.status(200).json({
@@ -369,7 +525,7 @@ const getJobAttachment = catchAsync(async (req, res, next) => {
   const job = await Job.findById(id);
 
   if (!job) {
-    return next(new AppError(`No job found with matching id: ${id}`, 204));
+    return next(new AppError(`No job found with matching id: ${id}`, 404));
   }
 
   const attachment = job.attachments.find(
@@ -396,10 +552,10 @@ const deleteJobAttachment = catchAsync(async (req, res, next) => {
   const job = await Job.findById(id);
 
   if (!job) {
-    return next(new AppError(`No job found with matching id: ${id}`, 204));
+    return next(new AppError(`No job found with matching id: ${id}`, 404));
   }
 
-  const isAllowed = req.currentUser.id === job.userId.toString();
+  const isAllowed = req.currentUser.id === job.user.toString();
 
   if (!isAllowed) {
     return next(
@@ -438,10 +594,10 @@ const deleteJobAttachments = catchAsync(async (req, res, next) => {
   const job = await Job.findById(id);
 
   if (!job) {
-    return next(new AppError(`No job found with matching id: ${id}`, 204));
+    return next(new AppError(`No job found with matching id: ${id}`, 404));
   }
 
-  const isAllowed = req.currentUser.id === job.userId.toString();
+  const isAllowed = req.currentUser.id === job.user.toString();
 
   if (!isAllowed) {
     return next(

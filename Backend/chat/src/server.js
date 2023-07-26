@@ -38,7 +38,7 @@ mongoose.connect(connectionString).then(() => {
 const allowedOrigins = process.env.ALLOWED_ORIGINS.split(",");
 
 const socketServer = new SocketServer(app, {
-  path: "/api/v1/chats",
+  path: "/api/v1/chats/socket.io",
   cors: {
     origin: allowedOrigins,
     methods: ["GET", "POST"],

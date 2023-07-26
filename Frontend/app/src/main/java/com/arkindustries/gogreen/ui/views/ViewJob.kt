@@ -1,4 +1,4 @@
-package com.arkindustries.gogreen
+package com.arkindustries.gogreen.ui.views
 
 import android.os.Bundle
 import android.widget.ArrayAdapter

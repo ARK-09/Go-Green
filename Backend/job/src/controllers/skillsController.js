@@ -97,7 +97,7 @@ const deleteSkill = catchAsync(async (req, res, next) => {
     return next(new AppError("Something went wrong...", 500));
   });
 
-  res.status(200).json({
+  res.status(204).json({
     status: "success",
     data: null,
   });
@@ -112,7 +112,7 @@ const deleteSkills = catchAsync(async (req, res, next) => {
       return next(new AppError("Something went wrong...", 500));
     });
 
-  res.status(200).json({
+  res.status(204).json({
     status: "success",
     data: null,
   });

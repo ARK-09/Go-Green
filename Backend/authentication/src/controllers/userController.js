@@ -15,6 +15,23 @@ const UserDeletedPublisher = require("../events/userDeletedPublisher");
 const UserForgetPasswordPublisher = require("../events/userForgetPasswordPublisher");
 const UserResetPasswordPublisher = require("../events/userResetPasswordPublisher");
 
+const fieldsToExclude = [
+  "email",
+  "password",
+  "isActive",
+  "invalidLoginCount",
+  "userType",
+  "phoneNo",
+  "financeAllowed",
+  "passwordChangedAt",
+  "resetToken",
+  "resetTokenExpireAt",
+  "otp",
+  "otpExpireAt",
+  "blocked",
+  "__v",
+];
+
 const login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email });
@@ -86,9 +103,24 @@ const signUp = catchAsync(async (req, res, next) => {
     JWT_EXPIRY
   );
 
+  const fieldsToInclude = [
+    "email",
+    "isActive",
+    "userType",
+    "phoneNo",
+    "financeAllowed",
+    "passwordChangedAt",
+    "blocked",
+  ];
+  const fieldsToExclud = fieldsToExclude.filter(
+    (field) => !fieldsToInclude.includes(field)
+  );
+
+  let userResult = await newUser.removeFields(fieldsToExclud);
+
   res.status(200).json({
     status: "success",
-    data: { Jwt, user: newUser },
+    data: { Jwt, user: userResult },
   });
 });
 
@@ -97,19 +129,51 @@ const currentUser = catchAsync(async (req, res, next) => {
 
   const user = await User.findById(currentUser.id);
 
+  const fieldsToInclude = [
+    "email",
+    "isActive",
+    "userType",
+    "phoneNo",
+    "financeAllowed",
+    "passwordChangedAt",
+    "blocked",
+  ];
+  const fieldsToExclud = fieldsToExclude.filter(
+    (field) => !fieldsToInclude.includes(field)
+  );
+
+  const userResult = await user.removeFields(fieldsToExclud);
+
   res.status(200).json({
     status: "success",
-    data: { user },
+    data: { userResult },
   });
 });
 
 const getUsers = catchAsync(async (req, res, next) => {
-  const users = await User.find({});
+  let users = await User.find({});
+
+  const fieldsToInclude = [
+    "email",
+    "isActive",
+    "userType",
+    "phoneNo",
+    "financeAllowed",
+    "passwordChangedAt",
+    "blocked",
+  ];
+  const fieldsToExclud = fieldsToExclude.filter(
+    (field) => !fieldsToInclude.includes(field)
+  );
+
+  let usersResult = await Promise.all(
+    users.map(async (user) => await user.removeFields(fieldsToExclud))
+  );
 
   res.status(200).json({
     status: "success",
-    length: users.length,
-    data: { users },
+    length: usersResult.length,
+    data: { users: usersResult },
   });
 });
 
@@ -122,9 +186,24 @@ const getUser = catchAsync(async (req, res, next) => {
     return next(new AppError(`No user find with the id: ${userId}.`, 404));
   }
 
+  const fieldsToInclude = [
+    "email",
+    "isActive",
+    "userType",
+    "phoneNo",
+    "financeAllowed",
+    "passwordChangedAt",
+    "blocked",
+  ];
+  const fieldsToExclud = fieldsToExclude.filter(
+    (field) => !fieldsToInclude.includes(field)
+  );
+
+  let userResult = await user.removeFields(fieldsToExclud);
+
   res.status(200).json({
     status: "success",
-    data: { user },
+    data: { user: userResult },
   });
 });
 
@@ -153,19 +232,39 @@ const updateUser = catchAsync(async (req, res, next) => {
 
   user.name = name ? name : user.name;
   user.email = email ? email : user.email;
-  user.password = password ? password : user.password;
+
+  if (password) {
+    console.log(password);
+    user.password = password;
+  }
+
   user.phoneNo = phoneNo ? phoneNo : user.phoneNo;
   user.image = image || user.image;
 
-  user = await user.save();
+  user = await user.save({ validateBeforeSave: false });
 
   await new UserUpdatedPublisher(natsWrapper.client).publish(user).catch(() => {
     return next(new AppError("Something went wrong...", 500));
   });
 
+  const fieldsToInclude = [
+    "email",
+    "isActive",
+    "userType",
+    "phoneNo",
+    "financeAllowed",
+    "passwordChangedAt",
+    "blocked",
+  ];
+  const fieldsToExclud = fieldsToExclude.filter(
+    (field) => !fieldsToInclude.includes(field)
+  );
+
+  let userResult = await user.removeFields(fieldsToExclud);
+
   res.status(200).json({
     status: "success",
-    data: { user },
+    data: { user: userResult },
   });
 });
 
@@ -195,7 +294,7 @@ const deleteUser = catchAsync(async (req, res, next) => {
       return next(new AppError("Something went wrong...", 500));
     });
 
-  res.status(404).json({
+  res.status(204).json({
     status: "success",
     data: { user: null },
   });
@@ -226,7 +325,7 @@ const forgetPassword = catchAsync(async (req, res, next) => {
     );
 
     const emailUtl = new EmailBuilder()
-      .setFrom("info@gogreen.com")
+      .setFrom(process.env.RESET_SUPPORT_EMAIL)
       .setTo(user.email)
       .setSubject("Password reset request for your account")
       .setHtml(html)

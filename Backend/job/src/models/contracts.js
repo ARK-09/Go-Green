@@ -1,8 +1,9 @@
 const mongoose = require("mongoose");
 
 const contractSchema = new mongoose.Schema({
-  userId: {
+  user: {
     type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
     required: [true, "Please provide a user id. Who initiated the contract."],
   },
   proposalId: {

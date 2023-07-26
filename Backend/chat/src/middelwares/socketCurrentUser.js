@@ -5,7 +5,7 @@ const socketCurrentUser = async (socket, next) => {
   const user = await User.findById(socket.currentUser.id);
 
   if (!user) {
-    return next(new AppError("The user with this token no longer exist", 204));
+    return next(new AppError("The user with this token no longer exist", 404));
   }
 
   if (!user.isActive) {

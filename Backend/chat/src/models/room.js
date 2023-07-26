@@ -7,13 +7,17 @@ const roomSchema = new mongoose.Schema({
   },
   members: [
     {
-      userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Users",
-        required: true,
-      },
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+      _id: false,
     },
   ],
+  ownerId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
 });
 
 const Room = mongoose.model("Rooms", roomSchema);

@@ -1,14 +1,10 @@
 package com.arkindustries.gogreen.api.request
 
-import com.google.gson.annotations.SerializedName
-
-data class SignUpRequest (
-    @SerializedName("name")
+data class SignupRequest(
     val name: String,
-    @SerializedName("email")
     val email: String,
-    @SerializedName("password")
     val password: String,
-    @SerializedName("userType")
-    val userType: String
+    val userType: String,
+    val phoneNo: String?,
+    val image: String?
 )

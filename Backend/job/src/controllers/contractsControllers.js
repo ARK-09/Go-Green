@@ -10,19 +10,34 @@ const ContractCreatedPublisher = require("../events/contractCreatedPublisher");
 const ContractUpdatedPublisher = require("../events/contractUpdatedPublisher");
 const ContractDeletedPublisher = require("../events/contractDeletedPublisher");
 
+const fieldsToExclude = [
+  "password",
+  "isActive",
+  "invalidLoginCount",
+  "phoneNo",
+  "financeAllowed",
+  "passwordChangedAt",
+  "resetToken",
+  "resetTokenExpireAt",
+  "otp",
+  "otpExpireAt",
+  "blocked",
+  "__v",
+];
+
 const createContract = catchAsync(async (req, res, next) => {
   const { proposalid, amount } = req.body;
 
   const proposal = await Proposal.findById(proposalid);
 
   if (!proposal) {
-    return next(new AppError(`No proposal found with id: ${proposalid}.`, 204));
+    return next(new AppError(`No proposal found with id: ${proposalid}.`, 404));
   }
 
   const job = await Job.findById(proposal.refId);
 
-  const isProposalOwner = req.currentUser.id === proposal.userId.toString();
-  const isJobOwner = req.currentUser.id === job.userId.toString();
+  const isProposalOwner = req.currentUser.id === proposal.user.toString();
+  const isJobOwner = req.currentUser.id === job.user.toString();
 
   const isAllowed = isProposalOwner || isJobOwner;
 
@@ -41,7 +56,7 @@ const createContract = catchAsync(async (req, res, next) => {
   }
 
   const contract = await Contract.create({
-    userId: req.currentUser.id,
+    user: req.currentUser.id,
     proposalId: proposalid,
     amount,
     status: isJobOwner
@@ -57,16 +72,25 @@ const createContract = catchAsync(async (req, res, next) => {
       return next(new AppError("Something went wrong...", 500));
     });
 
+  const contractsPopulated = await contract.populate(
+    "user",
+    `-${fieldsToExclude.join(" -")}`
+  );
+
   res.status(200).json({
     status: "success",
     data: {
-      contract,
+      contract: contractsPopulated,
     },
   });
 });
 
 const getContracts = catchAsync(async (req, res, next) => {
-  const contracts = await Contract.find({ userId: req.currentUser.id });
+  const contracts = await Contract.find({ user: req.currentUser.id }).populate(
+    "user",
+    `-${fieldsToExclude.join(" -")}`
+  );
+
   res.status(200).json({
     status: "success",
     data: {
@@ -90,19 +114,19 @@ const getJobContracts = catchAsync(async (req, res, next) => {
     status: "Hired",
   });
 
-  const isJobOwner = req.currentUser.id === job.userId.toString();
+  const isJobOwner = req.currentUser.id === job.user.toString();
   const isHiredForTheJob = !proposal
     ? false
-    : proposal.userId.toString() === req.currentUser.id;
+    : proposal.user.toString() === req.currentUser.id;
 
   let searchQuery;
 
   if (isJobOwner) {
     searchQuery = {
-      $or: [{ userId: req.currentUser.id }, { userId: proposal.userId }],
+      $or: [{ user: req.currentUser.id }, { user: proposal.user }],
     };
   } else if (isHiredForTheJob) {
-    searchQuery = { userId: req.currentUser.id };
+    searchQuery = { user: req.currentUser.id };
   }
 
   const isAllowed = isJobOwner || isHiredForTheJob;
@@ -111,7 +135,10 @@ const getJobContracts = catchAsync(async (req, res, next) => {
     return next(new AppError("You'r not allowed to perform this action.", 403));
   }
 
-  const contracts = await Contract.find(searchQuery);
+  const contracts = await Contract.find(searchQuery).populate(
+    "user",
+    `-${fieldsToExclude.join(" -")}`
+  );
 
   return res.status(200).json({
     status: "success",
@@ -124,7 +151,10 @@ const getJobContracts = catchAsync(async (req, res, next) => {
 const getContract = catchAsync(async (req, res, next) => {
   const { id } = req.params;
 
-  const contract = await Contract.findById(id);
+  const contract = await Contract.findById(id).populate(
+    "user",
+    `-${fieldsToExclude.join(" -")}`
+  );
 
   if (!contract) {
     return next(new AppError(`No contract found with id: ${id}`, 403));
@@ -133,8 +163,8 @@ const getContract = catchAsync(async (req, res, next) => {
   const proposal = await Proposal.findOne({ _id: contract.proposalId });
 
   const isAllowed =
-    req.currentUser.id === contract.userId.toString() ||
-    req.currentUser.id === proposal.userId.toString();
+    req.currentUser.id === contract.user.toString() ||
+    req.currentUser.id === proposal.user.toString();
 
   if (!isAllowed) {
     return next(
@@ -161,8 +191,8 @@ const updateContract = catchAsync(async (req, res, next) => {
 
   const proposal = await Proposal.findOne({ _id: contract.proposalId });
 
-  const isContractOwner = contract.userId.toString() === req.currentUser.id;
-  const isContractPartner = req.currentUser.id === proposal.userId.toString();
+  const isContractOwner = contract.user.toString() === req.currentUser.id;
+  const isContractPartner = req.currentUser.id === proposal.user.toString();
 
   const isAllowed = isContractOwner || isContractPartner;
 
@@ -222,10 +252,15 @@ const updateContract = catchAsync(async (req, res, next) => {
       return next(new AppError("Something went wrong...", 500));
     });
 
+  const contractPopulated = await contract.populate(
+    "user",
+    `-${fieldsToExclude.join(" -")}`
+  );
+
   res.status(200).json({
     status: "success",
     data: {
-      contract,
+      contract: contractPopulated,
     },
   });
 });
@@ -242,8 +277,8 @@ const deleteContract = catchAsync(async (req, res, next) => {
   const proposal = await Proposal.findOne({ _id: contract.proposalId });
 
   const isAllowed =
-    req.currentUser.id === contract.userId.toString() ||
-    req.currentUser.id === proposal.userId.toString();
+    req.currentUser.id === contract.user.toString() ||
+    req.currentUser.id === proposal.user.toString();
 
   if (!isAllowed) {
     return next(
@@ -259,7 +294,7 @@ const deleteContract = catchAsync(async (req, res, next) => {
       return next(new AppError("Something went wrong...", 500));
     });
 
-  res.status(200).json({
+  res.status(204).json({
     status: "success",
     data: null,
   });

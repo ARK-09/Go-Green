@@ -139,11 +139,6 @@ userSchema.methods.toJSON = function () {
   return returnedUser;
 };
 
-userSchema.pre(/^find/, function (next) {
-  this.select("-resetToken -resetTokenExpireAt -otp -otpExpireAt -__v");
-  next();
-});
-
 userSchema.methods.checkPassword = async function (password) {
   return await Password.compare(this.password, password);
 };

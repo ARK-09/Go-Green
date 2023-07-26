@@ -7,7 +7,7 @@
     android:layout_marginBottom="8dp"
     android:background="@drawable/border"
     android:backgroundTint="@color/white"
-    android:maxHeight="70dp">
+    android:maxHeight="55dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/user_container"
@@ -36,6 +36,7 @@
         </androidx.cardview.widget.CardView>
 
         <ImageView
+            android:id="@+id/imageView5"
             android:layout_width="9dp"
             android:layout_height="9dp"
             android:layout_marginTop="3dp"
@@ -50,6 +51,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
+            android:layout_marginTop="3dp"
             android:ellipsize="end"
             android:fontFamily="@font/inter_medium"
             android:singleLine="true"
@@ -58,90 +60,22 @@
             android:textSize="16sp"
             app:layout_constraintBottom_toTopOf="@+id/constraintLayout"
             app:layout_constraintStart_toEndOf="@id/img_container"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/img_container"
             app:layout_constraintVertical_chainStyle="packed" />
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/constraintLayout"
+        <RatingBar
+            android:id="@+id/user_ratting"
+            style="@style/Widget.AppCompat.RatingBar.Small"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="5dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="@id/user_name_tv"
+            android:numStars="5"
+            android:progressBackgroundTint="#a8a8a8"
+            android:progressTint="#FFF9C817"
+            android:rating="4.5"
+            android:stepSize="0.5"
+            app:layout_constraintStart_toStartOf="@+id/user_name_tv"
             app:layout_constraintTop_toBottomOf="@+id/user_name_tv"
-            app:layout_constraintVertical_bias="0.5">
-
-            <ImageView
-                android:id="@+id/rating_1"
-                android:layout_width="13dp"
-                android:layout_height="13dp"
-                android:layout_marginEnd="3dp"
-                android:background="@android:color/transparent"
-                android:src="@drawable/ic_rating_5"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/rating_2"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintHorizontal_chainStyle="packed"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.5" />
-
-            <ImageView
-                android:id="@+id/rating_2"
-                android:layout_width="13dp"
-                android:layout_height="13dp"
-                android:layout_marginEnd="3dp"
-                android:background="@android:color/transparent"
-                android:src="@drawable/ic_rating_5"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/rating_3"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toEndOf="@+id/rating_1"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.5" />
-
-            <ImageView
-                android:id="@+id/rating_3"
-                android:layout_width="13dp"
-                android:layout_height="13dp"
-                android:layout_marginEnd="3dp"
-                android:background="@android:color/transparent"
-                android:src="@drawable/ic_rating_5"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/rating_4"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toEndOf="@+id/rating_2"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.5" />
-
-            <ImageView
-                android:id="@+id/rating_4"
-                android:layout_width="13dp"
-                android:layout_height="13dp"
-                android:layout_marginEnd="3dp"
-                android:background="@android:color/transparent"
-                android:src="@drawable/ic_rating_5"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/rating_5"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toEndOf="@+id/rating_3"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.5" />
-
-            <ImageView
-                android:id="@+id/rating_5"
-                android:layout_width="13dp"
-                android:layout_height="13dp"
-                android:background="@android:color/transparent"
-                android:src="@drawable/ic_rating_5"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toEndOf="@+id/rating_4"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.5" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
+            tools:textAlignment="textStart" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

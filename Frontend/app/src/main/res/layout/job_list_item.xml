@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+<layout xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
+
         <variable
             name="job"
             type="com.arkindustries.gogreen.database.models.Job" />
@@ -15,7 +16,7 @@
         android:layout_marginBottom="16dp"
         android:background="@drawable/border_rounded"
         android:backgroundTint="@color/white"
-        android:minHeight="290dp">
+        android:minHeight="250dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/header_container"
@@ -48,14 +49,15 @@
                     app:layout_constraintTop_toTopOf="parent">
 
                     <ImageView
-                        android:id="@+id/imageView"
-                        android:layout_width="45dp"
-                        android:layout_height="45dp"
+                        android:id="@+id/user_iv"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
                         android:scaleType="centerCrop"
                         android:src="@drawable/person" />
                 </androidx.cardview.widget.CardView>
 
                 <ImageView
+                    android:id="@+id/imageView4"
                     android:layout_width="9dp"
                     android:layout_height="9dp"
                     android:layout_marginTop="3dp"
@@ -73,113 +75,47 @@
                     android:ellipsize="end"
                     android:fontFamily="@font/inter_medium"
                     android:singleLine="true"
-                    android:text="Maaz Mushtaq"
+                    tools:text="Maaz Mushtaq"
                     android:textColor="@color/black"
-                    android:textSize="16sp"
-                    app:layout_constraintBottom_toTopOf="@+id/constraintLayout"
-                    app:layout_constraintStart_toEndOf="@id/img_container"
-                    app:layout_constraintTop_toTopOf="parent"
+                    android:textSize="14sp"
+                    app:layout_constraintStart_toEndOf="@+id/img_container"
+                    app:layout_constraintTop_toTopOf="@+id/img_container"
                     app:layout_constraintVertical_chainStyle="packed" />
 
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/constraintLayout"
+                <RatingBar
+                    android:id="@+id/user_ratting"
+                    style="@style/Widget.AppCompat.RatingBar.Small"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="5dp"
-                    android:layout_marginTop="5dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="@id/user_name_tv"
-                    app:layout_constraintTop_toBottomOf="@+id/user_name_tv"
-                    app:layout_constraintVertical_bias="0.5">
+                    android:numStars="5"
+                    android:progressBackgroundTint="#a8a8a8"
+                    android:progressTint="#FFF9C817"
+                    android:rating="4.5"
+                    android:stepSize="0.5"
+                    app:layout_constraintStart_toStartOf="@+id/user_name_tv"
+                    app:layout_constraintTop_toBottomOf="@+id/user_name_tv" />
 
-                    <ImageView
-                        android:id="@+id/rating_1"
-                        android:layout_width="13dp"
-                        android:layout_height="13dp"
-                        android:layout_marginEnd="3dp"
-                        android:background="@android:color/transparent"
-                        android:src="@drawable/ic_rating_5"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/rating_2"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintHorizontal_chainStyle="packed"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintVertical_bias="0.5" />
-
-                    <ImageView
-                        android:id="@+id/rating_2"
-                        android:layout_width="13dp"
-                        android:layout_height="13dp"
-                        android:layout_marginEnd="3dp"
-                        android:background="@android:color/transparent"
-                        android:src="@drawable/ic_rating_5"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/rating_3"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toEndOf="@+id/rating_1"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintVertical_bias="0.5" />
-
-                    <ImageView
-                        android:id="@+id/rating_3"
-                        android:layout_width="13dp"
-                        android:layout_height="13dp"
-                        android:layout_marginEnd="3dp"
-                        android:background="@android:color/transparent"
-                        android:src="@drawable/ic_rating_5"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/rating_4"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toEndOf="@+id/rating_2"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintVertical_bias="0.5" />
-
-                    <ImageView
-                        android:id="@+id/rating_4"
-                        android:layout_width="13dp"
-                        android:layout_height="13dp"
-                        android:layout_marginEnd="3dp"
-                        android:background="@android:color/transparent"
-                        android:src="@drawable/ic_rating_5"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/rating_5"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toEndOf="@+id/rating_3"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintVertical_bias="0.5" />
-
-                    <ImageView
-                        android:id="@+id/rating_5"
-                        android:layout_width="13dp"
-                        android:layout_height="13dp"
-                        android:background="@android:color/transparent"
-                        android:src="@drawable/ic_rating_5"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toEndOf="@+id/rating_4"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintVertical_bias="0.5" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/send_offer_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@android:color/transparent"
-                android:drawableTop="@drawable/ic_send"
-                android:drawableTint="@color/primary"
                 android:ellipsize="end"
                 android:fontFamily="@font/inter"
+                android:minHeight="50dp"
                 android:singleLine="true"
-                android:text="Send Offer"
-                android:textColor="@color/primary"
+                android:text="SEND OFFER"
                 android:textSize="13sp"
+                app:iconSize="20dp"
+                android:textColor="@color/primary"
+                app:iconGravity="textTop"
+                app:iconTint="@color/primary"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                app:icon="@drawable/ic_send" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <TextView
@@ -189,7 +125,7 @@
             android:ellipsize="end"
             android:fontFamily="@font/inter"
             android:maxLines="7"
-            android:padding="16dp"
+            android:padding="8dp"
             android:scrollHorizontally="true"
             android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus eu congue sapien. Duis sodales magna nec faucibus rutrum. Pellentesque elementum pretium arcu. Aliquam pretium pulvinar quam, sit amet lobortis tortor consectetur non. Quisque enim enim, blandit hendrerit neque a, semper vulputate sapien. Cras nec sagittis dolor. Nulla facilisi. Etiam tortor risus, molestie in pretium non, vehicula in ligula. Maecenas vitae dolor mi. Donec congue congue sagittis. Mauris id nulla in tellus suscipit rutrum. Integer mattis non lectus vel vulputate."
             android:textColor="@color/text_primary"
@@ -199,7 +135,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/footer_container"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="55dp"
             android:background="@drawable/border_top"
             app:layout_constraintBottom_toBottomOf="parent">
 
@@ -208,9 +144,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:background="@drawable/border_right"
-                android:padding="16dp"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp"
+                android:padding="8dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/deadline_container"
                 app:layout_constraintHorizontal_bias="0.5"
@@ -219,8 +153,8 @@
                 app:layout_constraintTop_toTopOf="parent">
 
                 <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:layout_gravity="center_vertical"
                     android:layout_marginEnd="9dp"
                     android:src="@drawable/ic_price" />
@@ -242,9 +176,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:background="@drawable/border_right"
-                android:padding="16dp"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp"
+                android:padding="8dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/no_of_proposal_container"
                 app:layout_constraintHorizontal_bias="0.5"
@@ -252,8 +184,8 @@
                 app:layout_constraintTop_toTopOf="parent">
 
                 <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:layout_gravity="center_vertical"
                     android:layout_marginEnd="9dp"
                     android:src="@drawable/ic_clock" />
@@ -275,9 +207,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:background="@drawable/border_right"
-                android:padding="16dp"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp"
+                android:padding="8dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/location_container"
                 app:layout_constraintHorizontal_bias="0.5"
@@ -285,8 +215,8 @@
                 app:layout_constraintTop_toTopOf="parent">
 
                 <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:layout_gravity="center_vertical"
                     android:layout_marginEnd="9dp"
                     android:src="@drawable/ic_offers" />
@@ -317,8 +247,8 @@
                 app:layout_constraintTop_toTopOf="parent">
 
                 <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:layout_gravity="center_vertical"
                     android:layout_marginEnd="9dp"
                     android:src="@drawable/ic_location" />

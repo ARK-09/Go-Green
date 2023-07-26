@@ -16,7 +16,7 @@ const userRouter = require("./routes/userRouter");
 
 const app = express();
 
-app.enable("trust proxy");
+app.set("trust proxy", process.env.NODE_ENV == "development" ? 'loopback' : true);
 
 const bodySize =
   typeof process.env.BODY_SIZE === "string" ? process.env.BODY_SIZE : undefined;

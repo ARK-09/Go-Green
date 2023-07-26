@@ -67,7 +67,7 @@ router
     check("userType")
       .notEmpty()
       .withMessage("user type can't be empty.")
-      .isIn(["talent", "client"])
+      .isIn(["talent", "client", "admin"])
       .withMessage(
         "Invalid user type. Allowed values are: 'talent', 'client'."
       ),
@@ -134,26 +134,26 @@ router
       .isMongoId()
       .withMessage("Invalid user ID. Please provide a valid MongoDB ID."),
     check("name")
+      .optional()
       .isString()
       .withMessage("Name should be of type string.")
       .trim()
-      .notEmpty()
-      .withMessage("Name field is required.")
       .escape(),
     check("email")
+      .optional()
       .isEmail()
       .withMessage("Please provide a valid email address.")
       .normalizeEmail(),
     check("password")
+      .optional()
       .matches(
         /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&()])[A-Za-z\d@$!%*#?&()]{8,}$/
       )
       .withMessage(
         "Password must contain at least 8 characters, one letter, one number, and one special character."
-      )
-      .notEmpty()
-      .withMessage("Password field is required."),
+      ),
     check("phoneNo")
+      .optional()
       .isMobilePhone()
       .withMessage("Please provide a valid phone number.")
       .optional(),

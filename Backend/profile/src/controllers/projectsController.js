@@ -10,7 +10,7 @@ const createProject = catchAsync(async (req, res, next) => {
 
   if (!profile || !profile.active) {
     return next(
-      new AppError(`No profile found with matching id: ${profileId}`, 204)
+      new AppError(`No profile found with matching id: ${profileId}`, 404)
     );
   }
 
@@ -69,7 +69,7 @@ const getProjects = catchAsync(async (req, res, next) => {
 
   if (!profile || !profile.active) {
     return next(
-      new AppError(`No profile found with matching id: ${profileId}`, 204)
+      new AppError(`No profile found with matching id: ${profileId}`, 404)
     );
   }
 
@@ -90,7 +90,7 @@ const getProjectById = catchAsync(async (req, res, next) => {
 
   if (!profile || !profile.active) {
     return next(
-      new AppError(`No profile found with matching id: ${profileId}`, 204)
+      new AppError(`No profile found with matching id: ${profileId}`, 404)
     );
   }
 
@@ -118,7 +118,7 @@ const updateProjectById = catchAsync(async (req, res, next) => {
 
   if (!profile || !profile.active) {
     return next(
-      new AppError(`No profile found with matching id: ${profileId}`, 204)
+      new AppError(`No profile found with matching id: ${profileId}`, 404)
     );
   }
 
@@ -168,7 +168,7 @@ const deleteProjectById = catchAsync(async (req, res, next) => {
 
   if (!profile || !profile.active) {
     return next(
-      new AppError(`No profile found with matching id: ${profileId}`, 204)
+      new AppError(`No profile found with matching id: ${profileId}`, 404)
     );
   }
 
@@ -209,7 +209,7 @@ const createProjectAttachment = catchAsync(async (req, res, next) => {
 
   if (!profile || !profile.active) {
     return next(
-      new AppError(`No profile found with matching id: ${profileId}`, 204)
+      new AppError(`No profile found with matching id: ${profileId}`, 404)
     );
   }
 
@@ -254,7 +254,7 @@ const getProjectAttachments = catchAsync(async (req, res, next) => {
 
   if (!profile || !profile.active) {
     return next(
-      new AppError(`No profile found with matching id: ${profileId}`, 204)
+      new AppError(`No profile found with matching id: ${profileId}`, 404)
     );
   }
 
@@ -295,7 +295,7 @@ const getProjectAttachment = catchAsync(async (req, res, next) => {
 
   if (!profile || !profile.active) {
     return next(
-      new AppError(`No profile found with matching id: ${profileId}`, 204)
+      new AppError(`No profile found with matching id: ${profileId}`, 404)
     );
   }
 
@@ -346,7 +346,7 @@ const deleteProjectAttachment = catchAsync(async (req, res, next) => {
 
   if (!profile || !profile.active) {
     return next(
-      new AppError(`No profile found with matching id: ${profileId}`, 204)
+      new AppError(`No profile found with matching id: ${profileId}`, 404)
     );
   }
 
@@ -397,7 +397,7 @@ const deleteProjectAttachments = catchAsync(async (req, res, next) => {
 
   if (!profile || !profile.active) {
     return next(
-      new AppError(`No profile found with matching id: ${profileId}`, 204)
+      new AppError(`No profile found with matching id: ${profileId}`, 404)
     );
   }
 
@@ -438,7 +438,7 @@ const addProjectSkill = catchAsync(async (req, res, next) => {
 
   if (!profile || !profile.active) {
     return next(
-      new AppError(`No profile found with matching id: ${profileId}`, 204)
+      new AppError(`No profile found with matching id: ${profileId}`, 404)
     );
   }
 
@@ -483,7 +483,7 @@ const getProjectSkills = catchAsync(async (req, res, next) => {
 
   if (!profile || !profile.active) {
     return next(
-      new AppError(`No profile found with matching id: ${profileId}`, 204)
+      new AppError(`No profile found with matching id: ${profileId}`, 404)
     );
   }
 
@@ -524,7 +524,7 @@ const getProjectSkill = catchAsync(async (req, res, next) => {
 
   if (!profile || !profile.active) {
     return next(
-      new AppError(`No profile found with matching id: ${profileId}`, 204)
+      new AppError(`No profile found with matching id: ${profileId}`, 404)
     );
   }
 
@@ -575,7 +575,7 @@ const deleteProjectSkill = catchAsync(async (req, res, next) => {
 
   if (!profile || !profile.active) {
     return next(
-      new AppError(`No profile found with matching id: ${profileId}`, 204)
+      new AppError(`No profile found with matching id: ${profileId}`, 404)
     );
   }
 
@@ -626,7 +626,7 @@ const deleteProjectSkills = catchAsync(async (req, res, next) => {
 
   if (!profile || !profile.active) {
     return next(
-      new AppError(`No profile found with matching id: ${profileId}`, 204)
+      new AppError(`No profile found with matching id: ${profileId}`, 404)
     );
   }
 

@@ -42,6 +42,51 @@ spec:
                 secretKeyRef:
                   name: jwt-secret
                   key: JWT_KEY
+            - name: RESET_SUPPORT_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: reset-support-email
+                  key: RESET_SUPPORT_EMAIL
+            - name: MAIL_TRANSPORTER_USER_NAME_DEV
+              valueFrom:
+                secretKeyRef:
+                  name: mail-transporter-user-name-dev
+                  key: MAIL_TRANSPORTER_USER_NAME_DEV
+            - name: MAIL_TRANSPORTER_USER_PASSWORD_DEV
+              valueFrom:
+                secretKeyRef:
+                  name: mail-transporter-user-password-dev
+                  key: MAIL_TRANSPORTER_USER_PASSWORD_DEV
+            - name: MAIL_TRANSPORTER_USER_NAME_PROD
+              valueFrom:
+                secretKeyRef:
+                  name: mail-transporter-user-name-prod
+                  key: MAIL_TRANSPORTER_USER_NAME_PROD
+            - name: MAIL_TRANSPORTER_USER_PASSWORD_PROD
+              valueFrom:
+                secretKeyRef:
+                  name: mail-transporter-user-password-prod
+                  key: MAIL_TRANSPORTER_USER_PASSWORD_PROD
+            - name: MAIL_TRANSPORTER_HOST_DEV
+              valueFrom:
+                secretKeyRef:
+                  name: mail-transporter-host-dev
+                  key: MAIL_TRANSPORTER_HOST_DEV
+            - name: MAIL_TRANSPORTER_HOST_PORT_DEV
+              valueFrom:
+                secretKeyRef:
+                  name: mail-transporter-host-port-dev
+                  key: MAIL_TRANSPORTER_HOST_PORT_DEV
+            - name: MAIL_TRANSPORTER_HOST_PROD
+              valueFrom:
+                secretKeyRef:
+                  name: mail-transporter-host-prod
+                  key: MAIL_TRANSPORTER_HOST_PROD
+            - name: MAIL_TRANSPORTER_HOST_PORT_PROD
+              valueFrom:
+                secretKeyRef:
+                  name: mail-transporter-host-port-prod
+                  key: MAIL_TRANSPORTER_HOST_PORT_PROD
             - name: ALLOWED_ORIGINS
               value: "https://www.gogreen.rizsoft.online, https://www.gogreen.com"
 ---

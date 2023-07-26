@@ -26,7 +26,7 @@ router
       .withMessage(
         "Members should be provided as an array with at least one user ID."
       ),
-    check("members.*.userId")
+    check("members.*")
       .isMongoId()
       .withMessage("Invalid member ID. Please provide a valid MongoDB ID."),
     validateRequest,
@@ -92,7 +92,7 @@ router
       .withMessage(
         "Members should be provided as an array with at least one user ID."
       ),
-    check("members.*.userId")
+    check("members.*")
       .isMongoId()
       .withMessage("Invalid member ID. Please provide a valid MongoDB ID."),
     validateRequest,

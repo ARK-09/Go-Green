@@ -12,22 +12,22 @@ class NodeMailer {
 
 const devTransporter = () => {
   return new NodeMailer({
-    host: "sandbox.smtp.mailtrap.io",
-    port: 2525,
+    host: process.env.MAIL_TRANSPORTER_HOST_DEV,
+    port: process.env.MAIL_TRANSPORTER_HOST_PORT_DEV,
     auth: {
-      user: "fb985c752b398c",
-      pass: "85c9d40f670709",
+      user: process.env.MAIL_TRANSPORTER_USER_NAME_DEV,
+      pass: process.env.MAIL_TRANSPORTER_USER_PASSWORD_DEV,
     },
   });
 };
 
 const productionTransporter = () => {
   return new NodeMailer({
-    host: "sandbox.smtp.mailtrap.io",
-    port: 2525,
+    host: process.env.MAIL_TRANSPORTER_HOST_PROD,
+    port: process.env.MAIL_TRANSPORTER_HOST_PORT_PROD,
     auth: {
-      user: "fb985c752b398c",
-      pass: "85c9d40f670709",
+      user: process.env.MAIL_TRANSPORTER_USER_NAME_PROD,
+      pass: process.env.MAIL_TRANSPORTER_USER_PASSWORD_PROD,
     },
   });
 };

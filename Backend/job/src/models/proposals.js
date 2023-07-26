@@ -8,8 +8,9 @@ const proposalSchema = new mongoose.Schema({
       "Please provide a valid reference ID. (jobId or serviceId)",
     ],
   },
-  userId: {
+  user: {
     type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
     required: [true, "Please provide a valid user ID."],
   },
   bidAmount: {

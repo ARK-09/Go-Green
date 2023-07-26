@@ -13,13 +13,28 @@ const ProposalCreatedPublisher = require("../events/proposalCreatedPublisher");
 const ProposalUpdatedPublisher = require("../events/proposalUpdatedPublisher");
 const ProposalDeletedPublisher = require("../events/proposalDeletedPublisher");
 
+const fieldsToExclude = [
+  "password",
+  "isActive",
+  "invalidLoginCount",
+  "phoneNo",
+  "financeAllowed",
+  "passwordChangedAt",
+  "resetToken",
+  "resetTokenExpireAt",
+  "otp",
+  "otpExpireAt",
+  "blocked",
+  "__v",
+];
+
 const createJobProposal = catchAsync(async (req, res, next) => {
   const jobId = req.params.id;
 
   const job = await Job.findById(jobId);
 
   if (!job) {
-    return next(new AppError(`No job found with id: ${jobId}`, 204));
+    return next(new AppError(`No job found with id: ${jobId}`, 404));
   }
 
   const { bidAmount, coverLetter, proposedDuration, attachments } = req.body;
@@ -35,14 +50,14 @@ const createJobProposal = catchAsync(async (req, res, next) => {
 
   const isAllowed =
     req.currentUser.userType === "talent" &&
-    job.userId.toString() != req.currentUser.id;
+    job.user.toString() != req.currentUser.id;
 
   if (!isAllowed) {
     return next(new AppError("You'r not allowed to perform this action.", 403));
   }
 
   const isAlreadyApplied = await Proposal.findOne({
-    userId: req.currentUser.id,
+    user: req.currentUser.id,
   });
 
   if (isAlreadyApplied) {
@@ -60,7 +75,7 @@ const createJobProposal = catchAsync(async (req, res, next) => {
     proposedDuration,
     attachments,
     type: "job",
-    userId: req.currentUser.id,
+    user: req.currentUser.id,
   });
 
   await new ProposalCreatedPublisher(natsWrapper.client)
@@ -69,10 +84,15 @@ const createJobProposal = catchAsync(async (req, res, next) => {
       return next(new AppError("Something went wrong...", 500));
     });
 
+  const proposalPopulated = await proposal.populate(
+    "user",
+    `-${fieldsToExclude.join(" -")}`
+  );
+
   res.status(200).json({
     status: "success",
     data: {
-      proposal,
+      proposal: proposalPopulated,
     },
   });
 });
@@ -83,19 +103,19 @@ const createServiceProposal = catchAsync(async (req, res, next) => {
   const service = await Job.findById(serviceId);
 
   if (!service) {
-    return next(new AppError(`No service found with id: ${serviceId}`, 204));
+    return next(new AppError(`No service found with id: ${serviceId}`, 404));
   }
 
   const isAllowed =
     req.currentUser.userType === "client" &&
-    service.userId.toString() != req.currentUser.id;
+    service.user.toString() != req.currentUser.id;
 
   if (!isAllowed) {
     return next(new AppError("You'r not allowed to perform this action.", 403));
   }
 
   const isAlreadyApplied = await Proposal.findOne({
-    userId: req.currentUser.id,
+    user: req.currentUser.id,
   });
 
   if (isAlreadyApplied) {
@@ -120,7 +140,7 @@ const createServiceProposal = catchAsync(async (req, res, next) => {
     proposedDuration,
     attachments,
     type: "service",
-    userId: req.currentUser.id,
+    user: req.currentUser.id,
   });
 
   await new ProposalCreatedPublisher(natsWrapper.client)
@@ -129,10 +149,15 @@ const createServiceProposal = catchAsync(async (req, res, next) => {
       return next(new AppError("Something went wrong...", 500));
     });
 
+  const proposalPopulated = await proposal.populate(
+    "user",
+    `-${fieldsToExclude.join(" -")}`
+  );
+
   res.status(200).json({
     status: "success",
     data: {
-      proposal,
+      proposal: proposalPopulated,
     },
   });
 });
@@ -143,15 +168,15 @@ const getJobProposals = catchAsync(async (req, res, next) => {
   const job = await Job.findById(jobId);
 
   if (!job) {
-    return next(new AppError(`No job found with id: ${jobId}`, 204));
+    return next(new AppError(`No job found with id: ${jobId}`, 404));
   }
 
-  const isJobOwner = req.currentUser.id === job.userId.toString();
+  const isJobOwner = req.currentUser.id === job.user.toString();
 
   if (isJobOwner) {
     const proposals = await Proposal.find({
       $and: [{ type: "job" }, { refId: jobId }],
-    });
+    }).populate("user", `-${fieldsToExclude.join(" -")}`);
 
     return res.status(200).json({
       status: "success",
@@ -164,8 +189,8 @@ const getJobProposals = catchAsync(async (req, res, next) => {
   const proposal = await Proposal.find({
     type: "job",
     refId: jobId,
-    userId: req.currentUser.id,
-  });
+    user: req.currentUser.id,
+  }).populate("user", `-${fieldsToExclude.join(" -")}`);
 
   res.status(200).json({
     status: "success",
@@ -181,10 +206,10 @@ const getServiceProposals = catchAsync(async (req, res, next) => {
   const service = await Job.findById(serviceId);
 
   if (!service) {
-    return next(new AppError(`No service found with id: ${serviceId}`, 204));
+    return next(new AppError(`No service found with id: ${serviceId}`, 404));
   }
 
-  const isAllowed = req.currentUser.id === service.userId.toString();
+  const isAllowed = req.currentUser.id === service.user.toString();
 
   if (!isAllowed) {
     return next(
@@ -194,7 +219,7 @@ const getServiceProposals = catchAsync(async (req, res, next) => {
 
   const proposals = await Proposal.find({
     $and: [{ type: "service" }, { refId: serviceId }],
-  });
+  }).populate("user", `-${fieldsToExclude.join(" -")}`);
 
   res.status(200).json({
     status: "success",
@@ -207,10 +232,13 @@ const getServiceProposals = catchAsync(async (req, res, next) => {
 const getProposal = catchAsync(async (req, res, next) => {
   const { id } = req.params;
 
-  const proposal = await Proposal.findById(id);
+  const proposal = await Proposal.findById(id).populate(
+    "user",
+    `-${fieldsToExclude.join(" -")}`
+  );
 
   if (!proposal) {
-    return next(new AppError(`No proposal found with id: ${id}`, 204));
+    return next(new AppError(`No proposal found with id: ${id}`, 404));
   }
 
   let isAllowed = await checkUserPermission(req.currentUser, proposal);
@@ -235,7 +263,7 @@ const deleteProposal = catchAsync(async (req, res, next) => {
   const proposal = await Proposal.findById(id);
 
   if (!proposal) {
-    return next(new AppError(`No proposal found with id: ${id}`, 204));
+    return next(new AppError(`No proposal found with id: ${id}`, 404));
   }
 
   let isAllowed = await checkUserPermission(req.currentUser, proposal);
@@ -246,7 +274,7 @@ const deleteProposal = catchAsync(async (req, res, next) => {
     );
   }
 
-  const isProposalOwner = req.currentUser.id === proposal.userId.toString();
+  const isProposalOwner = req.currentUser.id === proposal.user.toString();
 
   if (isProposalOwner) {
     await updateProposalStatus(proposal, "Withdraw");
@@ -260,11 +288,9 @@ const deleteProposal = catchAsync(async (req, res, next) => {
       return next(new AppError("Something went wrong...", 500));
     });
 
-  res.status(200).json({
+  res.status(204).json({
     status: "success",
-    data: {
-      proposal,
-    },
+    data: null,
   });
 });
 
@@ -275,7 +301,7 @@ const createProposalAttachment = catchAsync(async (req, res, next) => {
 
   if (!proposal) {
     return next(
-      new AppError(`No proposal found with matching id: ${proposalId}`, 204)
+      new AppError(`No proposal found with matching id: ${proposalId}`, 404)
     );
   }
 
@@ -287,7 +313,7 @@ const createProposalAttachment = catchAsync(async (req, res, next) => {
     );
   }
 
-  const isAllowed = req.currentUser.id === proposal.userId.toString();
+  const isAllowed = req.currentUser.id === proposal.user.toString();
 
   if (!isAllowed) {
     return next(
@@ -307,10 +333,15 @@ const createProposalAttachment = catchAsync(async (req, res, next) => {
       return next(new AppError("Something went wrong...", 500));
     });
 
+  const proposalPopulated = await proposal.populate(
+    "user",
+    `-${fieldsToExclude.join(" -")}`
+  );
+
   res.status(200).json({
     status: "success",
     data: {
-      proposal,
+      proposal: proposalPopulated,
     },
   });
 });
@@ -322,7 +353,7 @@ const getProposalAttachments = catchAsync(async (req, res, next) => {
 
   if (!proposal) {
     return next(
-      new AppError(`No proposal found with matching id: ${proposalId}`, 204)
+      new AppError(`No proposal found with matching id: ${proposalId}`, 404)
     );
   }
 
@@ -348,7 +379,7 @@ const getProposalAttachment = catchAsync(async (req, res, next) => {
   const proposal = await Proposal.findById(id);
 
   if (!proposal) {
-    return next(new AppError(`No proposal found with matching id: ${id}`, 204));
+    return next(new AppError(`No proposal found with matching id: ${id}`, 404));
   }
 
   const isAllowed = await checkUserPermission(req.currentUser, proposal);
@@ -383,7 +414,7 @@ const deleteProposalAttachment = catchAsync(async (req, res, next) => {
   const proposal = await Proposal.findById(id);
 
   if (!proposal) {
-    return next(new AppError(`No proposal found with matching id: ${id}`, 204));
+    return next(new AppError(`No proposal found with matching id: ${id}`, 404));
   }
 
   if (proposal.status === "Withdraw" || proposal.status === "Declined") {
@@ -394,7 +425,7 @@ const deleteProposalAttachment = catchAsync(async (req, res, next) => {
     );
   }
 
-  const isAllowed = req.currentUser.id === proposal.userId.toString();
+  const isAllowed = req.currentUser.id === proposal.user.toString();
 
   if (!isAllowed) {
     return next(
@@ -435,7 +466,7 @@ const deleteProposalAttachments = catchAsync(async (req, res, next) => {
   const proposal = await Proposal.findById(id);
 
   if (!proposal) {
-    return next(new AppError(`No proposal found with matching id: ${id}`, 204));
+    return next(new AppError(`No proposal found with matching id: ${id}`, 404));
   }
 
   if (proposal.status === "Withdraw" || proposal.status === "Declined") {
@@ -446,7 +477,7 @@ const deleteProposalAttachments = catchAsync(async (req, res, next) => {
     );
   }
 
-  const isAllowed = req.currentUser.id === proposal.userId.toString();
+  const isAllowed = req.currentUser.id === proposal.user.toString();
 
   if (!isAllowed) {
     return next(
