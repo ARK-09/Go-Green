@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<layout  xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <import type="com.arkindustries.gogreen.database.entites.CategoryEntity"/>
+        <import type="com.arkindustries.gogreen.ui.models.LabelledItem"/>
+        <variable
+            name="item"
+            type="LabelledItem&lt;CategoryEntity>" />
+    </data>
+
+<androidx.constraintlayout.widget.ConstraintLayout
+    android:layout_width="match_parent"
+    android:layout_height="35dp"
+    android:maxHeight="35dp"
+    android:layout_margin="5dp"
+    android:padding="8dp"
+    android:background="@drawable/border_rounded"
+    android:backgroundTint="@{item.isSelected ? @color/primary : @color/white}"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:maxEms="9"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:textColor="@{item.isSelected ? @color/white : @color/primary}"
+        android:fontFamily="@font/montserrat"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Item" />
+</androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
