@@ -1,52 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/white"
-    android:maxHeight="90dp"
-    android:padding="8dp"
-    tools:background="@drawable/border_bottom">
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="com.arkindustries.gogreen.R" />
+        <variable
+            name="image"
+            type="String" />
+        <variable
+            name="project"
+            type="com.arkindustries.gogreen.api.response.Project" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/border_bottom_gray"
+        android:maxHeight="90dp"
+        android:padding="8dp"
+        tools:background="@drawable/border_bottom_gray">
 
 
-    <ImageView
-        android:id="@+id/project_image"
-        android:layout_width="100dp"
-        android:layout_height="0dp"
-        android:scaleType="centerCrop"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:srcCompat="@tools:sample/avatars" />
+        <ImageView
+            android:id="@+id/project_image"
+            android:layout_width="80dp"
+            android:layout_height="0dp"
+            android:scaleType="centerCrop"
+            app:url="@{image}"
+            app:errorImage="@{R.drawable.test}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:srcCompat="@tools:sample/avatars" />
 
-    <TextView
-        android:id="@+id/project_title"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:ellipsize="end"
-        android:singleLine="true"
-        tools:text="Every route that is receiving JWT in the request body should always verify the token and then proceed forward"
-        android:textColor="@color/text_primary"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="@+id/project_image"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@+id/project_image"
-        app:layout_constraintTop_toTopOf="@+id/project_image"
-        app:layout_constraintVertical_bias="0.0" />
+        <TextView
+            android:id="@+id/project_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="13dp"
+            android:layout_marginTop="5dp"
+            android:ellipsize="end"
+            android:fontFamily="@font/inter_medium"
+            android:singleLine="true"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:text="@{project.title}"
+            app:layout_constraintBottom_toBottomOf="@+id/project_image"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@+id/project_image"
+            app:layout_constraintTop_toTopOf="@+id/project_image"
+            app:layout_constraintVertical_bias="0.0"
+            tools:text="Every route that is receiving JWT in the request body should always verify the token and then proceed forward" />
 
-    <TextView
-        android:id="@+id/project_description"
-        android:layout_width="0dp"
-        android:maxLines="3"
-        android:textStyle="italic"
-        android:ellipsize="end"
-        android:layout_height="wrap_content"
-        tools:text="Every route that is receiving JWT in the request body should always verify the token and then proceed forward"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/project_title"
-        app:layout_constraintTop_toBottomOf="@+id/project_title" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <TextView
+            android:id="@+id/project_description"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:ellipsize="end"
+            android:fontFamily="@font/inter"
+            android:maxLines="2"
+            android:textColor="@color/text_secondary_secondary"
+            android:textStyle="italic"
+            android:text="@{project.description}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/project_title"
+            app:layout_constraintTop_toBottomOf="@+id/project_title"
+            tools:text="Every route that is receiving JWT in the request body should always verify the token and then proceed forward" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

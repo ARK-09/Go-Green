@@ -13,24 +13,29 @@ const UserDeletedListener = require("./events/userDeletedListener");
 const UserForgetPasswordListener = require("./events/userForgetPasswordListener");
 const UserResetPasswordListener = require("./events/userResetPasswordListener");
 
-natsWrapper.connect("gogreen", "1112", "http://nats-srv:4222").then(() => {
-  new UserCreatedListener(natsWrapper.client).listen();
-  new UserUpdatedListener(natsWrapper.client).listen();
-  new UserDeletedListener(natsWrapper.client).listen();
-  new UserForgetPasswordListener(natsWrapper.client).listen();
-  new UserResetPasswordListener(natsWrapper.client).listen();
+natsWrapper
+  .connect(
+    process.env.NATS_CLUSTER_ID,
+    process.env.NATS_CLIENT_ID,
+    process.env.NATS_URL
+  )
+  .then(() => {
+    new UserCreatedListener(natsWrapper.client).listen();
+    new UserUpdatedListener(natsWrapper.client).listen();
+    new UserDeletedListener(natsWrapper.client).listen();
+    new UserForgetPasswordListener(natsWrapper.client).listen();
+    new UserResetPasswordListener(natsWrapper.client).listen();
 
-  natsWrapper.client.on("close", () => {
-    console.log("NATAS connection closed!");
-    process.exit();
+    natsWrapper.client.on("close", () => {
+      console.log("NATAS connection closed!");
+      process.exit();
+    });
+
+    process.on("SIGINT", () => natsWrapper.client.close());
+    process.on("SIGTERM", () => natsWrapper.client.close());
   });
 
-  process.on("SIGINT", () => natsWrapper.client.close());
-  process.on("SIGTERM", () => natsWrapper.client.close());
-});
-
 const connectionString = process.env.MONGO_URI;
-
 mongoose.connect(connectionString).then(() => {
   console.log("DB connection successful!");
 });
@@ -47,8 +52,8 @@ const socketServer = new SocketServer(app, {
 
 socketServer.use(socketAuth, socketCurrentUser);
 
-const httpServer = socketServer.listen(() => {
-  Listeners.init();
+const httpServer = socketServer.listen((socket) => {
+  Listeners.init(socket);
 });
 
 const port = parseInt(process.env.PORT) || 4005;

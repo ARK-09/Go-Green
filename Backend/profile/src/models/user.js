@@ -88,8 +88,15 @@ const userSchema = new mongoose.Schema({
     },
   },
   image: {
-    type: String,
-    default: null,
+    id: {
+      type: mongoose.Schema.Types.ObjectId,
+      default: undefined,
+    },
+    url: {
+      type: String,
+      default: "",
+    },
+    _id: false,
   },
   userStatus: {
     type: String,
@@ -132,10 +139,7 @@ userSchema.pre("save", async function (next) {
 
 userSchema.methods.toJSON = function () {
   const returnedUser = this.toObject();
-  returnedUser.id = returnedUser._id;
 
-  delete returnedUser._id;
-  delete returnedUser.email;
   delete returnedUser.blocked;
   delete returnedUser.password;
   delete returnedUser.isActive;

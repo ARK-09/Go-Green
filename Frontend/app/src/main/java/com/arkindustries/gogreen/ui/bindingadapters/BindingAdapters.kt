@@ -3,7 +3,6 @@ package com.arkindustries.gogreen.ui.bindingadapters
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.databinding.BindingAdapter
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
@@ -12,42 +11,33 @@ import com.arkindustries.gogreen.api.response.Location
 import com.arkindustries.gogreen.database.entites.AttachmentEntity
 import com.arkindustries.gogreen.database.entites.SkillEntity
 import com.arkindustries.gogreen.ui.adapters.ViewAttachmentsAdapter
+import com.arkindustries.gogreen.utils.DateTimeUtils
 import com.bumptech.glide.Glide
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.text.ParseException
-import java.text.SimpleDateFormat
-import java.util.Calendar
 import java.util.Locale
-import java.util.concurrent.TimeUnit
 
 @BindingAdapter("location")
 fun TextView.location(location: Location?) {
-    if (location != null) {
-
+    if (location?.coordinates != null) {
         val geocodingService = GeocodingClient.createGeocodingService()
-
-        val lifecycleOwner = this.rootView.context as LifecycleOwner
-
-        if (location.coordinates != null) {
-            lifecycleOwner.lifecycleScope.launch {
+        this.context?.let {
+            CoroutineScope(Dispatchers.IO).launch {
                 val response = geocodingService.getAddressFromLocation(
-                    location.coordinates[0],
-                    location.coordinates[1].trim()
+                    location.coordinates[1].trim(),
+                    location.coordinates[0].trim()
                 )
                 withContext(Dispatchers.Main) {
-                    val locationResult = response.address.city + ", " + response.address.country
+                    val locationResult = (response.address.city
+                        ?: response.address.state) + ", " + response.address.country
                     this@location.text = locationResult
                 }
             }
-        } else {
-            this.text = "..."
         }
-    } else {
-        this.text = "..."
     }
 }
 
@@ -62,8 +52,8 @@ fun Chip.location(location: Location?) {
         if (location.coordinates != null) {
             lifecycleOwner?.lifecycleScope?.launch {
                 val response = geocodingService.getAddressFromLocation(
-                    location.coordinates[0],
-                    location.coordinates[1].trim()
+                    location.coordinates[1].trim(),
+                    location.coordinates[0]
                 )
                 withContext(Dispatchers.Main) {
                     val locationResult = response.address.city + ", " + response.address.country
@@ -103,25 +93,5 @@ fun ImageView.image(url: String?, errorImage: Int) {
 @BindingAdapter("timeAgo")
 fun TextView.timeAgo(date: String?) {
     if (date == null) return
-
-    val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
-
-    try {
-        val createdDate = inputFormat.parse(date)
-        val currentDate = Calendar.getInstance().time
-        val timeDifferenceInMillis = currentDate.time - (createdDate?.time ?: currentDate.time)
-
-        val hours = TimeUnit.MILLISECONDS.toHours(timeDifferenceInMillis)
-        val days = TimeUnit.MILLISECONDS.toDays(timeDifferenceInMillis)
-
-        val formattedTimeAgo = if (days >= 1) {
-            "$days days ago"
-        } else {
-            "$hours hours ago"
-        }
-
-        text = formattedTimeAgo
-    } catch (e: ParseException) {
-        e.printStackTrace()
-    }
+    text = DateTimeUtils.formatTimeAgo(date, Locale.getDefault())
 }

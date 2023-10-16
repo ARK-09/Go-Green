@@ -4,6 +4,7 @@ const {
   AppError,
   catchAsync,
   JWT,
+  Password,
   natsWrapper,
 } = require("@ark-industries/gogreen-common");
 const { devTransporter } = require("../util/email/nodemailer");
@@ -55,12 +56,21 @@ const login = catchAsync(async (req, res, next) => {
     return next(new AppError("Invalid email or password", 400));
   }
 
+  if (user.blocked.isBlocked) {
+    return next(
+      new AppError(
+        `Your account has been blocked by the team due to ${user.blocked.reason}. Please contact support for further assistance.`,
+        401
+      )
+    );
+  }
+
   const JWT_KEY = process.env.JWT_KEY;
   const JWT_EXPIRY = parseInt(process.env.JWT_EXPIRY) / (24 * 60 * 60) + "d"; // recieving 10 days in seconds converting to 10 day
 
   const Jwt = JWT.sign(
     {
-      id: user.id,
+      _id: user._id,
       email: user.email,
     },
     JWT_KEY,
@@ -74,16 +84,24 @@ const login = catchAsync(async (req, res, next) => {
 });
 
 const signUp = catchAsync(async (req, res, next) => {
-  const { name, email, password, userType, phoneNo } = req.body;
+  const { name, email, password, userType, phoneNo, image } = req.body;
 
-  const newUser = await User.create({
+  const userObject = {
     name,
     email,
     password,
     userType,
     phoneNo,
-    image: "",
-  });
+  };
+
+  if (image) {
+    userObject.image = {
+      id: image.id,
+      url: image.url,
+    };
+  }
+
+  const newUser = await User.create(userObject);
 
   await new UserCreatedPublisher(natsWrapper.client)
     .publish(newUser)
@@ -96,7 +114,7 @@ const signUp = catchAsync(async (req, res, next) => {
 
   const Jwt = JWT.sign(
     {
-      id: newUser.id,
+      _id: newUser._id,
       email: newUser.email,
     },
     JWT_KEY,
@@ -108,6 +126,7 @@ const signUp = catchAsync(async (req, res, next) => {
     "isActive",
     "userType",
     "phoneNo",
+    "image",
     "financeAllowed",
     "passwordChangedAt",
     "blocked",
@@ -127,17 +146,19 @@ const signUp = catchAsync(async (req, res, next) => {
 const currentUser = catchAsync(async (req, res, next) => {
   const currentUser = req.currentUser;
 
-  const user = await User.findById(currentUser.id);
+  const user = await User.findById(currentUser._id);
 
   const fieldsToInclude = [
     "email",
     "isActive",
     "userType",
     "phoneNo",
+    "image",
     "financeAllowed",
     "passwordChangedAt",
     "blocked",
   ];
+
   const fieldsToExclud = fieldsToExclude.filter(
     (field) => !fieldsToInclude.includes(field)
   );
@@ -146,11 +167,21 @@ const currentUser = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     status: "success",
-    data: { userResult },
+    data: { user: userResult },
   });
 });
 
 const getUsers = catchAsync(async (req, res, next) => {
+  const currentUser = req.currentUser;
+
+  const isAllowed = currentUser.userType === "admin";
+
+  if (!isAllowed) {
+    return next(
+      new AppError("You don't have permission to perform this action.", 403)
+    );
+  }
+
   let users = await User.find({});
 
   const fieldsToInclude = [
@@ -158,6 +189,7 @@ const getUsers = catchAsync(async (req, res, next) => {
     "isActive",
     "userType",
     "phoneNo",
+    "image",
     "financeAllowed",
     "passwordChangedAt",
     "blocked",
@@ -167,7 +199,7 @@ const getUsers = catchAsync(async (req, res, next) => {
   );
 
   let usersResult = await Promise.all(
-    users.map(async (user) => await user.removeFields(fieldsToExclud))
+    users.map(async (user) => user.removeFields(fieldsToExclud))
   );
 
   res.status(200).json({
@@ -182,6 +214,16 @@ const getUser = catchAsync(async (req, res, next) => {
 
   const user = await User.findById(userId);
 
+  const isAllowed =
+    req.currentUser.userType === "admin" ||
+    user._id.toString() === req.currentUser._id.toString();
+
+  if (!isAllowed) {
+    return next(
+      new AppError("You don't have permission to perform this action.", 403)
+    );
+  }
+
   if (!user) {
     return next(new AppError(`No user find with the id: ${userId}.`, 404));
   }
@@ -191,6 +233,7 @@ const getUser = catchAsync(async (req, res, next) => {
     "isActive",
     "userType",
     "phoneNo",
+    "image",
     "financeAllowed",
     "passwordChangedAt",
     "blocked",
@@ -209,7 +252,8 @@ const getUser = catchAsync(async (req, res, next) => {
 
 const updateUser = catchAsync(async (req, res, next) => {
   const userId = req.params.id;
-  const { name, email, password, userType, phoneNo, image } = req.body;
+  const { name, email, password, currentPassword, userType, phoneNo, image } =
+    req.body;
 
   let user = await User.findById(userId);
 
@@ -218,7 +262,8 @@ const updateUser = catchAsync(async (req, res, next) => {
   }
 
   const isAllowed =
-    req.currentUser.id === user.id || req.currentUser.userType === "admin";
+    req.currentUser._id.toString() === user._id.toString() ||
+    req.currentUser.userType === "admin";
 
   if (!isAllowed) {
     return next(
@@ -234,12 +279,28 @@ const updateUser = catchAsync(async (req, res, next) => {
   user.email = email ? email : user.email;
 
   if (password) {
-    console.log(password);
+    const oldPasswordMatched = await user.checkPassword(currentPassword);
+
+    if (!oldPasswordMatched) {
+      return next(new AppError("Current password not matched", 400));
+    }
+
+    const isNewPasswordSameAsOld = await Password.compare(
+      user.password,
+      password
+    );
+
+    if (isNewPasswordSameAsOld) {
+      return next(new AppError("New password same as old", 409));
+    }
+
     user.password = password;
   }
 
   user.phoneNo = phoneNo ? phoneNo : user.phoneNo;
-  user.image = image || user.image;
+  if (image) {
+    user.image = { id: image.id, url: image.url } || user.image;
+  }
 
   user = await user.save({ validateBeforeSave: false });
 
@@ -252,10 +313,12 @@ const updateUser = catchAsync(async (req, res, next) => {
     "isActive",
     "userType",
     "phoneNo",
+    "image",
     "financeAllowed",
     "passwordChangedAt",
     "blocked",
   ];
+
   const fieldsToExclud = fieldsToExclude.filter(
     (field) => !fieldsToInclude.includes(field)
   );
@@ -278,7 +341,8 @@ const deleteUser = catchAsync(async (req, res, next) => {
   }
 
   const isAllowed =
-    req.currentUser.id === user.id || req.currentUser.userType === "admin";
+    req.currentUser._id.toString() === user._id.toString() ||
+    req.currentUser.userType === "admin";
 
   if (!isAllowed) {
     return next(
@@ -289,7 +353,7 @@ const deleteUser = catchAsync(async (req, res, next) => {
   await user.updateOne({ isActive: false, userStatus: "Offline" });
 
   await new UserDeletedPublisher(natsWrapper.client)
-    .publish({ id: user.id })
+    .publish({ id: user._id })
     .catch(() => {
       return next(new AppError("Something went wrong...", 500));
     });
@@ -321,6 +385,7 @@ const forgetPassword = catchAsync(async (req, res, next) => {
       {
         userName: user.name,
         resetUrl,
+        resetToken,
       }
     );
 
@@ -332,15 +397,17 @@ const forgetPassword = catchAsync(async (req, res, next) => {
       .setTransporter(devTransporter())
       .build();
 
+    console.log(process.env.RESET_SUPPORT_EMAIL);
     const info = await emailUtl.sendMail();
 
     await new UserForgetPasswordPublisher(natsWrapper.client)
       .publish({
-        id: user.id,
+        id: user._id,
         resetToken: user.resetToken,
         resetTokenExpireAt: user.resetTokenExpireAt,
       })
-      .catch(() => {
+      .catch((err) => {
+        console.log(err);
         return next(new AppError("Something went wrong...", 500));
       });
 
@@ -349,6 +416,7 @@ const forgetPassword = catchAsync(async (req, res, next) => {
       message: `Reset token is sent to ${info.accepted[0]}. The token is valid for 10 mintus.`,
     });
   } catch (err) {
+    console.log(err);
     user.resetToken = undefined;
     user.resetTokenExpireAt = undefined;
     await user.save({ validateBeforeSave: false });
@@ -384,7 +452,7 @@ const resetPassword = catchAsync(async (req, res, next) => {
 
   await new UserResetPasswordPublisher(natsWrapper.client)
     .publish({
-      id: user.id,
+      id: user._id,
       newPassword: user.password,
       passwordChangedAt: user.passwordChangedAt,
     })
@@ -397,7 +465,7 @@ const resetPassword = catchAsync(async (req, res, next) => {
 
   const Jwt = JWT.sign(
     {
-      id: user.id,
+      _id: user._id,
       email: user.email,
     },
     JWT_KEY,

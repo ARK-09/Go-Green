@@ -1,4 +1,11 @@
 package com.arkindustries.gogreen.api.response
 
-class ReviewsResponse {
-}
+data class ReviewsResponse(
+    val reviews: List<Review>
+)
+
+data class Review(
+    val doc: Job,
+    val clientFeedback: String,
+    val clientRating: Double,
+)

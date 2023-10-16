@@ -71,7 +71,10 @@ class JobAdapter(
                 binding.user = job.user
 
                 binding.root.setOnClickListener { onItemClick(job) }
-                binding.sendOfferBtn.setOnClickListener { onOfferClick(job) }
+
+                if (!isUserClient) {
+                    binding.sendOfferBtn.setOnClickListener { onOfferClick(job) }
+                }
 
                 binding.executePendingBindings()
             }

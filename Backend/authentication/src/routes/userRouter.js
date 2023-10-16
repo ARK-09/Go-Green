@@ -2,6 +2,7 @@ const express = require("express");
 const { body, check, param } = require("express-validator");
 const currentUser = require("../middlewares/currentUser");
 const {
+  AppError,
   requireAuth,
   restrictTo,
   validateRequest,
@@ -31,7 +32,6 @@ router
     check("password")
       .isString()
       .withMessage("Password should be of type string.")
-      .not()
       .notEmpty()
       .withMessage("Password can't be empty")
       .escape(),
@@ -60,14 +60,13 @@ router
     check("password")
       .isString()
       .withMessage("Password should be of type string.")
-      .not()
       .notEmpty()
       .withMessage("Password can't be empty")
       .escape(),
     check("userType")
       .notEmpty()
       .withMessage("user type can't be empty.")
-      .isIn(["talent", "client", "admin"])
+      .isIn(["talent", "client"])
       .withMessage(
         "Invalid user type. Allowed values are: 'talent', 'client'."
       ),
@@ -77,6 +76,14 @@ router
       .withMessage("Please provide a valid Pakistani mobile number."),
     check("image")
       .optional()
+      .isObject()
+      .withMessage(
+        "Please provide image as valid json object with these properties: id, image."
+      ),
+    check("image.*.id")
+      .isMongoId("Please provide valid image id.")
+      .withMessage(),
+    check("image.*.url")
       .isURL({
         protocols: ["https"],
         host_whitelist: ["gogreen-files-bucket.s3.ap-south-1.amazonaws.com"],
@@ -100,8 +107,6 @@ router
       .withMessage("Please provide a valid email address")
       .normalizeEmail(),
     validateRequest,
-    requireAuth(JWT_KEY),
-    currentUser,
     UserController.forgetPassword
   )
   .post(
@@ -114,8 +119,6 @@ router
         "The password should be at least 8 characters long and contain a combination of alphanumeric characters and at least one special character [@, $, !, %, *, #, ?, &, (, )]."
       ),
     validateRequest,
-    requireAuth(JWT_KEY),
-    currentUser,
     UserController.resetPassword
   );
 
@@ -126,7 +129,6 @@ router
     validateRequest,
     requireAuth(JWT_KEY),
     currentUser,
-    restrictTo("admin"),
     UserController.getUser
   )
   .patch(
@@ -152,6 +154,23 @@ router
       .withMessage(
         "Password must contain at least 8 characters, one letter, one number, and one special character."
       ),
+    check("currentPassword")
+      .optional()
+      .matches(
+        /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&()])[A-Za-z\d@$!%*#?&()]{8,}$/
+      )
+      .withMessage(
+        "Password must contain at least 8 characters, one letter, one number, and one special character."
+      )
+      .custom((value, { req }) => {
+        if (req.password && !value) {
+          throw new AppError(
+            "Both the current password and the old password must be provided."
+          );
+        }
+
+        return true;
+      }),
     check("phoneNo")
       .optional()
       .isMobilePhone()
@@ -159,6 +178,14 @@ router
       .optional(),
     check("image")
       .optional()
+      .isObject()
+      .withMessage(
+        "Please provide image as valid json object with these properties: id, image."
+      ),
+    check("image.*.id")
+      .isMongoId("Please provide valid image id.")
+      .withMessage(),
+    check("image.*.url")
       .isURL({
         protocols: ["https"],
         host_whitelist: ["gogreen-files-bucket.s3.ap-south-1.amazonaws.com"],

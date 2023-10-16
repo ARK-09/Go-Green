@@ -4,145 +4,49 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.arkindustries.gogreen.api.request.CreateContractRequest
-import com.arkindustries.gogreen.api.response.ApiResponse
-import com.arkindustries.gogreen.api.response.ContractResponse
-import com.arkindustries.gogreen.ui.repositories.ContractRepository
+import com.arkindustries.gogreen.api.response.GeocodingReverseResponse
+import com.arkindustries.gogreen.api.response.GeocodingSearchResponse
+import com.arkindustries.gogreen.ui.repositories.GeocodingRepository
 import kotlinx.coroutines.launch
 
-class ContractViewModel(private val repository: ContractRepository) : ViewModel() {
+class GeocodingViewModel(private val geocodingRepository: GeocodingRepository) : ViewModel() {
     private val _loadingState = MutableLiveData<Boolean>()
     val loadingState: LiveData<Boolean> get() = _loadingState
 
-    private val _contracts = MutableLiveData<List<ContractResponse>>()
-    val contracts: LiveData<List<ContractResponse>> = _contracts
+    private val _geocodingSearch = MutableLiveData<List<GeocodingSearchResponse>>()
+    val geocodingSearch: LiveData<List<GeocodingSearchResponse>> = _geocodingSearch
 
-    private val _contract = MutableLiveData<ContractResponse>()
-    val contract: LiveData<ContractResponse> = _contract
+    private val _geocodingReverse = MutableLiveData<GeocodingReverseResponse> ()
+    val geocodingReverse: LiveData<GeocodingReverseResponse> = _geocodingReverse
 
-    private val _error = MutableLiveData<ApiResponse<*>>()
-    val error: LiveData<ApiResponse<*>> = _error
+    private val _error = MutableLiveData<Exception>()
+    val error: LiveData<Exception> = _error
 
-    init {
-        refreshContracts()
-    }
-
-    fun refreshContracts() {
+    fun searchAddress(address: String) {
         _loadingState.value = true
         viewModelScope.launch {
-            val response = repository.getContractsFromServer()
-
-            if (response.status == "fail" || response.status == "error") {
-                _error.value = response
+            try{
+                val response = geocodingRepository.searchAddress(address)
+                _geocodingSearch.value = response
+            } catch (exp: Exception) {
+                _error.value = exp
+            } finally {
                 _loadingState.value = false
-                return@launch
             }
-
-            getAllContracts()
-
-            _loadingState.value = false
         }
     }
 
-    fun getAllContracts() {
+    fun reverseGeocode(lat: String, lon: String) {
         _loadingState.value = true
         viewModelScope.launch {
-            val response = repository.getContractsFromServer()
-
-            if (response.status == "fail" || response.status == "error") {
-                _error.value = response
+            try{
+                val response = geocodingRepository.reverseGeocode(lat, lon)
+                _geocodingReverse.value = response
+            } catch (exp: Exception) {
+                _error.value = exp
+            } finally {
                 _loadingState.value = false
-                return@launch
             }
-
-            if (response.data != null) {
-                _contracts.value = response.data!!
-            }
-
-            _loadingState.value = false
-        }
-    }
-
-    fun getContractById(contractId: String) {
-        _loadingState.value = true
-        viewModelScope.launch {
-            val response = repository.getContractByIdFromServer(contractId)
-
-            if (response.status == "fail" || response.status == "error") {
-                _error.value = response
-                _loadingState.value = false
-                return@launch
-            }
-            if (response.data != null) {
-                _contract.value = response.data!!
-            }
-
-            _loadingState.value = false
-        }
-    }
-
-    fun deleteContract(contractId: String) {
-        _loadingState.value = true
-        viewModelScope.launch {
-            val response = repository.deleteContractFromServer(contractId)
-
-            if (response.status == "fail" || response.status == "error") {
-                _error.value = response
-                _loadingState.value = false
-                return@launch
-            }
-            _loadingState.value = false
-        }
-    }
-
-    fun createContractAtServer(contractRequest: CreateContractRequest) {
-        _loadingState.value = true
-        viewModelScope.launch {
-            val response = repository.createContractAtServer(contractRequest)
-
-            if (response.status == "fail" || response.status == "error") {
-                _error.value = response
-                _loadingState.value = false
-                return@launch
-            }
-
-            if (response.data != null) {
-                _contract.value = response.data!!
-            }
-            _loadingState.value = false
-        }
-    }
-
-    fun updateContractAtServer(contractId: String, contractRequest: CreateContractRequest) {
-        _loadingState.value = true
-        viewModelScope.launch {
-            val response = repository.updateContractAtServer(contractId, contractRequest)
-
-            if (response.status == "fail" || response.status == "error") {
-                _error.value = response
-                _loadingState.value = false
-                return@launch
-            }
-
-            if (response.data != null) {
-                _contract.value = response.data!!
-            }
-            _loadingState.value = false
-        }
-    }
-
-    fun deleteContractFromServer(contractId: String) {
-        _loadingState.value = true
-        viewModelScope.launch {
-            val response = repository.deleteContractFromServer(contractId)
-
-            if (response.status == "fail" || response.status == "error") {
-                _loadingState.value = false
-                return@launch
-            }
-
-            repository.deleteContractFromServer(contractId)
-            _loadingState.value = false
         }
     }
 }

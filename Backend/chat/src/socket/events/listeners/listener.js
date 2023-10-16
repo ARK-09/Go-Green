@@ -5,14 +5,12 @@ const {
   typingStart,
   typingStop,
 } = require("../../controllers/roomController");
-const SocketServer = require("../../socketServer");
 const { validatePayload } = require("../../util/validator");
 
-const init = () => {
-  SocketServer.getSocket()
+const init = (socket) => {
+  socket
     .onAny(async (...args) => {
-      SocketServer.getSocket().data = args[1];
-      validatePayload();
+      validatePayload(socket, args[1]);
     })
     .on("room:join", joinRoom)
     .on("message:send", sendMessage)

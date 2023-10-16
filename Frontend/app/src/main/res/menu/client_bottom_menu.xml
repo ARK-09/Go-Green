@@ -2,11 +2,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/jobs"
+        android:id="@+id/jobsFragment"
         android:title="Jobs"
         android:icon="@drawable/ic_search"/>
     <item
-        android:id="@+id/proposals"
+        android:id="@+id/proposalsFragment"
         android:title="Proposals"
         android:icon="@drawable/ic_send" />
     <item
@@ -14,15 +14,10 @@
         android:visible="true"
         android:title="" />
     <item
-        android:id="@+id/messages"
+        android:id="@+id/rooms"
         android:title="Messages"
         android:icon="@drawable/ic_message"
         />
-<!--    <item-->
-<!--        android:id="@+id/notifications"-->
-<!--        android:title="Notifications"-->
-<!--        -->
-<!--        android:icon="@drawable/ic_notification" />-->
     <item
         android:icon="@drawable/ic_profile"
         android:id="@+id/profile"

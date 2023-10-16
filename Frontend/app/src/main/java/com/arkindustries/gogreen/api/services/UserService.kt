@@ -30,12 +30,12 @@ interface UserService {
 
     @GET("users/{id}")
     suspend fun getUserById(
-        @Path("id") userId: Long
+        @Path("id") userId: String
     ): ApiResponse<UserResponse>
 
     @PATCH("users/{id}")
     suspend fun updateUserById(
-        @Path("id") userId: Long,
+        @Path("id") userId: String,
         @Body updateUserRequest: UpdateUserRequest
     ): ApiResponse<UserResponse>
 
@@ -48,8 +48,8 @@ interface UserService {
     suspend fun resetPassword(
         @Path("resettokken") resetToken: String,
         @Body resetPasswordRequest: ResetPasswordRequest
-    ): ApiResponse<Unit>
+    ): ApiResponse<LoginResponse>
 
     @POST("users/forgetpassword")
-    suspend fun forgetPassword(@Body forgetPasswordRequest: ForgetPasswordRequest): ApiResponse<Unit>
+    suspend fun forgetPassword(@Body forgetPasswordRequest: ForgetPasswordRequest): ApiResponse<String>
 }

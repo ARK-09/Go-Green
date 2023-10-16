@@ -2,20 +2,23 @@ const Job = require("../models/jobs");
 
 async function checkUserPermission(currentUser, proposal) {
   const proposalUserId = proposal.user.toString();
-  const currentUserIsProposalUser = currentUser.id === proposalUserId;
+  const currentUserIsProposalUser =
+    currentUser._id.toString() === proposalUserId;
 
   if (currentUserIsProposalUser) {
     return true;
   }
 
+  console.log(currentUserIsProposalUser);
+
   const proposalType = proposal.type;
 
-  if (proposalType === "job") {
-    const job = await Job.findById(proposal.refId);
-    return currentUser.id === job.user.toString();
-  } else if (proposalType === "service") {
-    const service = await Job.findById(proposal.refId);
-    return currentUser.id === service.user.toString();
+  if (proposalType === "Jobs") {
+    const job = await Job.findById(proposal.doc);
+    return currentUser._id.toString() === job.user.toString();
+  } else if (proposalType === "Services") {
+    const service = await Job.findById(proposal.doc);
+    return currentUser._id.toString() === service.user.toString();
   }
 
   return false;

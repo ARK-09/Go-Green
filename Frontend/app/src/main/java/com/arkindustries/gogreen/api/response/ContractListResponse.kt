@@ -1,4 +1,5 @@
 package com.arkindustries.gogreen.api.response
 
-class ContractListResponse {
-}
+data class ContractListResponse(
+    val contracts: List<ContractResponse>?
+)

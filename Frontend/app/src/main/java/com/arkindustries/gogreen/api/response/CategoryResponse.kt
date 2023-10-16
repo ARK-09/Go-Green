@@ -1,4 +1,10 @@
 package com.arkindustries.gogreen.api.response
 
-class CategoryResponse {
-}
+data class CategoryResponse(
+    val category: Category
+)
+
+data class Category(
+    val _id: String,
+    val title: String,
+)

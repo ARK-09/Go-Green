@@ -19,6 +19,10 @@ router
       .escape()
       .notEmpty()
       .withMessage("Description field is required."),
+    check("talentCount")
+      .optional()
+      .isInt({ min: 1 })
+      .withMessage("The required number of talents must be greater than zero."),
     check("categories")
       .isArray({ min: 1 })
       .withMessage(
@@ -79,25 +83,49 @@ router
       .withMessage(
         "Invalid Attachment MIME type provided. Only the following MIME types are allowed: image/jpeg, image/png, image/gif, video/mp4, video/quicktime."
       ),
-
     check("attachments.*.originalName")
       .notEmpty()
       .withMessage("Attachment Original name is required"),
-
-    check("attachments.*.url")
-      .isURL({
-        protocols: ["https"],
-        host_whitelist: ["gogreen-files-bucket.s3.ap-south-1.amazonaws.com"],
-      })
-      .withMessage("Please provide a valid image url.")
-      .notEmpty()
-      .withMessage("Attachment URL is required"),
-
     check("attachments.*.createdDate")
       .notEmpty()
       .withMessage("Attachment Created date is required")
       .isISO8601()
       .withMessage("Attachment Created date should be in ISO 8601 format"),
+    check("location")
+      .optional()
+      .isObject()
+      .withMessage("Location should be an object.")
+      .bail()
+      .custom((location) => {
+        const isLatitude = (num) => isFinite(num) && Math.abs(num) <= 90;
+        const isLongitude = (num) => isFinite(num) && Math.abs(num) <= 180;
+
+        if (!Array.isArray(location.coordinates)) {
+          throw new Error(
+            "Location coordinates should contain exactly two elements: [longitude, latitude]."
+          );
+        }
+
+        if (
+          location.coordinates.some(
+            (coord) =>
+              typeof coord !== "number" || isNaN(coord) || !isFinite(coord)
+          )
+        ) {
+          throw new Error("Coordinates should be valid float numbers.");
+        }
+
+        const [longitude, latitude] = location.coordinates;
+
+        if (!isLatitude(latitude)) {
+          throw new Error("Latitude must be a number between -90 and 90.");
+        }
+
+        if (!isLongitude(longitude)) {
+          throw new Error("Longitude must be a number between -180 and 180.");
+        }
+        return true;
+      }),
     validateRequest,
     requireAuth(JWT_KEY),
     currentUser,
@@ -123,56 +151,45 @@ router.route("/search").get(
     .optional()
     .isFloat({ min: 5 })
     .withMessage("Price should be an integer with min value 5."),
-  query("location.latitude")
+  query("location")
     .optional()
-    .custom((value, { req }) => {
-      if (value && !req.query["location.longitude"]) {
-        throw new Error("Longitude is required if latitude is provided.");
+    .isObject()
+    .withMessage("Location should be an object.")
+    .bail()
+    .if(query("location.coordinates").exists())
+    .isArray({ min: 2, max: 2 })
+    .withMessage(
+      "Coordinates should be an array containing exactly two elements: [latitude, longitude]."
+    )
+    .bail()
+    .custom((coordinates) => {
+      const isLatitude = (num) => isFinite(num) && Math.abs(num) <= 90;
+      const isLongitude = (num) => isFinite(num) && Math.abs(num) <= 180;
+
+      if (
+        coordinates.some(
+          (coord) =>
+            typeof coord !== "number" || isNaN(coord) || !isFinite(coord)
+        )
+      ) {
+        throw new Error("Coordinates should be valid float numbers.");
       }
-      return true;
-    })
-    .isFloat()
-    .withMessage("Latitude should be a float number."),
-  query("location.longitude")
-    .optional()
-    .custom((value, { req }) => {
-      if (value && !req.query["location.latitude"]) {
-        throw new Error("Latitude is required if longitude is provided.");
+
+      const [latitude, longitude] = coordinates;
+
+      if (!isLatitude(latitude)) {
+        throw new Error("Latitude must be a number between -90 and 90.");
       }
+
+      if (!isLongitude(longitude)) {
+        throw new Error("Longitude must be a number between -180 and 180.");
+      }
+
       return true;
-    })
-    .isFloat()
-    .withMessage("Longitude should be a float number."),
+    }),
   validateRequest,
   JobsController.searchJobs
 );
-
-router
-  .route("/:jobid/proposals")
-  .get(
-    param("jobid")
-      .isMongoId()
-      .withMessage("Invalid job ID. Please provide a valid MongoDB ID."),
-    validateRequest,
-    requireAuth(JWT_KEY),
-    currentUser,
-    JobsController.isAlreadyApplied
-  );
-
-router
-  .route("/:jobid/proposals/:proposalid")
-  .patch(
-    param("jobid")
-      .isMongoId()
-      .withMessage("Invalid job ID. Please provide a valid MongoDB ID."),
-    param("proposalid")
-      .isMongoId()
-      .withMessage("Invalid proposal ID. Please provide a valid MongoDB ID."),
-    validateRequest,
-    requireAuth(JWT_KEY),
-    currentUser,
-    JobsController.hire
-  );
 
 router
   .route("/:id")
@@ -189,7 +206,11 @@ router
     param("id")
       .isMongoId()
       .withMessage("Invalid job ID. Please provide a valid MongoDB ID."),
-    check("title").escape().notEmpty().withMessage("Title field is required."),
+    check("title")
+      .optional()
+      .escape()
+      .notEmpty()
+      .withMessage("Title field is required."),
     check("description")
       .optional()
       .notEmpty()
@@ -265,15 +286,6 @@ router
       .notEmpty()
       .withMessage("Attachment Original name is required"),
 
-    check("attachments.*.url")
-      .isURL({
-        protocols: ["https"],
-        host_whitelist: ["gogreen-files-bucket.s3.ap-south-1.amazonaws.com"],
-      })
-      .withMessage("Please provide a valid image url.")
-      .notEmpty()
-      .withMessage("Attachment URL is required"),
-
     check("attachments.*.createdDate")
       .notEmpty()
       .withMessage("Attachment Created date is required")
@@ -283,7 +295,7 @@ router
       .optional()
       .notEmpty()
       .withMessage("Status field is required.")
-      .isIn("Open", "Assigned", "Completed", "Canceled", "Disputed")
+      .isIn(["Open", "Assigned", "Completed", "Canceled", "Disputed"])
       .withMessage(
         "Status must be one of: Draft, Open, In Review, Assigned, Completed, Canceled, Disputed."
       ),
@@ -335,15 +347,6 @@ router
     check("attachments.*.originalName")
       .notEmpty()
       .withMessage("Original name is required"),
-
-    check("attachments.*.url")
-      .notEmpty()
-      .withMessage("URL is required")
-      .isURL({
-        protocols: ["https"],
-        host_whitelist: ["gogreen-files-bucket.s3.ap-south-1.amazonaws.com"],
-      })
-      .withMessage("Please provide a valid image url."),
 
     check("attachments.*.createdDate")
       .notEmpty()

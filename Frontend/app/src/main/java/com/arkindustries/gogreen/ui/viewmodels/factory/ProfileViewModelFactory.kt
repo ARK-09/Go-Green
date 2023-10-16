@@ -2,14 +2,14 @@ package com.arkindustries.gogreen.ui.viewmodels.factory
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.arkindustries.gogreen.ui.repositories.ChatRepository
-import com.arkindustries.gogreen.ui.viewmodels.ChatViewModel
+import com.arkindustries.gogreen.ui.repositories.ProfileRepository
+import com.arkindustries.gogreen.ui.viewmodels.ProfileViewModel
 
-class ChatViewModelFactory(private val chatRepository: ChatRepository) : ViewModelProvider.Factory {
+class ProfileViewModelFactory(private val profileRepository: ProfileRepository) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(ChatViewModel::class.java)) {
-            return ChatViewModel (chatRepository) as T
+        if (modelClass.isAssignableFrom(ProfileViewModel::class.java)) {
+            return ProfileViewModel (profileRepository) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

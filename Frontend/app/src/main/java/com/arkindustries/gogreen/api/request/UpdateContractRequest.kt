@@ -1,4 +1,6 @@
 package com.arkindustries.gogreen.api.request
 
-class UpdateContractRequest {
-}
+data class UpdateContractRequest(
+    val amount: Double?,
+    val status: String?
+)

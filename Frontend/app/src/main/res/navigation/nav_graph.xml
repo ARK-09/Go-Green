@@ -8,16 +8,124 @@
     <activity
         android:id="@+id/signUp"
         android:name="com.arkindustries.gogreen.ui.views.SignUp"
-        tools:layout="@layout/activity_sign_in"
-        android:label="SignUp" />
+        android:label="SignUp"
+        tools:layout="@layout/activity_sign_in" />
     <activity
         android:id="@+id/signIn"
         android:name="com.arkindustries.gogreen.ui.views.SignIn"
-        tools:layout="@layout/activity_sign_up"
-        android:label="SignIn" />
+        android:label="SignIn"
+        tools:layout="@layout/activity_sign_up" />
     <fragment
         android:id="@+id/jobsFragment"
         android:name="com.arkindustries.gogreen.ui.views.JobsFragment"
-        tools:layout="@layout/fragment_jobs"
-        android:label="JobsFragment" />
+        android:label="JobsFragment"
+        tools:layout="@layout/fragment_jobs">
+        <action
+            android:id="@+id/action_jobsFragment_to_viewJob"
+            app:destination="@id/viewJob"
+            tools:layout="@layout/activity_view_job" />
+        <action
+            android:id="@+id/action_jobsFragment_to_proposal"
+            app:destination="@id/proposal" />
+    </fragment>
+    <fragment
+        android:id="@+id/createJob"
+        android:name="com.arkindustries.gogreen.ui.views.CreateJob"
+        android:label="CreateJob"
+        tools:layout="@layout/activity_create_job" />
+    <fragment
+        android:id="@+id/viewJob"
+        android:name="com.arkindustries.gogreen.ui.views.ViewJob"
+        android:label="ViewJob"
+        tools:layout="@layout/activity_view_job">
+        <argument
+            android:name="jobId"
+            app:argType="string"
+            app:nullable="true" />
+        <action
+            android:id="@+id/action_viewJob_to_proposal"
+            app:destination="@id/proposal" />
+        <action
+            android:id="@+id/action_viewJob_to_createJob"
+            app:destination="@id/createJob" />
+    </fragment>
+    <fragment
+        android:id="@+id/proposalsFragment"
+        android:name="com.arkindustries.gogreen.ui.views.ProposalsFragment"
+        android:label="ProposalsFragment"
+        tools:layout="@layout/fragment_proposals">
+        <action
+            android:id="@+id/action_proposalsFragment_to_rooms"
+            app:destination="@id/rooms" />
+        <action
+            android:id="@+id/action_proposalsFragment_to_viewProposal"
+            app:destination="@id/viewProposal" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/proposal"
+        android:name="com.arkindustries.gogreen.ui.views.Proposal"
+        android:label="Proposal"
+        tools:layout="@layout/activity_proposal">
+        <argument
+            android:name="proposalId"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="jobId"
+            app:argType="string"
+            app:nullable="true" />
+        <action
+            android:id="@+id/action_proposal_to_rooms"
+            app:destination="@id/rooms" />
+    </fragment>
+    <fragment
+        android:id="@+id/rooms"
+        android:name="com.arkindustries.gogreen.ui.views.Rooms"
+        android:label="fragment_rooms"
+        tools:layout="@layout/fragment_rooms">
+        <argument
+            android:name="proposalId"
+            app:argType="string"
+            app:nullable="true" />
+        <action
+            android:id="@+id/action_rooms_to_chat"
+            app:destination="@id/chat" />
+    </fragment>
+    <fragment
+        android:id="@+id/profile"
+        android:name="com.arkindustries.gogreen.ui.views.Profile"
+        android:label="fragment_profile"
+        tools:layout="@layout/fragment_profile" />
+    <fragment
+        android:id="@+id/notification"
+        android:name="com.arkindustries.gogreen.ui.views.Notification"
+        tools:layout="@layout/fragment_notifications"
+        android:label="Notification" />
+    <fragment
+        android:id="@+id/viewProposal"
+        tools:layout="@layout/activity_view_proposal"
+        android:name="com.arkindustries.gogreen.ui.views.ViewProposal"
+        android:label="ViewProposal" >
+        <action
+            android:id="@+id/action_viewProposal_to_rooms"
+            app:destination="@id/rooms" />
+        <action
+            android:id="@+id/action_viewProposal_to_proposal"
+            app:destination="@id/proposal" />
+    </fragment>
+    <activity
+        android:id="@+id/chat"
+        android:name="com.arkindustries.gogreen.ui.views.Chat"
+        android:label="activity_chat"
+        tools:layout="@layout/activity_chat" >
+        <argument
+            android:name="roomId"
+            app:argType="string" />
+    </activity>
+    <activity
+        android:id="@+id/account"
+        tools:layout="@layout/activity_account"
+        android:name="com.arkindustries.gogreen.ui.views.Account"
+        android:label="Account" />
 </navigation>

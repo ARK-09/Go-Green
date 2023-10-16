@@ -20,10 +20,7 @@ const skillsRouter = require("./routes/skillsRouter");
 
 const app = express();
 
-app.set(
-  "trust proxy",
-  process.env.NODE_ENV == "development" ? "loopback" : true
-);
+app.set("trust proxy", process.env.NODE_ENV == "development" ? "loopback" : 3);
 
 const bodySize =
   typeof process.env.BODY_SIZE === "string" ? process.env.BODY_SIZE : undefined;
@@ -56,7 +53,7 @@ app.use("/api", limiter);
 
 app.use(mongoSanitize());
 
-app.use(hpp());
+app.use(hpp({ whitelist: ["titles", "ids"] }));
 
 app.use(compression());
 

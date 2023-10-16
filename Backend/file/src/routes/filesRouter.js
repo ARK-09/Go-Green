@@ -14,9 +14,20 @@ const uploadMiddleware = (req, res, next) => {
   multer.array("files", 5)(req, res, function (err) {
     if (err) {
       console.log(err);
+      let errorMessage;
+      if (
+        err instanceof multer.MulterError &&
+        err.code === "LIMIT_UNEXPECTED_FILE"
+      ) {
+        errorMessage =
+          "Error while uploading files Maximum number of files allowed is 5";
+      } else {
+        errorMessage = "File upload failed!. Please try again.";
+      }
+
       return res.status(500).json({
         status: "fail",
-        message: "File upload failed!. Please try again.",
+        message: errorMessage,
       });
     }
     next();

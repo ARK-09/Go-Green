@@ -38,7 +38,7 @@ const jobsSchema = new mongoose.Schema({
     },
     default: "Open",
   },
-  expactedDuration: {
+  expectedDuration: {
     type: String,
     required: [
       true,
@@ -49,6 +49,14 @@ const jobsSchema = new mongoose.Schema({
   paymentType: {
     type: String,
     required: [true, "Payment type must be one of: 'hourly', 'fixed'."],
+  },
+  talentCount: {
+    type: Number,
+    default: 1,
+    required: [
+      true,
+      "Please provide total talent required for the job min: 1.",
+    ],
   },
   attachments: [
     {
@@ -71,7 +79,6 @@ const jobsSchema = new mongoose.Schema({
         },
       },
       originalName: String,
-      url: String,
       createdDate: { type: Date, default: Date.now },
       _id: false,
     },
@@ -87,7 +94,37 @@ const jobsSchema = new mongoose.Schema({
     ref: "User",
     required: [true, "Please provide a valid user ID."],
   },
+  location: {
+    type: {
+      type: String,
+      default: "Point",
+      enum: {
+        values: ["Point"],
+        message:
+          "Please provide location type as 'Point' no other values are acceptable.",
+      },
+    },
+    coordinates: {
+      type: [Number],
+      index: "2dsphere",
+      required: [
+        true,
+        "Please provide job location coordinates as [longitude, latitude].",
+      ],
+      validate: {
+        validator: (coords) => coords.length === 2,
+        message:
+          "Coordinates should contain exactly two elements: [longitude, latitude].",
+      },
+    },
+  },
+  createdDate: {
+    type: Date,
+    default: Date.now,
+  },
 });
+
+jobsSchema.index({ "location.coordinates": "2dsphere" });
 
 const Jobs = mongoose.model("Jobs", jobsSchema);
 

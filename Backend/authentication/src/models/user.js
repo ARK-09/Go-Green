@@ -6,14 +6,12 @@ const { generateResetToken } = require("../util/resetToken");
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: [true, "Please provide a name"],
     minlength: [3, "Name must be at least 3 characters long"],
     maxlength: [25, "Name cannot be more than 25 characters long"],
     trim: true,
   },
   email: {
     type: String,
-    required: [true, "Please provide an email"],
     unique: true,
     lowercase: true,
     trim: true,
@@ -24,7 +22,6 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: [true, "Please provide a password"],
     validate: {
       validator: function (value) {
         const reg =
@@ -73,12 +70,10 @@ const userSchema = new mongoose.Schema({
       values: ["talent", "client", "admin"],
       message: "Invalid user type.",
     },
-    required: [true, "Please provide a user type"],
     default: "client",
   },
   phoneNo: {
     type: String,
-    required: [true, "Please provide a phone number"],
     trim: true,
     validator: {
       validate: (value) => {
@@ -89,8 +84,15 @@ const userSchema = new mongoose.Schema({
     },
   },
   image: {
-    type: String,
-    default: null,
+    id: {
+      type: mongoose.Schema.Types.ObjectId,
+      default: undefined,
+    },
+    url: {
+      type: String,
+      default: "",
+    },
+    _id: false,
   },
   userStatus: {
     type: String,
@@ -131,23 +133,11 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
-userSchema.methods.toJSON = function () {
-  const returnedUser = this.toObject();
-  returnedUser.id = returnedUser._id;
-
-  delete returnedUser._id;
-
-  return returnedUser;
-};
-
 userSchema.methods.removeFields = async function (fields) {
   const fieldsToExclude = fields.map((field) => field.replace(/[-+]/g, ""));
 
   const copy = { ...this.toObject() };
   fieldsToExclude.forEach((field) => delete copy[field]);
-
-  copy.id = copy._id;
-  delete copy._id;
 
   return copy;
 };
@@ -178,6 +168,13 @@ userSchema.methods.createResetToken = async function (
   this.resetTokenExpireAt = Date.now() + expiresAt;
 
   return resetToken;
+};
+
+userSchema.methods.createOtp = async function (expiresAt = 10 * 60 * 1000) {
+  const otp = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
+  this.otp = otp;
+  this.otpExpireAt = Date.now() + expiresAt;
+  return otp;
 };
 
 const User = mongoose.model("User", userSchema);

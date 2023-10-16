@@ -34,10 +34,11 @@ const createContract = catchAsync(async (req, res, next) => {
     return next(new AppError(`No proposal found with id: ${proposalid}.`, 404));
   }
 
-  const job = await Job.findById(proposal.refId);
+  const job = await Job.findById(proposal.doc);
 
-  const isProposalOwner = req.currentUser.id === proposal.user.toString();
-  const isJobOwner = req.currentUser.id === job.user.toString();
+  const isProposalOwner =
+    req.currentUser._id.toString() === proposal.user.toString();
+  const isJobOwner = req.currentUser._id.toString() === job.user.toString();
 
   const isAllowed = isProposalOwner || isJobOwner;
 
@@ -56,7 +57,7 @@ const createContract = catchAsync(async (req, res, next) => {
   }
 
   const contract = await Contract.create({
-    user: req.currentUser.id,
+    user: req.currentUser._id.toString(),
     proposalId: proposalid,
     amount,
     status: isJobOwner
@@ -86,10 +87,9 @@ const createContract = catchAsync(async (req, res, next) => {
 });
 
 const getContracts = catchAsync(async (req, res, next) => {
-  const contracts = await Contract.find({ user: req.currentUser.id }).populate(
-    "user",
-    `-${fieldsToExclude.join(" -")}`
-  );
+  const contracts = await Contract.find({
+    user: req.currentUser._id.toString(),
+  }).populate("user", `-${fieldsToExclude.join(" -")}`);
 
   res.status(200).json({
     status: "success",
@@ -110,23 +110,23 @@ const getJobContracts = catchAsync(async (req, res, next) => {
 
   const proposal = await Proposal.findOne({
     type: "job",
-    refId: id,
+    doc: id,
     status: "Hired",
   });
 
-  const isJobOwner = req.currentUser.id === job.user.toString();
+  const isJobOwner = req.currentUser._id.toString() === job.user.toString();
   const isHiredForTheJob = !proposal
     ? false
-    : proposal.user.toString() === req.currentUser.id;
+    : proposal.user.toString() === req.currentUser._id.toString();
 
   let searchQuery;
 
   if (isJobOwner) {
     searchQuery = {
-      $or: [{ user: req.currentUser.id }, { user: proposal.user }],
+      $or: [{ user: req.currentUser._id.toString() }, { user: proposal.user }],
     };
   } else if (isHiredForTheJob) {
-    searchQuery = { user: req.currentUser.id };
+    searchQuery = { user: req.currentUser._id.toString() };
   }
 
   const isAllowed = isJobOwner || isHiredForTheJob;
@@ -163,8 +163,8 @@ const getContract = catchAsync(async (req, res, next) => {
   const proposal = await Proposal.findOne({ _id: contract.proposalId });
 
   const isAllowed =
-    req.currentUser.id === contract.user.toString() ||
-    req.currentUser.id === proposal.user.toString();
+    req.currentUser._id.toString() === contract.user.toString() ||
+    req.currentUser._id.toString() === proposal.user.toString();
 
   if (!isAllowed) {
     return next(
@@ -191,8 +191,10 @@ const updateContract = catchAsync(async (req, res, next) => {
 
   const proposal = await Proposal.findOne({ _id: contract.proposalId });
 
-  const isContractOwner = contract.user.toString() === req.currentUser.id;
-  const isContractPartner = req.currentUser.id === proposal.user.toString();
+  const isContractOwner =
+    contract.user.toString() === req.currentUser._id.toString();
+  const isContractPartner =
+    req.currentUser._id.toString() === proposal.user.toString();
 
   const isAllowed = isContractOwner || isContractPartner;
 
@@ -277,8 +279,8 @@ const deleteContract = catchAsync(async (req, res, next) => {
   const proposal = await Proposal.findOne({ _id: contract.proposalId });
 
   const isAllowed =
-    req.currentUser.id === contract.user.toString() ||
-    req.currentUser.id === proposal.user.toString();
+    req.currentUser._id.toString() === contract.user.toString() ||
+    req.currentUser._id.toString() === proposal.user.toString();
 
   if (!isAllowed) {
     return next(

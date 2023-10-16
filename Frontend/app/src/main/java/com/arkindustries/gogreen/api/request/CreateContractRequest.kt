@@ -1,4 +1,6 @@
 package com.arkindustries.gogreen.api.request
 
-class CreateContractRequest {
-}
+data class CreateContractRequest(
+    val proposalId: String,
+    val amount: Double
+)

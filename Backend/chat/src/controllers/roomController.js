@@ -23,7 +23,7 @@ const createRoom = catchAsync(async (req, res, next) => {
 
   members = Array.from(new Set(members));
 
-  if (members.some((member) => member === req.currentUser.id)) {
+  if (members.some((member) => member === req.currentUser._id.toString())) {
     return next(new AppError("The user is already a member.", 401));
   }
 
@@ -31,7 +31,7 @@ const createRoom = catchAsync(async (req, res, next) => {
 
   const invalidMembers = members.filter((userId) => {
     return !validUser.some((user) => {
-      return user.id.toString() === userId;
+      return user._id.toString() === userId;
     });
   });
 
@@ -49,19 +49,14 @@ const createRoom = catchAsync(async (req, res, next) => {
   const room = await Room.create({
     name,
     members,
-    ownerId: req.currentUser.id,
+    owner: req.currentUser._id,
   });
 
-  const roomPopulated = await room.populate(
-    "members",
-    `-${fieldsToExclude.join(" -")}`
-  );
-
-  roomPopulated.members = roomPopulated.members.map((member) => {
-    member.id = member._id;
-    delete member._id;
-    return member;
-  });
+  const roomPopulated = await room.populate([
+    { path: "members", select: `-${fieldsToExclude.join(" -")}` },
+    { path: "owner", select: `-${fieldsToExclude.join(" -")}` },
+    { path: "lastMessage" },
+  ]);
 
   res.status(201).json({
     status: "success",
@@ -71,10 +66,17 @@ const createRoom = catchAsync(async (req, res, next) => {
 
 const getRooms = catchAsync(async (req, res, next) => {
   const { offset = 1, limit = 10 } = req.query;
-  const currentUser = req.currentUser.id;
+  const currentUser = req.currentUser._id.toString();
 
   const filterQuery = {
-    ownerId: currentUser,
+    $or: [
+      {
+        owner: currentUser,
+      },
+      {
+        members: { $in: [currentUser] },
+      },
+    ],
   };
 
   const totalRooms = await Room.countDocuments(filterQuery);
@@ -83,32 +85,41 @@ const getRooms = catchAsync(async (req, res, next) => {
   const skip = (offset - 1) * limit;
 
   const rooms = await Room.find(filterQuery)
-    .populate("members", `-${fieldsToExclude.join(" -")}`)
+    .populate([
+      { path: "members", select: `-${fieldsToExclude.join(" -")}` },
+      { path: "owner", select: `-${fieldsToExclude.join(" -")}` },
+      {
+        path: "lastMessage",
+        populate: { path: "sender", select: `-${fieldsToExclude.join(" -")}` },
+      },
+    ])
+    .sort({ createdDate: 1 })
     .skip(skip)
-    .limit(limit)
-    .lean();
+    .limit(limit);
 
-  const roomsRestul = rooms.map((room) => {
-    room.members = room.members.map((member) => {
-      member.id = member._id ? member._id : member.id;
-      delete member._id;
-      return member;
-    });
-    return room;
-  });
+  const roomWithUnreadedMessages = await Promise.all(
+    rooms.map(async (room) => {
+      const unreadMessages = await Message.countDocuments({
+        room: room._id,
+        status: "sent",
+        sender: { $ne: req.currentUser._id },
+      });
+      return { ...room.toObject(), unreadMessages };
+    })
+  );
 
   res.status(200).json({
     status: "success",
     totalRooms,
     totalPages,
     offset,
-    data: { rooms: roomsRestul },
+    data: { rooms: roomWithUnreadedMessages },
   });
 });
 
 const getRoom = catchAsync(async (req, res, next) => {
   const { id } = req.params;
-  const currentUser = req.currentUser.id;
+  const currentUser = req.currentUser._id.toString();
 
   const room = await Room.findById(id);
 
@@ -117,8 +128,8 @@ const getRoom = catchAsync(async (req, res, next) => {
   }
 
   const isAllowed =
-    room.members.some((member) => member === currentUser) ||
-    room.ownerId.toString() === currentUser;
+    room.members.some((member) => member.toString() === currentUser) ||
+    room.owner.toString() === currentUser;
 
   if (!isAllowed) {
     return next(
@@ -126,20 +137,25 @@ const getRoom = catchAsync(async (req, res, next) => {
     );
   }
 
-  const roomPopulated = await room.populate(
-    "members",
-    `-${fieldsToExclude.join(" -")}`
-  );
+  const roomPopulated = await room.populate([
+    { path: "members", select: `-${fieldsToExclude.join(" -")}` },
+    { path: "owner", select: `-${fieldsToExclude.join(" -")}` },
+    {
+      path: "lastMessage",
+      populate: { path: "sender", select: `-${fieldsToExclude.join(" -")}` },
+    },
+  ]);
 
-  roomPopulated.members.forEach((member) => {
-    member.id = member._id;
-    delete member._id;
+  const unreadMessages = await Message.countDocuments({
+    room: room._id,
+    status: "sent",
+    sender: { $ne: req.currentUser._id },
   });
 
   res.status(200).json({
     status: "success",
     data: {
-      room: roomPopulated,
+      room: { ...roomPopulated.toObject(), unreadMessages },
     },
   });
 });
@@ -147,17 +163,17 @@ const getRoom = catchAsync(async (req, res, next) => {
 const getRoomMessages = catchAsync(async (req, res, next) => {
   const { offset = 1, limit = 10 } = req.query;
   const { id } = req.params;
-  const currentUser = req.currentUser.id;
+  const currentUser = req.currentUser._id.toString();
 
   const room = await Room.findById(id);
 
   if (!room) {
-    return next(new AppError(`No room found with id: ${id}`, 404));
+    return next(new AppError(`No room fo und with id: ${id}`, 404));
   }
 
   const isAllowed =
-    room.members.some((member) => member === currentUser) ||
-    room.ownerId.toString() === currentUser;
+    room.members.some((member) => member.toString() === currentUser) ||
+    room.owner.toString() === currentUser;
 
   if (!isAllowed) {
     return next(
@@ -166,14 +182,21 @@ const getRoomMessages = catchAsync(async (req, res, next) => {
   }
 
   const filterQuery = {
-    roomId: id,
+    room: id,
   };
 
+  const unreadMessages = await Message.countDocuments({
+    room: id,
+    status: "sent",
+    sender: { $ne: currentUser },
+  });
   const totalMessages = await Message.countDocuments(filterQuery);
   const totalPages = Math.ceil(totalMessages / limit);
   const skip = (offset - 1) * limit;
 
   const messages = await Message.find(filterQuery)
+    .populate([{ path: "sender", select: `-${fieldsToExclude.join(" -")}` }])
+    .sort({ _id: -1 })
     .skip(skip)
     .limit(limit)
     .lean();
@@ -182,6 +205,7 @@ const getRoomMessages = catchAsync(async (req, res, next) => {
     status: "success",
     totalMessages,
     totalPages,
+    unreadMessages,
     offset,
     data: { messages },
   });
@@ -190,19 +214,15 @@ const getRoomMessages = catchAsync(async (req, res, next) => {
 const addRoomMembers = catchAsync(async (req, res, next) => {
   let { members } = req.body;
   const { id } = req.params;
-  const currentUser = req.currentUser.id;
+  const currentUser = req.currentUser._id.toString();
 
   members = Array.from(new Set(members));
-
-  if (members.some((member) => member === req.currentUser.id)) {
-    return next(new AppError("The user is already a member.", 401));
-  }
 
   const validUser = await User.find({ _id: { $in: members }, isActive: true });
 
   const invalidMembers = members.filter((userId) => {
     return !validUser.some((user) => {
-      return user.id.toString() === userId;
+      return user._id.toString() === userId;
     });
   });
 
@@ -224,8 +244,8 @@ const addRoomMembers = catchAsync(async (req, res, next) => {
   }
 
   const isAllowed =
-    room.members.some((member) => member === currentUser) ||
-    room.ownerId.toString() === currentUser;
+    room.members.some((member) => member.toString() === currentUser) ||
+    room.owner.toString() === currentUser;
 
   if (!isAllowed) {
     return next(
@@ -243,10 +263,19 @@ const addRoomMembers = catchAsync(async (req, res, next) => {
     );
   }
 
+  if (members.some((member) => member.toString() === room.owner)) {
+    return next(
+      new AppError(`The user is already a memeber: ${room.owner}`, 401)
+    );
+  }
+
   room.members.push(...members);
   await room.save();
 
-  await room.populate("members", `-${fieldsToExclude.join(" -")}`);
+  await room.populate([
+    { path: "members", select: `-${fieldsToExclude.join(" -")}` },
+    { path: "owner", select: `-${fieldsToExclude.join(" -")}` },
+  ]);
 
   res.status(200).json({
     status: "success",
@@ -258,39 +287,7 @@ const addRoomMembers = catchAsync(async (req, res, next) => {
 
 const getRoomMembers = catchAsync(async (req, res, next) => {
   const { id } = req.params;
-  const currentUser = req.currentUser.id;
-
-  const room = await Room.findById(id).populate(
-    "members",
-    `-${fieldsToExclude.join(" -")}`
-  );
-
-  if (!room) {
-    return next(new AppError(`No room found with id ${id}`, 404));
-  }
-
-  const isAllowed =
-    room.members.some((member) => member === currentUser) ||
-    room.ownerId.toString() === currentUser;
-
-  if (!isAllowed) {
-    return next(
-      new AppError("You'r are not allowed to access this room.", 403)
-    );
-  }
-
-  res.status(200).json({
-    status: "success",
-    data: {
-      members: room.members,
-    },
-  });
-});
-
-const getRoomMember = catchAsync(async (req, res, next) => {
-  const { memberid } = req.params;
-  const { id } = req.params;
-  const currentUser = req.currentUser.id;
+  const currentUser = req.currentUser._id.toString();
 
   const room = await Room.findById(id);
 
@@ -299,8 +296,42 @@ const getRoomMember = catchAsync(async (req, res, next) => {
   }
 
   const isAllowed =
-    room.members.some((member) => member === currentUser) ||
-    room.ownerId.toString() === currentUser;
+    room.members.some((member) => member.toString() === currentUser) ||
+    room.owner.toString() === currentUser;
+
+  if (!isAllowed) {
+    return next(
+      new AppError("You'r are not allowed to access this room.", 403)
+    );
+  }
+
+  const roomPopulated = await room.populate([
+    { path: "members", select: `-${fieldsToExclude.join(" -")}` },
+    { path: "owner", select: `-${fieldsToExclude.join(" -")}` },
+  ]);
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      members: roomPopulated.members,
+    },
+  });
+});
+
+const getRoomMember = catchAsync(async (req, res, next) => {
+  const { memberid } = req.params;
+  const { id } = req.params;
+  const currentUser = req.currentUser._id.toString();
+
+  const room = await Room.findById(id);
+
+  if (!room) {
+    return next(new AppError(`No room found with id ${id}`, 404));
+  }
+
+  const isAllowed =
+    room.members.some((member) => member.toString() === currentUser) ||
+    room.owner.toString() === currentUser;
 
   if (!isAllowed) {
     return next(
@@ -324,7 +355,7 @@ const getRoomMember = catchAsync(async (req, res, next) => {
 
 const deleteRoomMember = catchAsync(async (req, res, next) => {
   const { id, memberid } = req.params;
-  const currentUser = req.currentUser.id;
+  const currentUser = req.currentUser._id.toString();
 
   const room = await Room.findById(id);
 
@@ -333,8 +364,8 @@ const deleteRoomMember = catchAsync(async (req, res, next) => {
   }
 
   const isAllowed =
-    room.members.some((member) => member === currentUser) ||
-    room.ownerId.toString() === currentUser;
+    room.members.some((member) => member.toString() === currentUser) ||
+    room.owner.toString() === currentUser;
 
   if (!isAllowed) {
     return next(

@@ -4,14 +4,12 @@ const io = require("socket.io");
 class SocketServer {
   static instance = null;
   io = null;
-  socket = null;
   server = null;
 
   constructor(server, options) {
     if (!SocketServer.instance) {
       this.server = createServer(server);
       this.io = io(this.server, options);
-      this.socket = null;
       SocketServer.instance = this;
     }
   }
@@ -32,19 +30,10 @@ class SocketServer {
     }
 
     this.io.on("connection", (socket) => {
-      this.socket = socket;
       callback(socket);
     });
 
     return this.server;
-  }
-
-  static getSocket() {
-    if (!SocketServer.instance) {
-      throw new Error("Can't get socket before initialization.");
-    }
-
-    return this.instance.socket;
   }
 
   static getIo() {

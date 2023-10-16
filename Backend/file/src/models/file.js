@@ -14,7 +14,7 @@ const fileSchema = new mongoose.Schema({
     validate: {
       validator: function (value) {
         const mimeTypeRegex =
-          /^(text\/plain)$|^(image\/(jpeg|png|gif))$|^(video\/(mp4|mpeg|quicktime))$|^(audio\/(mp3|wav))$|^(application\/(pdf|msword|vnd\.openxmlformats-officedocument\.wordprocessingml\.document))$/;
+          /^(text\/plain)$|^(image\/(jpeg|jpg|png|gif))$|^(video\/(mp4|mpeg|quicktime))$|^(audio\/(mp3|wav))$|^(application\/(pdf|msword|vnd\.openxmlformats-officedocument\.wordprocessingml\.document))$/;
         return mimeTypeRegex.test(value);
       },
       message:
@@ -28,6 +28,12 @@ const fileSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     required: [true, "Please provide a valid user id."],
+  },
+  purpose: {
+    type: String,
+    enum: {
+      values: ["profile", "job", "proposal", "Services", "message"],
+    },
   },
 });
 

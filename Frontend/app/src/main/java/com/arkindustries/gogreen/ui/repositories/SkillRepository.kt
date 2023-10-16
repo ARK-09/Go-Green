@@ -1,46 +1,56 @@
 package com.arkindustries.gogreen.ui.repositories
 
-import com.arkindustries.gogreen.api.request.CategoryRequest
+import com.arkindustries.gogreen.api.request.SkillsRequest
 import com.arkindustries.gogreen.api.response.ApiResponse
-import com.arkindustries.gogreen.api.response.CategoryResponse
-import com.arkindustries.gogreen.api.services.CategoryService
-import com.arkindustries.gogreen.database.dao.CategoryDao
-import com.arkindustries.gogreen.database.entites.CategoryEntity
+import com.arkindustries.gogreen.api.response.SkillResponse
+import com.arkindustries.gogreen.api.response.SkillsResponse
+import com.arkindustries.gogreen.api.services.SkillService
+import com.arkindustries.gogreen.database.dao.SkillDao
+import com.arkindustries.gogreen.database.entites.SkillEntity
+import com.arkindustries.gogreen.utils.handleApiCall
 
-class CategoryRepository(private val categoryDao: CategoryDao, private val categoryService: CategoryService) {
+class SkillRepository(private val skillService: SkillService, private val skillDao: SkillDao) {
 
-    suspend fun getCategoriesFromServer(): ApiResponse<List<CategoryResponse>> {
-        return  categoryService.getCategories()
+    suspend fun getSkillsFromServer(): ApiResponse<SkillsResponse> {
+        return handleApiCall {
+          skillService.getSkills()
+        }
     }
 
-    suspend fun createCategoryFromServer(categoryRequest: CategoryRequest): ApiResponse<CategoryResponse> {
-        return categoryService.createCategory(categoryRequest);
+    suspend fun createSkillAtServer(skillsRequest: SkillsRequest): ApiResponse<SkillResponse> {
+        return handleApiCall {
+         skillService.createSkill(skillsRequest);
+        }
     }
 
-    suspend fun updateCategoryFromServer(
-        categoryId: String,
-        categoryRequest: CategoryRequest
-    ): ApiResponse<CategoryResponse> {
-        return categoryService.updateCategory(categoryId, categoryRequest)
+    suspend fun updateSkillAtServer(
+        skillId: String,
+        skillsRequest: SkillsRequest
+    ): ApiResponse<SkillResponse> {
+        return handleApiCall {
+         skillService.updateSkill(skillId, skillsRequest)
+        }
     }
 
-    suspend fun deleteCategoryFromServer(categoryId: String): ApiResponse<Unit> {
-        return categoryService.deleteCategory(categoryId)
+    suspend fun deleteSkillFromServer(skillId: String): ApiResponse<Unit> {
+        return handleApiCall {
+         skillService.deleteSkill(skillId)
+        }
     }
 
-    suspend fun getAllCategoriesFromLocal(): List<CategoryEntity> {
-        return categoryDao.getAllCategories()
+    suspend fun getAllSkillsFromLocal(): List<SkillEntity> {
+        return skillDao.getAllSkills()
     }
 
-    suspend fun getCategoryByIdFromLocal(categoryId: String): CategoryEntity {
-        return categoryDao.getCategoryById(categoryId)
+    suspend fun getSkillByIdFromLocal(skillId: String): SkillEntity {
+        return skillDao.getAllSkillById(skillId)
     }
 
-    suspend fun upsertCategoriesToLocal(categories: List<CategoryEntity>) {
-        categoryDao.upsertAll(categories)
+    suspend fun upsertSkillsToLocal(skills: List<SkillEntity>) {
+        skillDao.upsertAll(skills)
     }
 
-    suspend fun deleteAllCategoriesFromLocal() {
-        categoryDao.deleteAll()
+    suspend fun deleteAllSkillsFromLocal() {
+        skillDao.deleteAll()
     }
 }

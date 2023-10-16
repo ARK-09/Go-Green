@@ -1,6 +1,4 @@
-package com.arkindustries.gogreen.api.request
-
-import com.arkindustries.gogreen.api.response.AttachmentResponse
+package com.arkindustries.gogreen.api.response
 
 data class ProjectsResponse(
     val projects: List<Project>

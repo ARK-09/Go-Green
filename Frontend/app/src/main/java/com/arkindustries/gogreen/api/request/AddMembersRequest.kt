@@ -1,4 +1,5 @@
 package com.arkindustries.gogreen.api.request
 
-class AddMembersRequest {
-}
+data class AddMembersRequest(
+    val members: List<String>
+)

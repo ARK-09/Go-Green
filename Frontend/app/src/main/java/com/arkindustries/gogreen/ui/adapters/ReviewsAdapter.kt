@@ -4,53 +4,56 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.arkindustries.gogreen.api.response.Language
-import com.arkindustries.gogreen.databinding.LanguageListItemBinding
+import com.arkindustries.gogreen.api.response.Review
+import com.arkindustries.gogreen.databinding.WorkHistoryListItemBinding
 
-class LanguageAdapter(
-    private val onItemClick: (Language) -> Unit
-) : RecyclerView.Adapter<LanguageAdapter.LanguageViewHolder>() {
+class ReviewAdapter(
+    private val onItemClick: (Review) -> Unit
+) : RecyclerView.Adapter<ReviewAdapter.ReviewViewHolder>() {
 
-    private val languages = mutableListOf<Language>()
+    private val reviews = mutableListOf<Review>()
 
-    fun submitList(newLanguages: List<Language>) {
-        val diffCallback = LanguageDiffCallback(languages, newLanguages)
+    fun submitList(newReviews: List<Review>) {
+        val diffCallback = ReviewDiffCallback(reviews, newReviews)
         val diffResult = DiffUtil.calculateDiff(diffCallback)
-        languages.clear()
-        languages.addAll(newLanguages)
+        reviews.clear()
+        reviews.addAll(newReviews)
         diffResult.dispatchUpdatesTo(this)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LanguageViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ReviewViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        val binding = LanguageListItemBinding.inflate(inflater, parent, false)
-        return LanguageViewHolder(binding)
+        val binding = WorkHistoryListItemBinding.inflate(inflater, parent, false)
+        return ReviewViewHolder(binding)
     }
 
-    override fun onBindViewHolder(holder: LanguageViewHolder, position: Int) {
-        val project = languages[position]
+    override fun onBindViewHolder(holder: ReviewViewHolder, position: Int) {
+        val project = reviews[position]
         holder.bind(project)
     }
 
-    override fun getItemCount(): Int = languages.size
+    override fun getItemCount(): Int = reviews.size
 
-    inner class LanguageViewHolder(
-        private val binding: LanguageListItemBinding
+    inner class ReviewViewHolder(
+        private val binding: WorkHistoryListItemBinding
     ) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(language: Language) {
+        fun bind(review: Review) {
             binding.apply {
-                binding.languageTitle.text = language.name
-                binding.experience.text = language.experience
-                binding.root.setOnClickListener { onItemClick(language) }
+                this.workTitle.text = review.doc.title
+                this.workRatting.rating = review.clientRating.toFloat()
+                this.startDate.text = review.doc.createdDate
+                this.endDate.text = review.doc.createdDate
+                this.feedback.text = review.clientFeedback
+                this.root.setOnClickListener { onItemClick(review) }
             }
         }
     }
 }
 
-class LanguageDiffCallback(
-    private val oldList: List<Language>,
-    private val newList: List<Language>
+class ReviewDiffCallback(
+    private val oldList: List<Review>,
+    private val newList: List<Review>
 ) :
     DiffUtil.Callback() {
 
@@ -59,7 +62,7 @@ class LanguageDiffCallback(
     override fun getNewListSize(): Int = newList.size
 
     override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-        return oldList[oldItemPosition]._id == newList[newItemPosition]._id
+        return oldList[oldItemPosition].doc._id == newList[newItemPosition].doc._id
     }
 
     override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {

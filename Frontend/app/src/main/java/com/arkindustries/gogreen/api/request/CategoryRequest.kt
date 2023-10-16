@@ -1,4 +1,5 @@
 package com.arkindustries.gogreen.api.request
 
-class CategoryRequest {
-}
+data class CategoryRequest(
+    val categories: List<String>,
+)

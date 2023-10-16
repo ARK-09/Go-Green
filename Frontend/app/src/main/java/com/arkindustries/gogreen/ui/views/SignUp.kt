@@ -2,18 +2,18 @@ package com.arkindustries.gogreen.ui.views
 
 import android.content.Context
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.arkindustries.gogreen.R
+import com.arkindustries.gogreen.api.RetrofitClient
 import com.arkindustries.gogreen.api.request.SignupRequest
-import com.arkindustries.gogreen.data.models.UserViewModel
-import com.arkindustries.gogreen.data.repositories.UserRepository
-import com.arkindustries.gogreen.databinding.ActivitySignInBinding
+import com.arkindustries.gogreen.database.AppDatabase
 import com.arkindustries.gogreen.databinding.ActivitySignUpBinding
+import com.arkindustries.gogreen.ui.repositories.UserRepository
+import com.arkindustries.gogreen.ui.viewmodels.UserViewModel
 import com.arkindustries.gogreen.ui.viewmodels.factory.UserViewModelFactory
 import com.arkindustries.gogreen.utils.UserSessionManager
 import com.google.android.material.snackbar.Snackbar
@@ -21,6 +21,7 @@ import com.google.android.material.snackbar.Snackbar
 class SignUp : AppCompatActivity() {
     private lateinit var signUpBinding: ActivitySignUpBinding
     private lateinit var viewModel: UserViewModel
+    private lateinit var database: AppDatabase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,7 +30,10 @@ class SignUp : AppCompatActivity() {
         signUpBinding = ActivitySignUpBinding.inflate(layoutInflater)
         setContentView(signUpBinding.root)
 
-        val userRepository = UserRepository(this)
+        database = AppDatabase.getInstance(this)
+
+        val userService = RetrofitClient.createUserService(this)
+        val userRepository = UserRepository(userService, database.userDao())
         viewModel =
             ViewModelProvider(this, UserViewModelFactory(userRepository))[UserViewModel::class.java]
 
@@ -55,13 +59,6 @@ class SignUp : AppCompatActivity() {
             }
 
         signUpBinding.passwordTi.editText?.onFocusChangeListener =
-            View.OnFocusChangeListener { _, hasFocus ->
-                if (hasFocus) {
-                    clearError()
-                }
-            }
-
-        signUpBinding.confirmPasswordTi.editText?.onFocusChangeListener =
             View.OnFocusChangeListener { _, hasFocus ->
                 if (hasFocus) {
                     clearError()
@@ -110,7 +107,6 @@ class SignUp : AppCompatActivity() {
         signUpBinding.fullNameTi.error = null
         signUpBinding.emailTi.error = null
         signUpBinding.passwordTi.error = null
-        signUpBinding.confirmPasswordTi.error = null
         signUpBinding.phoneNoTi.error = null
     }
 
@@ -119,8 +115,7 @@ class SignUp : AppCompatActivity() {
             if (response.status == "success") {
                 if (response.data != null) {
                     UserSessionManager.saveJwtToken(this, response.data.Jwt)
-                    Log.i(SignUp::class.qualifiedName, response.data.Jwt)
-                    navigateToHome()
+                    navigateToWelcomeScreen()
                 } else {
                     Snackbar.make(
                         signUpBinding.root,
@@ -131,7 +126,6 @@ class SignUp : AppCompatActivity() {
             } else {
                 signUpBinding.errorTv.visibility = View.VISIBLE
                 signUpBinding.errorTv.text = response.message
-                Log.e(SignUp::class.qualifiedName, response.stack.toString())
             }
         }
     }
@@ -140,7 +134,6 @@ class SignUp : AppCompatActivity() {
         val fullName = signUpBinding.fullNameTi.editText?.text.toString()
         val email = signUpBinding.emailTi.editText?.text.toString()
         val password = signUpBinding.passwordTi.editText?.text.toString()
-        val confirmPassword = signUpBinding.confirmPasswordTi.editText?.text.toString()
         val phoneNo = signUpBinding.phoneNoTi.editText?.text.toString()
 
         if (fullName.isEmpty()) {
@@ -158,11 +151,6 @@ class SignUp : AppCompatActivity() {
             return false
         }
 
-        if (password != confirmPassword) {
-            signUpBinding.confirmPasswordTi.error = "Password and confirm password should be same"
-            return false
-        }
-
         if (phoneNo.isEmpty()) {
             signUpBinding.phoneNoTi.error = "Phone no is required field."
             return false
@@ -171,8 +159,8 @@ class SignUp : AppCompatActivity() {
         return true
     }
 
-    private fun navigateToHome() {
-        val intent = Intent(this, Home::class.java)
+    private fun navigateToWelcomeScreen() {
+        val intent = Intent(this, MainActivity::class.java)
         startActivity(intent)
         finish()
     }

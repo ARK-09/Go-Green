@@ -1,8 +1,8 @@
-const { Listener, Subjects } = require("@ark-industries/gogreen-common");
-const User = require("../models/user");
+const { Listener } = require("@ark-industries/gogreen-common");
+const Skill = require("../models/skills");
 
-class UserUpdatedListener extends Listener {
-  subject = Subjects.userUpdated;
+class SkillUpdatedListener extends Listener {
+  subject = "skill:updated";
   queueGroupName = "profile-service-queue-group";
 
   constructor(client) {
@@ -11,34 +11,13 @@ class UserUpdatedListener extends Listener {
 
   onMessage = async (data, message) => {
     if (data) {
-      const {
-        id,
-        name,
-        email,
-        password,
-        passwordChangedAt,
-        userType,
-        phoneNo,
-        image,
-      } = data;
+      const { _id, title, categories } = data;
 
-      await User.findByIdAndUpdate(
-        id,
-        {
-          name,
-          email,
-          password,
-          passwordChangedAt,
-          userType,
-          phoneNo,
-          image,
-        },
-        { runValidators: false }
-      );
+      await Skill.findByIdAndUpdate(_id, { title, categories });
 
       message.ack();
     }
   };
 }
 
-module.exports = UserUpdatedListener;
+module.exports = SkillUpdatedListener;

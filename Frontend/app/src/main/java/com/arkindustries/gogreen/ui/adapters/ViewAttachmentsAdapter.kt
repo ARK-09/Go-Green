@@ -16,7 +16,7 @@ class ViewAttachmentsAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FileViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        val binding = JobAttachmentListItemBinding.inflate(inflater)
+        val binding = JobAttachmentListItemBinding.inflate(inflater, parent, false)
         return FileViewHolder(binding)
     }
 

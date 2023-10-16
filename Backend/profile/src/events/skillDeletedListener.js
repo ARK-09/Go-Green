@@ -1,9 +1,8 @@
-const { Listener, Subjects } = require("@ark-industries/gogreen-common");
-const User = require("../models/user");
-const Profile = require("../models/profiles");
+const { Listener } = require("@ark-industries/gogreen-common");
+const Skill = require("../models/skills");
 
-class UserDeletedListener extends Listener {
-  subject = Subjects.userDeleted;
+class SkillDeletedListener extends Listener {
+  subject = "skill:deleted";
   queueGroupName = "profile-service-queue-group";
 
   constructor(client) {
@@ -12,23 +11,17 @@ class UserDeletedListener extends Listener {
 
   onMessage = async (data, message) => {
     if (data) {
-      const { id } = data;
+      if (data.all) {
+        await Skill.deleteMany({});
+        message.ack();
+        return;
+      }
 
-      await User.findByIdAndUpdate(
-        id,
-        { isActive: false, userStatus: "Offline" },
-        { runValidators: false }
-      );
-
-      await Profile.findOneAndUpdate(
-        { userId: id },
-        { active: false },
-        { runValidators: false }
-      );
-
+      const id = data;
+      await Skill.findByIdAndDelete(id);
       message.ack();
     }
   };
 }
 
-module.exports = UserDeletedListener;
+module.exports = SkillDeletedListener;

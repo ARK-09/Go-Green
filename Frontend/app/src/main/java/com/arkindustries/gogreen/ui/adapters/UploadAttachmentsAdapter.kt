@@ -1,15 +1,11 @@
 package com.arkindustries.gogreen.ui.adapters
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.ProgressBar
-import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.arkindustries.gogreen.R
 import com.arkindustries.gogreen.database.entites.AttachmentEntity
+import com.arkindustries.gogreen.databinding.AttachmentListItemBinding
 
 class UploadAttachmentsAdapter(
     var dataList: MutableList<AttachmentEntity> = mutableListOf(),
@@ -19,9 +15,9 @@ class UploadAttachmentsAdapter(
     RecyclerView.Adapter<UploadAttachmentsAdapter.FileViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FileViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.attachment_list_item, parent, false)
-        return FileViewHolder(view)
+        val layoutInflater = LayoutInflater.from(parent.context)
+        val binding = AttachmentListItemBinding.inflate(layoutInflater, parent, false)
+        return FileViewHolder(binding)
     }
 
     fun updateData(newData: List<AttachmentEntity>) {
@@ -38,9 +34,18 @@ class UploadAttachmentsAdapter(
         notifyItemRangeInserted(startInsertPosition, newItems.size)
     }
 
-    fun removeItem(position: Int) {
-        dataList.removeAt(position)
-        notifyItemRemoved(position)
+    fun removeItem(condition: (attachmentEntity: AttachmentEntity) -> Boolean) {
+        val iterator = dataList.listIterator(dataList.size)
+
+        while (iterator.hasPrevious()) {
+            val position = iterator.previousIndex()
+            val item = iterator.previous()
+
+            if (condition(item)) {
+                iterator.remove()
+                notifyItemRemoved(position)
+            }
+        }
     }
 
     override fun getItemCount(): Int {
@@ -51,18 +56,19 @@ class UploadAttachmentsAdapter(
         holder.bind(dataList[position], onDeleteClickListener)
     }
 
-    inner class FileViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val fileNameTextView: TextView = itemView.findViewById(R.id.file_name_tv)
-        var progressBar: ProgressBar = itemView.findViewById(R.id.file_progress)
-        private val deleteImageView: ImageView = itemView.findViewById(R.id.action_btn)
-
-        fun bind(item: AttachmentEntity, onDeleteClickListener: (position: Int, item: AttachmentEntity) -> Unit) {
+    inner class FileViewHolder(val binding: AttachmentListItemBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+        fun bind(
+            item: AttachmentEntity,
+            onDeleteClickListener: (position: Int, item: AttachmentEntity) -> Unit
+        ) {
             val fileName = item.originalName
-            fileNameTextView.text = fileName
-            progressBar.progress = progress
-            deleteImageView.setOnClickListener {
+            binding.fileNameTv.text = fileName
+            binding.fileProgress.progress = progress
+            binding.actionBtn.setOnClickListener {
                 onDeleteClickListener(bindingAdapterPosition, dataList[bindingAdapterPosition])
             }
+            binding.actionBtn.isEnabled = item.url == null
         }
     }
 

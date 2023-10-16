@@ -1,4 +1,3 @@
 package com.arkindustries.gogreen.socket.request
 
-class RoomJoin {
-}
+data class RoomJoin (val roomId: String)

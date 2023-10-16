@@ -11,9 +11,9 @@ import com.arkindustries.gogreen.api.response.GeocodingSearchResponse
 
 
 class LocationAdapter(
-    private var dataList: List<GeocodingSearchResponse> = mutableListOf(GeocodingSearchResponse("", "", "", "")),
     private val listener: OnItemClickListener
 ) : RecyclerView.Adapter<LocationAdapter.ViewHolder>() {
+    var dataList = mutableListOf<GeocodingSearchResponse>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view =
@@ -32,7 +32,8 @@ class LocationAdapter(
     fun updateData(newData: List<GeocodingSearchResponse>) {
         val diffCallback = LocationDiffCallback(dataList, newData)
         val diffResult = DiffUtil.calculateDiff(diffCallback)
-        dataList = newData
+        dataList.clear()
+        dataList.addAll(newData)
         diffResult.dispatchUpdatesTo(this)
     }
 
@@ -43,7 +44,7 @@ class LocationAdapter(
             itemView.setOnClickListener {
                 val position = bindingAdapterPosition
                 if (position != RecyclerView.NO_POSITION) {
-                    val item = dataList.get(position)
+                    val item = dataList[position]
                     listener.onItemClick(item)
                 }
             }

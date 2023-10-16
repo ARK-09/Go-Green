@@ -1,4 +1,6 @@
 package com.arkindustries.gogreen.api.request
 
-class ReviewRequest {
-}
+data class ReviewRequest(
+    val feedback: String,
+    val rating: Double
+)

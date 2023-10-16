@@ -1,7 +1,7 @@
 const { catchAsync, AppError } = require("@ark-industries/gogreen-common");
+const extractValidProperties = require("../util/extractValidProperties");
 const Project = require("../models/projects");
 const Profile = require("../models/profiles");
-const mongoose = require("mongoose");
 
 const createProject = catchAsync(async (req, res, next) => {
   const profileId = req.params.id;
@@ -15,7 +15,7 @@ const createProject = catchAsync(async (req, res, next) => {
   }
 
   const isAllowed =
-    req.currentUser.id === profile.userId.toString() &&
+    req.currentUser._id.toString() === profile.userId.toString() &&
     req.currentUser.userType === "talent";
 
   if (!isAllowed) {
@@ -24,15 +24,17 @@ const createProject = catchAsync(async (req, res, next) => {
     );
   }
 
-  const {
-    title,
-    description,
-    startDate,
-    endDate,
-    attachments,
-    skills,
-    contractId,
-  } = req.body;
+  const { title, description, startDate, endDate, skills, contractId } =
+    req.body;
+
+  let { attachments } = req.body;
+
+  attachments = extractValidProperties(attachments, [
+    "id",
+    "mimeType",
+    "originalName",
+    "createdDate",
+  ]);
 
   const project = new Project({
     title,
@@ -42,9 +44,10 @@ const createProject = catchAsync(async (req, res, next) => {
     contractId,
   });
 
-  if (attachments.length > 0) {
-    console.dir(req.body, { depth: null });
+  if (attachments && Array.isArray(attachments)) {
     project.attachments.push(...attachments);
+  } else if (typeof attachments === "object") {
+    project.attachments.push(attachments);
   }
 
   if (skills.length > 0) {
@@ -65,7 +68,9 @@ const createProject = catchAsync(async (req, res, next) => {
 const getProjects = catchAsync(async (req, res, next) => {
   const profileId = req.params.id;
 
-  const profile = await Profile.findById(profileId);
+  const profile = await Profile.findById(profileId)
+    .sort({ createdDate: 1 })
+    .populate("projects");
 
   if (!profile || !profile.active) {
     return next(
@@ -73,12 +78,10 @@ const getProjects = catchAsync(async (req, res, next) => {
     );
   }
 
-  const projects = (await profile.populate("projects")).projects;
-
   res.status(200).json({
     status: "success",
-    length: projects.length,
-    data: { projects },
+    length: profile.projects.length,
+    data: { projects: profile.projects },
   });
 });
 
@@ -123,7 +126,7 @@ const updateProjectById = catchAsync(async (req, res, next) => {
   }
 
   const isAllowed =
-    req.currentUser.id === profile.userId.toString() &&
+    req.currentUser._id.toString() === profile.userId.toString() &&
     req.currentUser.userType === "talent";
 
   if (!isAllowed) {
@@ -149,7 +152,7 @@ const updateProjectById = catchAsync(async (req, res, next) => {
   project.description = description || project.description;
   project.startDate = startDate || project.startDate;
   project.endDate = endDate || project.endDate;
-  project.skills = skills || project.skills;
+  project.skills = skills.length > 0 || project.skills;
   project.contractId = contractId || project.contractId;
 
   await profile.save();
@@ -173,7 +176,7 @@ const deleteProjectById = catchAsync(async (req, res, next) => {
   }
 
   const isAllowed =
-    (req.currentUser.id === profile.userId.toString() &&
+    (req.currentUser._id.toString() === profile.userId.toString() &&
       req.currentUser.userType === "talent") ||
     req.currentUser.userType === "admin";
 
@@ -214,7 +217,7 @@ const createProjectAttachment = catchAsync(async (req, res, next) => {
   }
 
   const isAllowed =
-    req.currentUser.id === profile.userId.toString() &&
+    req.currentUser._id.toString() === profile.userId.toString() &&
     req.currentUser.userType === "talent";
 
   if (!isAllowed) {
@@ -233,9 +236,21 @@ const createProjectAttachment = catchAsync(async (req, res, next) => {
     );
   }
 
-  const { attachments } = req.body;
+  let { attachments } = req.body;
 
-  project.attachments.push(...attachments);
+  attachments = extractValidProperties(attachments, [
+    "id",
+    "mimeType",
+    "originalName",
+    "createdDate",
+  ]);
+
+  if (attachments && Array.isArray(attachments) && attachments.length > 0) {
+    project.attachments.push(...attachments);
+  } else if (typeof attachments === "object") {
+    project.attachments.push(attachments);
+  }
+
   await profile.save();
 
   res.status(200).json({
@@ -259,7 +274,7 @@ const getProjectAttachments = catchAsync(async (req, res, next) => {
   }
 
   const isAllowed =
-    req.currentUser.id === profile.userId.toString() &&
+    req.currentUser._id.toString() === profile.userId.toString() &&
     req.currentUser.userType === "talent";
 
   if (!isAllowed) {
@@ -300,7 +315,7 @@ const getProjectAttachment = catchAsync(async (req, res, next) => {
   }
 
   const isAllowed =
-    req.currentUser.id === profile.userId.toString() &&
+    req.currentUser._id.toString() === profile.userId.toString() &&
     req.currentUser.userType === "talent";
 
   if (!isAllowed) {
@@ -320,7 +335,7 @@ const getProjectAttachment = catchAsync(async (req, res, next) => {
   }
 
   const attachment = project.attachments.find(
-    (attachment) => attachment._id.toString() === attachmentid
+    (attachment) => attachment.id.toString() === attachmentid
   );
 
   if (!attachment) {
@@ -351,7 +366,7 @@ const deleteProjectAttachment = catchAsync(async (req, res, next) => {
   }
 
   const isAllowed =
-    req.currentUser.id === profile.userId.toString() &&
+    req.currentUser._id.toString() === profile.userId.toString() &&
     req.currentUser.userType === "talent";
 
   if (!isAllowed) {
@@ -371,7 +386,7 @@ const deleteProjectAttachment = catchAsync(async (req, res, next) => {
   }
 
   const attachmentIndex = project.attachments.findIndex(
-    (attachment) => attachment._id.toString() === attachmentid
+    (attachment) => attachment.id.toString() === attachmentid
   );
 
   if (attachmentIndex === -1) {
@@ -402,7 +417,7 @@ const deleteProjectAttachments = catchAsync(async (req, res, next) => {
   }
 
   const isAllowed =
-    req.currentUser.id === profile.userId.toString() &&
+    req.currentUser._id.toString() === profile.userId.toString() &&
     req.currentUser.userType === "talent";
 
   if (!isAllowed) {
@@ -443,7 +458,7 @@ const addProjectSkill = catchAsync(async (req, res, next) => {
   }
 
   const isAllowed =
-    req.currentUser.id === profile.userId.toString() &&
+    req.currentUser._id.toString() === profile.userId.toString() &&
     req.currentUser.userType === "talent";
 
   if (!isAllowed) {
@@ -488,7 +503,7 @@ const getProjectSkills = catchAsync(async (req, res, next) => {
   }
 
   const isAllowed =
-    req.currentUser.id === profile.userId.toString() &&
+    req.currentUser._id.toString() === profile.userId.toString() &&
     req.currentUser.userType === "talent";
 
   if (!isAllowed) {
@@ -529,7 +544,7 @@ const getProjectSkill = catchAsync(async (req, res, next) => {
   }
 
   const isAllowed =
-    req.currentUser.id === profile.userId.toString() &&
+    req.currentUser._id.toString() === profile.userId.toString() &&
     req.currentUser.userType === "talent";
 
   if (!isAllowed) {
@@ -549,7 +564,7 @@ const getProjectSkill = catchAsync(async (req, res, next) => {
   }
 
   // const attachment = project.attachments.find(
-  //   (attachment) => attachment._id.toString() === attachmentid
+  //   (attachment) => attachment.id.toString() === attachmentid
   // );
 
   // if (!attachment) {
@@ -580,7 +595,7 @@ const deleteProjectSkill = catchAsync(async (req, res, next) => {
   }
 
   const isAllowed =
-    req.currentUser.id === profile.userId.toString() &&
+    req.currentUser._id.toString() === profile.userId.toString() &&
     req.currentUser.userType === "talent";
 
   if (!isAllowed) {
@@ -600,7 +615,7 @@ const deleteProjectSkill = catchAsync(async (req, res, next) => {
   }
 
   const skillIndex = project.skills.findIndex(
-    (skill) => skill.id.toString() === skillId
+    (skill) => skill._id.toString() === skillId
   );
 
   if (skillIndex === -1) {
@@ -631,7 +646,7 @@ const deleteProjectSkills = catchAsync(async (req, res, next) => {
   }
 
   const isAllowed =
-    req.currentUser.id === profile.userId.toString() &&
+    req.currentUser._id.toString() === profile.userId.toString() &&
     req.currentUser.userType === "talent";
 
   if (!isAllowed) {

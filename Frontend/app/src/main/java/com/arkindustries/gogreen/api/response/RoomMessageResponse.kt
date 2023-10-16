@@ -1,4 +1,6 @@
 package com.arkindustries.gogreen.api.response
 
-class RoomMessageResponse {
-}
+data class RoomMessageResponse(
+    val message: RoomMessage
+)
+

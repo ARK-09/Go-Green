@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: profile-mongo-depl
-spec:  
+spec:
   replicas: 1
   selector:
     matchLabels:
@@ -13,15 +13,15 @@ spec:
         app: profile-mongo
     spec:
       containers:
-       -  name: profile-mongo
-          image: mongo 
+        - name: profile-mongo
+          image: mongo
           volumeMounts:
             - name: profile-mongo-volume
               mountPath: /data/db
       volumes:
         - name: profile-mongo-volume
           persistentVolumeClaim:
-              claimName: profile-mongo-volume               
+            claimName: profile-mongo-volume
 ---
 apiVersion: v1
 kind: Service

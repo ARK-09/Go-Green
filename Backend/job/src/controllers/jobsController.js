@@ -1,6 +1,7 @@
 const Job = require("../models/jobs");
 const Skill = require("../models/skills");
 const Category = require("../models/categories");
+const extractValidProperties = require("../utils/extractValidProperties");
 const {
   catchAsync,
   AppError,
@@ -32,10 +33,20 @@ const createJob = catchAsync(async (req, res, next) => {
     title,
     description,
     budget,
-    expactedDuration,
+    expectedDuration,
     paymentType,
-    attachments,
+    location,
+    talentCount,
   } = req.body;
+
+  let { attachments } = req.body;
+
+  attachments = extractValidProperties(attachments, [
+    "id",
+    "mimeType",
+    "originalName",
+    "createdDate",
+  ]);
 
   let { skills, categories } = req.body;
 
@@ -89,17 +100,31 @@ const createJob = catchAsync(async (req, res, next) => {
     );
   }
 
-  const job = await Job.create({
+  const jobObject = {
     title,
     description,
     skills: skills,
     categories,
     budget,
-    expactedDuration,
+    expectedDuration,
     paymentType,
-    attachments,
-    user: req.currentUser.id,
-  });
+    talentCount,
+    user: req.currentUser._id.toString(),
+  };
+
+  if (attachments) {
+    jobObject.attachments = attachments;
+  }
+
+  console.log(location.coordinates);
+
+  if (location) {
+    jobObject.location = {
+      coordinates: [location.coordinates[0], location.coordinates[1]],
+    };
+  }
+
+  const job = await Job.create(jobObject);
 
   await new JobCreatedPublisher(natsWrapper.client).publish(job).catch(() => {
     return next(new AppError("Something went wrong...", 500));
@@ -120,11 +145,14 @@ const createJob = catchAsync(async (req, res, next) => {
 const getJobs = catchAsync(async (req, res, next) => {
   const { limit = 10, offset = 1 } = req.params;
 
-  const totalJobs = await Job.countDocuments({ user: req.currentUser.id });
+  const totalJobs = await Job.countDocuments({
+    user: req.currentUser._id.toString(),
+  });
   const totalPages = Math.ceil(totalJobs / limit);
   const skip = (offset - 1) * limit;
 
-  const jobs = await Job.find({ user: req.currentUser.id })
+  const jobs = await Job.find({ user: req.currentUser._id.toString() })
+    .sort({ createdDate: 1 })
     .populate([
       { path: "user", select: `-${fieldsToExclude.join(" -")}` },
       { path: "categories", select: "-__v" },
@@ -134,23 +162,36 @@ const getJobs = catchAsync(async (req, res, next) => {
     .limit(limit)
     .lean();
 
+  const jobsResult = await Promise.all(
+    jobs.map(async (job) => {
+      const noOfProposalsSubmitted = await Proposal.countDocuments({
+        doc: job._id,
+      });
+
+      const interviewing = await Proposal.countDocuments({
+        doc: job._id,
+        status: "Accepted",
+      });
+
+      const jobObject = job;
+      jobObject.noOfProposals = noOfProposalsSubmitted;
+      jobObject.interviewing = interviewing;
+
+      return jobObject;
+    })
+  );
+
   res.status(200).json({
     status: "success",
     totalJobs,
     totalPages,
     offset,
-    data: { jobs },
+    data: { jobs: jobsResult },
   });
 });
 
 const searchJobs = catchAsync(async (req, res, next) => {
-  const {
-    query = "",
-    limit = 10,
-    offset = 1,
-    location = {},
-    price = 9,
-  } = req.query;
+  const { query = "", limit = 10, offset = 1, location, price = 9 } = req.query;
 
   const searchQuery = {};
 
@@ -165,10 +206,9 @@ const searchJobs = catchAsync(async (req, res, next) => {
     searchQuery.budget = { $gte: parseFloat(price) };
   }
 
-  // Add location criteria if provided
-  // if (req.query["location.latitude"] && req.query["location.longitude"]) {
-  //   const latitude = req.query["location.latitude"];
-  //   const longitude = req.query["location.longitude"];
+  // if (req.query.location && req.query.location.coordinates) {
+  //   const latitude = req.query.location.coordinates[0];
+  //   const longitude = req.query.location.coordinates[1];
 
   //   const maxDistanceInKilometers = 500;
 
@@ -193,99 +233,36 @@ const searchJobs = catchAsync(async (req, res, next) => {
       { path: "categories", select: "-__v" },
       { path: "skills", select: "-__v" },
     ])
+    .sort({ createdDate: -1 })
     .skip(skip)
     .limit(limit)
     .lean();
+
+  const jobsResult = await Promise.all(
+    jobs.map(async (job) => {
+      const noOfProposalsSubmitted = await Proposal.countDocuments({
+        doc: job._id,
+      });
+
+      const interviewing = await Proposal.countDocuments({
+        doc: job._id,
+        status: "Accepted",
+      });
+
+      const jobObject = job;
+      jobObject.noOfProposals = noOfProposalsSubmitted;
+      jobObject.interviewing = interviewing;
+
+      return jobObject;
+    })
+  );
 
   res.status(200).json({
     status: "success",
     totalJobs,
     totalPages,
     offset,
-    data: { jobs },
-  });
-});
-
-const isAlreadyApplied = catchAsync(async (req, res, next) => {
-  const { jobid } = req.params;
-
-  const job = await Job.findById(jobid);
-
-  if (!job) {
-    return next(new AppError(`No job found with id: ${jobid}`, 404));
-  }
-
-  const proposal = await Proposal.findOne({
-    user: req.currentUser.id,
-    type: "job",
-    refId: job._id.toString(),
-  });
-
-  if (!proposal) {
-    return res.status(200).json({
-      status: "success",
-      data: {
-        alreadyApplied: false,
-      },
-    });
-  }
-
-  res.status(200).json({
-    status: "success",
-    data: {
-      alreadyApplied: true,
-      status: proposal.status,
-    },
-  });
-});
-
-const hire = catchAsync(async (req, res, next) => {
-  const { jobid, proposalid } = req.params;
-
-  const job = await Job.findById(jobid);
-
-  if (!job) {
-    return next(new AppError(`No job found with id: ${jobid}`, 404));
-  }
-
-  if (job.status != "Open") {
-    return next(new AppError("The job is not open.", 403));
-  }
-
-  const proposal = await Proposal.findOne({ _id: proposalid, type: "job" });
-
-  if (!proposal) {
-    return next(
-      new AppError(`No proposal is found with id: ${proposalid}`, 404)
-    );
-  }
-
-  if (proposal.status === "Hired") {
-    return next(new AppError("Already hired!.", 409));
-  }
-
-  if (proposal.status === "Declined" || proposal.status === "Withdraw") {
-    return next(
-      new AppError("Can't hire a proposal who is withdrawn or declined.", 403)
-    );
-  }
-
-  const isAllowed = job.user.toString() === req.currentUser.id;
-
-  if (!isAllowed) {
-    return next(new AppError("You'r not allowed to perform this action.", 403));
-  }
-
-  job.status = "Assigned";
-  proposal.status = "Hired";
-  await job.save();
-  await proposal.save();
-
-  res.status(200).json({
-    status: "success",
-    data: {
-      message: "Hired successfully",
-    },
+    data: { jobs: jobsResult },
   });
 });
 
@@ -302,18 +279,35 @@ const getJob = catchAsync(async (req, res, next) => {
     return next(new AppError(`No job found with matching id: ${id}`, 404));
   }
 
+  const noOfProposalsSubmitted = await Proposal.countDocuments({ doc: id });
+  const interviewing = await Proposal.countDocuments({
+    doc: job._id,
+    status: "Accepted",
+  });
+
+  const jobResult = job.toObject();
+  jobResult.noOfProposals = noOfProposalsSubmitted;
+  jobResult.interviewing = interviewing;
+
   res.status(200).json({
     status: "success",
     data: {
-      job,
+      job: jobResult,
     },
   });
 });
 
 const updateJob = catchAsync(async (req, res, next) => {
   const { id } = req.params;
-  const { title, description, budget, status, expactedDuration, paymentType } =
-    req.body;
+  const {
+    title,
+    description,
+    budget,
+    status,
+    expectedDuration,
+    paymentType,
+    location,
+  } = req.body;
 
   let { skills, categories } = req.body;
 
@@ -323,7 +317,7 @@ const updateJob = catchAsync(async (req, res, next) => {
     return next(new AppError(`No job found with matching id: ${id}`, 404));
   }
 
-  const isAllowed = req.currentUser.id === job.user.toString();
+  const isAllowed = req.currentUser._id.toString() === job.user.toString();
 
   if (!isAllowed) {
     return next(
@@ -400,13 +394,19 @@ const updateJob = catchAsync(async (req, res, next) => {
     );
   }
 
+  if (location) {
+    job.location = {
+      coordinates: [location.coordinates[0], location.coordinates[1]],
+    };
+  }
+
   job.title = title || job.title;
   job.description = description || job.description;
   job.skills = skills.length > 0 ? skills : job.skills;
   job.categories = categories.length > 0 ? categories : job.categories;
   job.budget = budget || job.budget;
   job.status = status || job.status;
-  job.expactedDuration = expactedDuration || job.expactedDuration;
+  job.expectedDuration = expectedDuration || job.expectedDuration;
   job.paymentType = paymentType || job.paymentType;
 
   await job.save();
@@ -439,7 +439,7 @@ const deleteJob = catchAsync(async (req, res, next) => {
   }
 
   const isAllowed =
-    req.currentUser.id === job.user.toString() ||
+    req.currentUser._id.toString() === job.user.toString() ||
     req.currentUser.userType === "admin";
 
   if (!isAllowed) {
@@ -471,7 +471,7 @@ const createJobAttachment = catchAsync(async (req, res, next) => {
     return next(new AppError(`No job found with matching id: ${id}`, 404));
   }
 
-  const isAllowed = req.currentUser.id === job.user.toString();
+  const isAllowed = req.currentUser._id.toString() === job.user.toString();
 
   if (!isAllowed) {
     return next(
@@ -479,9 +479,20 @@ const createJobAttachment = catchAsync(async (req, res, next) => {
     );
   }
 
-  const { attachments } = req.body;
+  let { attachments } = req.body;
 
-  job.attachments.push(...attachments);
+  attachments = extractValidProperties(attachments, [
+    "id",
+    "mimeType",
+    "originalName",
+    "createdDate",
+  ]);
+
+  if (attachments && Array.isArray(attachments)) {
+    job.attachments.push(...attachments);
+  } else if (typeof attachments === "object") {
+    job.attachments.push(attachments);
+  }
 
   await job.save();
 
@@ -555,7 +566,7 @@ const deleteJobAttachment = catchAsync(async (req, res, next) => {
     return next(new AppError(`No job found with matching id: ${id}`, 404));
   }
 
-  const isAllowed = req.currentUser.id === job.user.toString();
+  const isAllowed = req.currentUser._id.toString() === job.user.toString();
 
   if (!isAllowed) {
     return next(
@@ -597,7 +608,7 @@ const deleteJobAttachments = catchAsync(async (req, res, next) => {
     return next(new AppError(`No job found with matching id: ${id}`, 404));
   }
 
-  const isAllowed = req.currentUser.id === job.user.toString();
+  const isAllowed = req.currentUser._id.toString() === job.user.toString();
 
   if (!isAllowed) {
     return next(
@@ -621,8 +632,6 @@ const deleteJobAttachments = catchAsync(async (req, res, next) => {
 exports.createJob = createJob;
 exports.getJobs = getJobs;
 exports.searchJobs = searchJobs;
-exports.isAlreadyApplied = isAlreadyApplied;
-exports.hire = hire;
 exports.getJob = getJob;
 exports.updateJob = updateJob;
 exports.deleteJob = deleteJob;

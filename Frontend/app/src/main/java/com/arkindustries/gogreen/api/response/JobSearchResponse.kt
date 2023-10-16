@@ -1,4 +1,5 @@
 package com.arkindustries.gogreen.api.response
 
-class JobSearchResponse {
-}
+data class JobSearchResponse(
+    val jobs: List<Job>?
+)

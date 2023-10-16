@@ -12,7 +12,7 @@ class UserUpdatedListener extends Listener {
   onMessage = async (data, message) => {
     if (data) {
       const {
-        id,
+        _id,
         name,
         email,
         password,
@@ -23,7 +23,7 @@ class UserUpdatedListener extends Listener {
       } = data;
 
       await User.findByIdAndUpdate(
-        id,
+        _id,
         {
           name,
           email,

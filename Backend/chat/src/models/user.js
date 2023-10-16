@@ -88,8 +88,15 @@ const userSchema = new mongoose.Schema({
     },
   },
   image: {
-    type: String,
-    default: null,
+    id: {
+      type: mongoose.Schema.Types.ObjectId,
+      default: undefined,
+    },
+    url: {
+      type: String,
+      default: "",
+    },
+    _id: false,
   },
   userStatus: {
     type: String,
@@ -129,14 +136,6 @@ userSchema.pre("save", async function (next) {
   }
   next();
 });
-
-userSchema.methods.toJSON = function () {
-  const returnedUser = this.toObject();
-  returnedUser.id = returnedUser._id;
-
-  delete returnedUser._id;
-  return returnedUser;
-};
 
 userSchema.methods.checkPassword = async function (password) {
   return await Password.compare(this.password, password);

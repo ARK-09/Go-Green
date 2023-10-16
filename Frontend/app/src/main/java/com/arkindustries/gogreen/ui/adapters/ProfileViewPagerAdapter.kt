@@ -2,24 +2,26 @@ package com.arkindustries.gogreen.ui.adapters
 
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import com.arkindustries.gogreen.ui.views.GeneralFragment
-import com.arkindustries.gogreen.ui.views.PortfolioFragment
-import com.arkindustries.gogreen.ui.views.ReviewsFragment
 
-class ProfileOwnerViewPagerAdapter(
+class ProfileViewPagerAdapter(
     fragment: Fragment,
+    private val fragments: List<Fragment>,
+    private val fallBackPosition: Int = 0
 ) : FragmentStateAdapter(fragment) {
 
     override fun getItemCount(): Int {
-        return 3
+        return fragments.size
     }
 
     override fun createFragment(position: Int): Fragment {
-        return when (position) {
-            0 -> PortfolioFragment()
-            1 -> GeneralFragment()
-            2 -> ReviewsFragment()
-            else -> PortfolioFragment()
+        return fragments [getAdjustedPosition(position)]
+    }
+
+    private fun getAdjustedPosition (position: Int): Int {
+        return if (position < fragments.size) {
+            position
+        } else {
+            fallBackPosition
         }
     }
 }

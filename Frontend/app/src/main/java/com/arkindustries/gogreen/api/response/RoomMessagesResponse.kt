@@ -1,6 +1,6 @@
 package com.arkindustries.gogreen.api.response
 
-data class RoomMessageResponse(
-    val message: RoomMessage
+data class RoomMessagesResponse(
+    val messages: List<RoomMessageUnpopulated>
 )
 

@@ -1,93 +1,57 @@
 package com.arkindustries.gogreen.ui.adapters
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LifecycleRegistry
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.arkindustries.gogreen.database.entites.JobEntity
-import com.arkindustries.gogreen.databinding.JobListItemBinding
+import com.arkindustries.gogreen.api.response.Project
+import com.arkindustries.gogreen.databinding.ProjectListItemBinding
 
-class JobAdapter(
-    private val onItemClick: (JobEntity) -> Unit,
-    private val onOfferClick: (JobEntity) -> Unit,
-    var isUserClient: Boolean = false
-) : RecyclerView.Adapter<JobAdapter.JobViewHolder>() {
+class ProjectsAdapter(
+    private val onItemClick: (Project) -> Unit
+) : RecyclerView.Adapter<ProjectsAdapter.ProjectViewHolder>() {
 
-    private val jobs = mutableListOf<JobEntity>()
+    private val projects = mutableListOf<Project>()
 
-    fun submitList(newJobs: List<JobEntity>) {
-        val diffCallback = JobDiffCallback(jobs, newJobs)
+    fun submitList(newProjects: List<Project>) {
+        val diffCallback = ProjectDiffCallback(projects, newProjects)
         val diffResult = DiffUtil.calculateDiff(diffCallback)
-        jobs.clear()
-        jobs.addAll(newJobs)
+        projects.clear()
+        projects.addAll(newProjects)
         diffResult.dispatchUpdatesTo(this)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): JobViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProjectViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        val binding = JobListItemBinding.inflate(inflater, parent, false)
-        binding.sendOfferBtn.visibility = if (isUserClient) {
-            View.INVISIBLE
-        } else {
-            View.VISIBLE
-        }
-        return JobViewHolder(binding)
+        val binding = ProjectListItemBinding.inflate(inflater, parent, false)
+        return ProjectViewHolder(binding)
     }
 
-    override fun onBindViewHolder(holder: JobViewHolder, position: Int) {
-        val job = jobs[position]
-        holder.bind(job)
+    override fun onBindViewHolder(holder: ProjectViewHolder, position: Int) {
+        val project = projects[position]
+        holder.bind(project)
     }
 
-    override fun getItemCount(): Int = jobs.size
+    override fun getItemCount(): Int = projects.size
 
-    inner class JobViewHolder(
-        private val binding: JobListItemBinding
+    inner class ProjectViewHolder(
+        private val binding: ProjectListItemBinding
     ) :
-        RecyclerView.ViewHolder(binding.root), LifecycleOwner {
-        private val lifecycleRegistry = LifecycleRegistry(this)
-
-        init {
-            lifecycleRegistry.currentState = Lifecycle.State.INITIALIZED
-        }
-
-        fun onAppear() {
-            lifecycleRegistry.currentState = Lifecycle.State.CREATED
-            lifecycleRegistry.currentState = Lifecycle.State.STARTED
-        }
-
-        fun onDisappear() {
-            lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
-        }
-
-        fun bind(job: JobEntity) {
+        RecyclerView.ViewHolder(binding.root) {
+        fun bind(project: Project) {
             binding.apply {
-                lifecycleOwner = this@JobViewHolder
-                binding.job = job
-                binding.user = job.user
-
-                binding.root.setOnClickListener { onItemClick(job) }
-
-                if (!isUserClient) {
-                    binding.sendOfferBtn.setOnClickListener { onOfferClick(job) }
-                }
-
+                binding.image = project.attachments [bindingAdapterPosition].url
+                binding.project = project
+                binding.root.setOnClickListener { onItemClick(project) }
                 binding.executePendingBindings()
             }
         }
-
-        override val lifecycle: Lifecycle
-            get() = lifecycleRegistry
     }
 }
 
-class JobDiffCallback(
-    private val oldList: List<JobEntity>,
-    private val newList: List<JobEntity>
+class ProjectDiffCallback(
+    private val oldList: List<Project>,
+    private val newList: List<Project>
 ) :
     DiffUtil.Callback() {
 
@@ -96,7 +60,7 @@ class JobDiffCallback(
     override fun getNewListSize(): Int = newList.size
 
     override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-        return oldList[oldItemPosition].jobId == newList[newItemPosition].jobId
+        return oldList[oldItemPosition]._id == newList[newItemPosition]._id
     }
 
     override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {

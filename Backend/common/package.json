@@ -10,6 +10,7 @@
   "author": "ark-industries",
   "license": "ISC",
   "dependencies": {
+    "@appland/appmap-agent-js": "^14.2.0",
     "express-validator": "^7.0.1",
     "jsonwebtoken": "^9.0.0",
     "node-nats-streaming": "^0.3.2"

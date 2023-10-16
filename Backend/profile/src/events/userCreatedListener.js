@@ -13,7 +13,7 @@ class UserCreatedListener extends Listener {
   onMessage = async (data, message) => {
     if (data) {
       const {
-        id,
+        _id,
         name,
         email,
         password,
@@ -27,7 +27,7 @@ class UserCreatedListener extends Listener {
       await User.create(
         [
           {
-            _id: id,
+            _id: _id,
             name,
             email,
             password,
@@ -40,7 +40,7 @@ class UserCreatedListener extends Listener {
         ],
         { validateBeforeSave: false }
       );
-      await Profile.create([{ userId: id }], { validateBeforeSave: false });
+      await Profile.create([{ user: _id }], { validateBeforeSave: false });
 
       message.ack();
     }

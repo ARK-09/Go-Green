@@ -4,63 +4,102 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/primary"
     tools:context=".ui.views.MainActivity">
 
     <ImageView
-        android:layout_width="250dp"
-        android:layout_height="250dp"
-        android:src="@drawable/circle_deco"
-        android:layout_marginStart="-100dp"
-        android:layout_marginTop="-110dp"
+        android:id="@+id/imageView7"
+        android:layout_width="0dp"
+        android:layout_height="270dp"
+        android:scaleType="centerCrop"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_welcome_deco_top" />
+
+    <ImageView
+        android:id="@+id/imageView8"
+        android:layout_width="0dp"
+        android:layout_height="270dp"
+        android:scaleType="centerCrop"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@drawable/ic_welcome_deco_bottom" />
+
 
     <ImageView
         android:id="@+id/logo_iv"
         android:layout_width="130dp"
         android:layout_height="130dp"
-        android:elevation="50dp"
+        android:layout_gravity="center"
         android:src="@drawable/logo_new"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/imageView8"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.30" />
-
-    <Button
-        android:id="@+id/sign_in_btn"
-        android:layout_width="0dp"
-        android:layout_height="60dp"
-        android:layout_marginStart="25dp"
-        android:layout_marginEnd="25dp"
-        android:layout_marginBottom="8dp"
-        android:text="Sign in"
-        android:fontFamily="@font/inter"
-        android:backgroundTint="@color/white"
-        android:textColor="?attr/colorPrimary"
-        android:textAllCaps="false"
-        app:layout_constraintBottom_toTopOf="@+id/create_account_btn"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintWidth_max="320dp" />
+        app:layout_constraintTop_toBottomOf="@+id/imageView7"
+        app:tint="@color/primary" />
 
     <Button
         android:id="@+id/create_account_btn"
-        android:layout_width="0dp"
-        android:layout_height="60dp"
-        android:layout_marginStart="25dp"
-        android:layout_marginEnd="25dp"
-        android:layout_marginBottom="45dp"
-        android:text="Create Account"
+        android:layout_width="185dp"
+        android:layout_height="45dp"
+        android:layout_marginTop="80dp"
+        android:background="@drawable/ic_button_left_round"
         android:fontFamily="@font/inter"
-        android:textColor="@color/white"
-        app:strokeColor="@color/white"
-        style="?attr/materialButtonOutlinedStyle"
+        android:text="Create Account"
         android:textAllCaps="false"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:textColor="@color/white"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/imageView8"
+        app:layout_constraintWidth_max="320dp" />
+
+    <Button
+        android:id="@+id/sign_in_btn"
+        android:layout_width="130dp"
+        android:layout_height="45dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/ic_button_left_round"
+        android:fontFamily="@font/inter"
+        android:text="Sign in"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/create_account_btn"
+        app:layout_constraintWidth_max="320dp" />
+
+    <RelativeLayout
+        android:id="@+id/progressBar"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginBottom="3.5dp"
+        android:layout_marginEnd="1.3dp"
+        app:layout_constraintBottom_toTopOf="@+id/imageView8"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintWidth_max="320dp" />
+        app:layout_constraintTop_toBottomOf="@+id/imageView7">
+
+        <ImageView
+            android:id="@+id/loadingImageView"
+            android:layout_width="130dp"
+            android:layout_height="130dp"
+            android:layout_gravity="center"
+            android:layout_centerInParent="true"
+            app:tint="@color/primary" />
+
+    </RelativeLayout>
+
+    <ImageButton
+        android:id="@+id/retry"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginTop="5dp"
+        android:visibility="gone"
+        android:background="@drawable/ic_button_left_round"
+        android:src="@drawable/ic_retry"
+        app:tint="@color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/sign_in_btn" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

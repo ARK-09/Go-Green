@@ -1,56 +1,104 @@
 package com.arkindustries.gogreen.ui.adapters
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.arkindustries.gogreen.api.response.Language
-import com.arkindustries.gogreen.databinding.LanguageListItemBinding
+import com.arkindustries.gogreen.api.response.Room
+import com.arkindustries.gogreen.databinding.RoomListItemBinding
+import com.bumptech.glide.Glide
 
-class LanguageAdapter(
-    private val onItemClick: (Language) -> Unit
-) : RecyclerView.Adapter<LanguageAdapter.LanguageViewHolder>() {
 
-    private val languages = mutableListOf<Language>()
+class RoomAdapter(
+    private val onItemClick: (Room) -> Unit,
+    private val isUserClient: Boolean,
+    private val loadMoreListener: (currentPage: Int) -> Unit,
+    private val ITEMS_THRESHOLD_BEFORE_LOAD: Int = 5,
+    private val pageSize: Int = 10
+) : RecyclerView.Adapter<RoomAdapter.RoomViewHolder>() {
+    private var isLoading = false
+    private val rooms = mutableListOf<Room>()
 
-    fun submitList(newLanguages: List<Language>) {
-        val diffCallback = LanguageDiffCallback(languages, newLanguages)
+    fun submitList(newRooms: List<Room>) {
+        val diffCallback = RoomDiffCallback(rooms, newRooms)
         val diffResult = DiffUtil.calculateDiff(diffCallback)
-        languages.clear()
-        languages.addAll(newLanguages)
+        rooms.clear()
+        rooms.addAll(newRooms)
         diffResult.dispatchUpdatesTo(this)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LanguageViewHolder {
-        val inflater = LayoutInflater.from(parent.context)
-        val binding = LanguageListItemBinding.inflate(inflater, parent, false)
-        return LanguageViewHolder(binding)
+    fun appendRooms(newRooms: List<Room>) {
+        rooms.addAll(newRooms)
+        notifyItemRangeInserted(rooms.size, newRooms.size)
     }
 
-    override fun onBindViewHolder(holder: LanguageViewHolder, position: Int) {
-        val project = languages[position]
+    fun addRoomAt(position: Int, newRoom: Room) {
+        rooms.add(position, newRoom)
+        notifyItemInserted(position)
+        notifyItemMoved(position, position+1)
+    }
+
+
+    fun setLoading(isLoading: Boolean) {
+        this.isLoading = isLoading
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RoomViewHolder {
+        val inflater = LayoutInflater.from(parent.context)
+        val binding = RoomListItemBinding.inflate(inflater, parent, false)
+        return RoomViewHolder(binding)
+    }
+
+    override fun onBindViewHolder(holder: RoomViewHolder, position: Int) {
+        val project = rooms[position]
+
+        val threshold = if (rooms.size - ITEMS_THRESHOLD_BEFORE_LOAD < 0) {
+            rooms.size
+        } else {
+            rooms.size - ITEMS_THRESHOLD_BEFORE_LOAD
+        }
+
+        if (position == threshold && isLoading) {
+            val currentPage = rooms.size / pageSize
+            loadMoreListener.invoke(if (currentPage < 1) 1 else currentPage )
+        }
         holder.bind(project)
     }
 
-    override fun getItemCount(): Int = languages.size
+    override fun getItemCount(): Int = rooms.size
 
-    inner class LanguageViewHolder(
-        private val binding: LanguageListItemBinding
+    inner class RoomViewHolder(
+        private val binding: RoomListItemBinding
     ) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(language: Language) {
+        fun bind(room: Room) {
             binding.apply {
-                binding.languageTitle.text = language.name
-                binding.experience.text = language.experience
-                binding.root.setOnClickListener { onItemClick(language) }
+                this.loading.visibility = if (isLoading) {
+                    View.VISIBLE
+                } else {
+                    View.INVISIBLE
+                }
+
+                this.roomName.text = room.name
+                this.roomLastMessage.text = room.lastMessage?.text?.ifBlank { "..." } ?: "..."
+                if (isUserClient) {
+                    Glide.with(binding.root).load(room.members[0].image.url)
+                        .error(com.arkindustries.gogreen.R.drawable.test).into(binding.roomImage)
+                } else {
+                    Glide.with(binding.root).load(room.owner.image.url)
+                        .error(com.arkindustries.gogreen.R.drawable.test)
+                        .into(binding.roomImage)
+                }
+                this.root.setOnClickListener { onItemClick(room) }
             }
         }
     }
 }
 
-class LanguageDiffCallback(
-    private val oldList: List<Language>,
-    private val newList: List<Language>
+class RoomDiffCallback(
+    private val oldList: List<Room>,
+    private val newList: List<Room>
 ) :
     DiffUtil.Callback() {
 

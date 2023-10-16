@@ -3,16 +3,16 @@ package com.arkindustries.gogreen.database.entites
 import androidx.room.Embedded
 import androidx.room.Junction
 import androidx.room.Relation
-import com.arkindustries.gogreen.database.crossref.JobAttachmentCrossRef
+import com.arkindustries.gogreen.database.crossref.ProposalAttachmentCrossRef
 
-data class JobWithAttachments(
+data class ProposalWithAttachments(
     @Embedded
-    val job: JobEntity,
+    val proposal: ProposalEntity,
 
     @Relation(
-        parentColumn = "jobId",
+        parentColumn = "proposalId",
         entityColumn = "attachmentId",
-        associateBy = Junction(JobAttachmentCrossRef::class)
+        associateBy = Junction(ProposalAttachmentCrossRef::class)
     )
-    val attachments: List<AttachmentEntity>
+    var attachments: List<AttachmentEntity>
 )

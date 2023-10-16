@@ -40,18 +40,22 @@ const projectsSchema = new mongoose.Schema({
         },
       },
       originalName: String,
-      url: String,
       createdDate: { type: Date, default: Date.now },
       _id: false,
     },
   ],
   skills: [
     {
-      id: mongoose.Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Skills",
     },
   ],
   contractId: {
     type: mongoose.Schema.Types.ObjectId,
+  },
+  createdDate: {
+    type: Date,
+    default: Date.now,
   },
 });
 

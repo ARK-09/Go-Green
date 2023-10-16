@@ -1,4 +1,3 @@
 package com.arkindustries.gogreen.socket.response
 
-class ErrorResponse {
-}
+data class ErrorResponse (val name: String, val message: String, val status: String)

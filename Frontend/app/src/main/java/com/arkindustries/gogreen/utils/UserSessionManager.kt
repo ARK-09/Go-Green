@@ -1,7 +1,7 @@
 package com.arkindustries.gogreen.utils
 
 import android.content.Context
-import android.content.SharedPreferences
+import android.util.Log
 
 object UserSessionManager {
     private const val PREF_NAME = "user_session"
@@ -9,6 +9,8 @@ object UserSessionManager {
 
     fun saveJwtToken(context: Context, token: String) {
         val preferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        preferences.edit().clear().apply()
+        Log.i(UserSessionManager::class.java.simpleName, preferences.getString(KEY_JWT_TOKEN, "default").toString())
         preferences.edit().putString(KEY_JWT_TOKEN, token).apply()
     }
 

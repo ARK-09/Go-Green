@@ -26,18 +26,19 @@ const messageSchema = new mongoose.Schema({
         },
       },
       originalName: String,
-      url: String,
       createdDate: { type: Date, default: Date.now },
       _id: false,
     },
   ],
-  roomId: {
+  room: {
     type: mongoose.Schema.Types.ObjectId,
     required: [true, "Please provide roomid for the message."],
+    ref: "Rooms",
   },
-  senderId: {
+  sender: {
     type: mongoose.Schema.Types.ObjectId,
     required: [true, "Please provide valid sender id."],
+    ref: "User",
   },
   status: {
     type: String,

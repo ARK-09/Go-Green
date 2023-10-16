@@ -64,15 +64,6 @@ router
       .notEmpty()
       .withMessage("Attachment Original name is required"),
 
-    check("attachments.*.url")
-      .isURL({
-        protocols: ["https"],
-        host_whitelist: ["gogreen-files-bucket.s3.ap-south-1.amazonaws.com"],
-      })
-      .withMessage("Please provide a valid image url.")
-      .notEmpty()
-      .withMessage("Attachment URL is required"),
-
     check("attachments.*.createdDate")
       .notEmpty()
       .withMessage("Attachment Created date is required")
@@ -160,15 +151,6 @@ router
     check("attachments.*.originalName")
       .notEmpty()
       .withMessage("Attachment Original name is required"),
-
-    check("attachments.*.url")
-      .isURL({
-        protocols: ["https"],
-        host_whitelist: ["gogreen-files-bucket.s3.ap-south-1.amazonaws.com"],
-      })
-      .withMessage("Please provide a valid image url.")
-      .notEmpty()
-      .withMessage("Attachment URL is required"),
 
     check("attachments.*.createdDate")
       .notEmpty()

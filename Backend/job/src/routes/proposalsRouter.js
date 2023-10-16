@@ -12,6 +12,22 @@ const JWT_KEY = process.env.JWT_KEY;
 const router = express.Router({ mergeParams: true });
 
 router
+  .route("/")
+  .get(requireAuth(JWT_KEY), currentUser, ProposalController.getProposals);
+
+router
+  .route("/users/:userid/reviews")
+  .get(
+    param("userid")
+      .isMongoId()
+      .withMessage("Invalid user ID. Please provide a valid MongoDB ID."),
+    validateRequest,
+    requireAuth(JWT_KEY),
+    currentUser,
+    ProposalController.getReviews
+  );
+
+router
   .route("/jobs/:id")
   .post(
     param("id")
@@ -64,15 +80,6 @@ router
     check("attachments.*.originalName")
       .notEmpty()
       .withMessage("Attachment Original name is required"),
-
-    check("attachments.*.url")
-      .notEmpty()
-      .withMessage("Attachment URL is required")
-      .isURL({
-        protocols: ["https"],
-        host_whitelist: ["gogreen-files-bucket.s3.ap-south-1.amazonaws.com"],
-      })
-      .withMessage("Please provide a valid image url."),
 
     check("attachments.*.createdDate")
       .notEmpty()
@@ -137,15 +144,6 @@ router
       .notEmpty()
       .withMessage("Attachment Original name is required"),
 
-    check("attachments.*.url")
-      .notEmpty()
-      .withMessage("Attachment URL is required")
-      .isURL({
-        protocols: ["https"],
-        host_whitelist: ["gogreen-files-bucket.s3.ap-south-1.amazonaws.com"],
-      })
-      .withMessage("Please provide a valid image url."),
-
     check("attachments.*.createdDate")
       .notEmpty()
       .withMessage("Attachment Created date is required")
@@ -177,6 +175,19 @@ router
     currentUser,
     ProposalController.getProposal
   )
+  .post(
+    param("id")
+      .isMongoId()
+      .withMessage("Invalid proposal ID. Please provide a valid MongoDB ID."),
+    check("rating")
+      .isFloat({ min: 0.0, max: 5.0 })
+      .withMessage("Rating should be between 0.0 to 5.0"),
+    check("feedback").notEmpty().withMessage("Feedback is required.").escape(),
+    validateRequest,
+    requireAuth(JWT_KEY),
+    currentUser,
+    ProposalController.createJobProposalFeedback
+  )
   .delete(
     param("id")
       .isMongoId()
@@ -185,6 +196,45 @@ router
     requireAuth(JWT_KEY),
     currentUser,
     ProposalController.deleteProposal
+  );
+
+router
+  .route("/:jobid")
+  .get(
+    param("jobid")
+      .isMongoId()
+      .withMessage("Invalid job ID. Please provide a valid MongoDB ID."),
+    validateRequest,
+    requireAuth(JWT_KEY),
+    currentUser,
+    ProposalController.isAlreadyApplied
+  );
+
+router
+  .route("/:id/jobs/:jobid")
+  .patch(
+    param("id")
+      .isMongoId()
+      .withMessage("Invalid proposal ID. Please provide a valid MongoDB ID."),
+    param("jobid")
+      .isMongoId()
+      .withMessage("Invalid job ID. Please provide a valid MongoDB ID."),
+    validateRequest,
+    requireAuth(JWT_KEY),
+    currentUser,
+    ProposalController.hireProposal
+  );
+
+router
+  .route("/:id/interviews")
+  .post(
+    param("id")
+      .isMongoId()
+      .withMessage("Invalid proposal ID. Please provide a valid MongoDB ID."),
+    validateRequest,
+    requireAuth(JWT_KEY),
+    currentUser,
+    ProposalController.createInterview
   );
 
 router
@@ -217,15 +267,6 @@ router
     check("attachments.*.originalName")
       .notEmpty()
       .withMessage("Attachment Original name is required"),
-
-    check("attachments.*.url")
-      .notEmpty()
-      .withMessage("Attachment URL is required")
-      .isURL({
-        protocols: ["https"],
-        host_whitelist: ["gogreen-files-bucket.s3.ap-south-1.amazonaws.com"],
-      })
-      .withMessage("Please provide a valid image url."),
 
     check("attachments.*.createdDate")
       .notEmpty()

@@ -1,4 +1,10 @@
 package com.arkindustries.gogreen.api.response
 
-class SkillResponse {
-}
+data class SkillResponse(
+    val skill: Skill
+)
+
+data class Skill(
+    val _id: String,
+    val title: String,
+)

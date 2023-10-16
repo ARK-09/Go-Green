@@ -1,4 +1,3 @@
 package com.arkindustries.gogreen.api.response
 
-interface FileReponse {
-}
+data class FileResponse (val file: File)

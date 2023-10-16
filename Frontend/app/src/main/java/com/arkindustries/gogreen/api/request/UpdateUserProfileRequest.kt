@@ -1,13 +1,14 @@
 package com.arkindustries.gogreen.api.request
 
-data class UserProfileRequest(
-    val id: String,
-    val about: String,
-    val languages: List<String>,
-    val dob: String,
-    val gender: String,
-    val ranking: Int,
-    val address: String,
-    val location: String,
-    val skills: List<String>
+import com.arkindustries.gogreen.api.response.Language
+import com.arkindustries.gogreen.api.response.Location
+
+data class UpdateUserProfileRequest(
+    val about: String? = null,
+    val languages: List<Language>? = null,
+    val dob: String? = null,
+    val gender: String? = null,
+    val address: String? = null,
+    val location: Location? = null,
+    val skills: List<String>? = null
 )

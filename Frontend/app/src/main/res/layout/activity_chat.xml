@@ -6,24 +6,81 @@
     android:layout_height="match_parent"
     tools:context=".ui.views.Chat">
 
-    <include
-        android:id="@+id/appbar_include"
-        layout="@layout/app_bar"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayout5"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/primary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageButton
+            android:id="@+id/back_btn"
+            android:layout_width="35dp"
+            android:layout_height="48dp"
+            android:background="@android:color/transparent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_back_arrow"
+            app:tint="@color/white" />
+
+        <TextView
+            android:id="@+id/room_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:fontFamily="@font/inter_medium"
+            android:textColor="@color/white"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@+id/materialCardView5"
+            app:layout_constraintTop_toTopOf="@+id/materialCardView5"
+            tools:text="Maaz Mushtaq" />
+
+        <TextView
+            android:id="@+id/user_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/inter"
+            android:textColor="@color/white"
+            app:layout_constraintStart_toStartOf="@+id/room_name"
+            app:layout_constraintTop_toBottomOf="@+id/room_name"
+            tools:text="Online" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/materialCardView5"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            app:cardCornerRadius="50dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/back_btn"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/room_image"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:scaleType="centerCrop"
+                tools:srcCompat="@tools:sample/avatars" />
+        </com.google.android.material.card.MaterialCardView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/messages"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        tools:listitem="@layout/message_sent"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintBottom_toTopOf="@+id/constraintLayout10"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/appbar_include">
+        app:layout_constraintTop_toBottomOf="@+id/constraintLayout5"
+        tools:listitem="@layout/message_sent">
 
     </androidx.recyclerview.widget.RecyclerView>
 
@@ -39,14 +96,25 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
+        <View
+            android:id="@+id/divider2"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="?android:attr/listDivider"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
         <ImageView
             android:id="@+id/imageView3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="7dp"
+            app:layout_constraintBottom_toBottomOf="@+id/message_et"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/message_et"
             app:srcCompat="@drawable/ic_attachment" />
 
         <View
@@ -61,7 +129,7 @@
             app:layout_constraintVertical_bias="0.5" />
 
         <EditText
-            android:id="@+id/editTextTextMultiLine2"
+            android:id="@+id/message_et"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:background="@color/white"
@@ -69,6 +137,7 @@
             android:foregroundGravity="center_vertical"
             android:gravity="start|center_vertical"
             android:hint="Type a message"
+            android:drawableTint="@color/primary"
             android:inputType="textMultiLine"
             android:paddingStart="5dp"
             android:paddingEnd="5dp"
@@ -76,8 +145,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/send"
             app:layout_constraintStart_toEndOf="@+id/divider5"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.5" />
+            app:layout_constraintTop_toBottomOf="@+id/divider2" />
 
         <ImageButton
             android:id="@+id/send"
@@ -85,12 +153,12 @@
             android:layout_height="0dp"
             android:adjustViewBounds="true"
             android:background="@color/primary"
-            app:tint="@color/white"
             android:scaleType="center"
             android:src="@drawable/ic_send"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="@+id/editTextTextMultiLine2"
+            app:tint="@color/white" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 

@@ -1,4 +1,5 @@
 package com.arkindustries.gogreen.api.response
 
-class ProposalSearchResponse {
-}
+data class ProposalSearchResponse(
+    val proposals: List<ProposalResponse>?
+)

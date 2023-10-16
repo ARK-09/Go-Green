@@ -3,12 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/border_bottom"
-    android:backgroundTint="@color/white"
-    android:maxHeight="155dp"
+    android:layout_height="wrap_content"
     android:minHeight="155dp"
-    android:padding="8dp">
+    android:paddingStart="8dp"
+    android:paddingTop="16dp"
+    android:paddingEnd="8dp"
+    android:paddingBottom="16dp">
 
 
     <TextView
@@ -18,7 +18,7 @@
         android:ellipsize="end"
         android:fontFamily="@font/inter_medium"
         android:maxLines="2"
-        android:textColor="@color/text_primary"
+        android:textColor="@color/black"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -68,12 +68,23 @@
         android:ellipsize="end"
         android:fontFamily="@font/inter_medium"
         android:maxLines="5"
-        android:textColor="@color/text_primary"
+        android:textColor="@color/text_secondary_secondary"
         android:textStyle="italic"
+        android:justificationMode="inter_word"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@+id/work_ratting"
         app:layout_constraintTop_toBottomOf="@+id/work_ratting"
         tools:text="Once again, Kamran completed the task with dedication and persistence. He was helpful, positive and determined to do a good job. Once again, Kamran completed the task with dedication and persistence. He was helpful, positive and determined to do a good job. Once again, Kamran completed the task with dedication and persistence. He was helpful, positive and determined to do a good job." />
+
+    <View
+        android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="8dp"
+        android:background="?android:attr/listDivider"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/feedback" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

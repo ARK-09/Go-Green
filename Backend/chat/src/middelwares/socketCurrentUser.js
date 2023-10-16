@@ -2,7 +2,7 @@ const { AppError } = require("@ark-industries/gogreen-common");
 const User = require("../models/user");
 
 const socketCurrentUser = async (socket, next) => {
-  const user = await User.findById(socket.currentUser.id);
+  const user = await User.findById(socket.currentUser._id.toString());
 
   if (!user) {
     return next(new AppError("The user with this token no longer exist", 404));

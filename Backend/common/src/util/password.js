@@ -7,7 +7,7 @@ class Password {
   static async toHash(password) {
     if (typeof password !== "string") return;
 
-    const salt = randomBytes(9).toString("hex");
+    const salt = randomBytes(16).toString("hex");
     const buf = await scryptAsync(password, salt, 64);
 
     return `${buf.toString("hex")}.${salt}`;
@@ -18,8 +18,9 @@ class Password {
 
     const [hashedPassword, salt] = storedPassword.split(".");
     const buf = await scryptAsync(suppliedPassword, salt, 64);
+    const hashedPasswordBuf = Buffer.from(hashedPassword, "hex");
 
-    return buf.toString("hex") === hashedPassword;
+    return timingSafeEqual(hashedPasswordBuf, buf);
   }
 }
 

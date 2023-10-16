@@ -12,14 +12,14 @@ build:
         manual:
           - src: "src/**/*.js"
             dest: .
-    - image: registry.digitalocean.com/gogreen-repo/catalog
-      context: catalog
-      docker:
-        dockerfile: Dockerfile
-      sync:
-        manual:
-          - src: "src/**/*.js"
-            dest: .
+    # - image: registry.digitalocean.com/gogreen-repo/catalog
+    #   context: catalog
+    #   docker:
+    #     dockerfile: Dockerfile
+    #   sync:
+    #     manual:
+    #       - src: "src/**/*.js"
+    #         dest: .
     - image: registry.digitalocean.com/gogreen-repo/chat
       context: chat
       docker:
@@ -28,14 +28,14 @@ build:
         manual:
           - src: "src/**/*.js"
             dest: .
-    # - image: registry.digitalocean.com/gogreen-repo/file
-    #   context: file
-    #   docker:
-    #     dockerfile: Dockerfile
-    #   sync:
-    #     manual:
-    #       - src: "src/**/*.js"
-    #         dest: .
+    - image: registry.digitalocean.com/gogreen-repo/file
+      context: file
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: "src/**/*.js"
+            dest: .
     - image: registry.digitalocean.com/gogreen-repo/job
       context: job
       docker:
@@ -65,8 +65,8 @@ manifests:
     - infra/k8s/chat-depl.yaml
     - infra/k8s/chat-mongo-depl.yaml
     # - infra/k8s/chat-mongo-volume.yaml
-    # - infra/k8s/file-depl.yaml
-    # - infra/k8s/file-mongo-depl.yaml
+    - infra/k8s/file-depl.yaml
+    - infra/k8s/file-mongo-depl.yaml
     # - infra/k8s/file-mongo-volume.yaml
     - infra/k8s/job-depl.yaml
     - infra/k8s/job-mongo-depl.yaml

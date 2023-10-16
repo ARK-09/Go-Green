@@ -4,16 +4,20 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
-
-<!--        <variable-->
-<!--            name="job"-->
-<!--            type="com.arkindustries.gogreen.database.entites.Job" />-->
+        <import type="com.arkindustries.gogreen.R" />
+        <variable
+            name="job"
+            type="com.arkindustries.gogreen.database.entites.JobEntity" />
+        <variable
+            name="user"
+            type="com.arkindustries.gogreen.database.entites.UserEntity" />
     </data>
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
+        android:layout_margin="8dp"
         app:cardCornerRadius="16dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -21,13 +25,13 @@
             android:layout_height="match_parent"
             android:background="@drawable/border_rounded"
             android:backgroundTint="@color/white"
-            android:minHeight="215dp">
+            android:minHeight="200dp">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/header_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/border_bottom"
+                android:background="@drawable/border_bottom_gray"
                 android:paddingStart="8dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
@@ -36,7 +40,6 @@
                     android:id="@+id/user_container"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
-                    android:background="@drawable/border_right"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/send_offer_btn"
                     app:layout_constraintHorizontal_bias="0.0"
@@ -58,8 +61,10 @@
                             android:id="@+id/user_iv"
                             android:layout_width="50dp"
                             android:layout_height="50dp"
+                            app:url="@{user.image.url}"
+                            app:errorImage="@{R.drawable.test}"
                             android:scaleType="centerCrop"
-                            android:src="@drawable/test" />
+                            tools:src="@drawable/test" />
                     </androidx.cardview.widget.CardView>
 
                     <ImageView
@@ -81,11 +86,12 @@
                         android:layout_marginTop="5dp"
                         android:ellipsize="end"
                         android:fontFamily="@font/montserrat_medium"
-                        android:textStyle="normal|bold"
                         android:singleLine="true"
-                        android:text="Eco-friendly Gardening Solutions"
+                        android:text="@{job.title}"
+                        tools:text="Eco-friendly Gardening Solutions"
                         android:textColor="@color/black"
                         android:textSize="16sp"
+                        android:textStyle="normal|bold"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toEndOf="@+id/img_container"
                         app:layout_constraintTop_toTopOf="@+id/img_container" />
@@ -98,8 +104,9 @@
                         android:layout_marginTop="3dp"
                         android:ellipsize="end"
                         android:fontFamily="@font/montserrat"
+                        android:text="@{user.name}"
                         android:singleLine="true"
-                        android:text="Maaz Mushtaq"
+                        tools:text="Maaz Mushtaq"
                         android:textColor="@color/text_secondary_secondary"
                         android:textSize="14sp"
                         app:layout_constraintEnd_toEndOf="parent"
@@ -133,17 +140,18 @@
             <TextView
                 android:id="@+id/job_description_tv"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginEnd="8dp"
                 android:ellipsize="end"
                 android:fontFamily="@font/montserrat"
-                android:maxLines="5"
+                android:justificationMode="inter_word"
+                android:maxLines="3"
                 android:padding="8dp"
                 android:scrollHorizontally="true"
-                android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus eu congue sapien. Duis sodales magna nec faucibus rutrum. Pellentesque elementum pretium arcu. Aliquam pretium pulvinar quam, sit amet lobortis tortor consectetur non. Quisque enim enim, blandit hendrerit neque a, semper vulputate sapien. Cras nec sagittis dolor. Nulla facilisi. Etiam tortor risus, molestie in pretium non, vehicula in ligula. Maecenas vitae dolor mi. Donec congue congue sagittis. Mauris id nulla in tellus suscipit rutrum. Integer mattis non lectus vel vulputate."
+                android:text="@{job.description}"
+                tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus eu congue sapien. Duis sodales magna nec faucibus rutrum. Pellentesque elementum pretium arcu. Aliquam pretium pulvinar quam, sit amet lobortis tortor consectetur non. Quisque enim enim, blandit hendrerit neque a, semper vulputate sapien. Cras nec sagittis dolor. Nulla facilisi. Etiam tortor risus, molestie in pretium non, vehicula in ligula. Maecenas vitae dolor mi. Donec congue congue sagittis. Mauris id nulla in tellus suscipit rutrum. Integer mattis non lectus vel vulputate."
                 android:textColor="@color/black"
-                android:justificationMode="inter_word"
                 app:layout_constraintBottom_toTopOf="@+id/footer_container"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -154,15 +162,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="45dp"
                 android:background="@drawable/border_top"
-                app:layout_constraintBottom_toBottomOf="parent">
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent">
 
                 <LinearLayout
                     android:id="@+id/price_container"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_marginEnd="8dp"
-                    android:background="@drawable/border_right"
-                    android:padding="8dp"
+                    android:padding="6dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
@@ -179,6 +188,7 @@
                         android:singleLine="true"
                         android:text="Rs:"
                         android:textColor="@color/text_primary"
+                        android:textSize="16sp"
                         android:textStyle="normal|bold" />
 
                     <TextView
@@ -189,7 +199,8 @@
                         android:ellipsize="marquee"
                         android:fontFamily="@font/montserrat_medium"
                         android:singleLine="true"
-                        android:text="119"
+                        android:text="@{String.valueOf(job.budget)}"
+                        tools:text="9000"
                         android:textColor="@color/black"
                         android:textStyle="normal|bold" />
                 </LinearLayout>
@@ -216,9 +227,10 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
                         android:ellipsize="marquee"
-                        android:fontFamily="@font/montserrat_medium"
+                        android:fontFamily="@font/montserrat_semibold"
                         android:singleLine="true"
-                        android:text="Lahore, Pakistan"
+                        app:location="@{job.location}"
+                        tools:text="Lahore, Pakistan"
                         android:textColor="@color/black" />
                 </LinearLayout>
             </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,5 +1,5 @@
 package com.arkindustries.gogreen.api.request
 
-data class SkillRequest(
+data class SkillsRequest(
     val skills: List<String>,
 )

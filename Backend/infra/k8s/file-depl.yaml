@@ -18,12 +18,20 @@ spec:
           env:
             - name: PORT
               value: "4006"
+            - name: NATS_CLIENT_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: NATS_URL
+              value: "http://nats-srv:4222"
+            - name: NATS_CLUSTER_ID
+              value: builders-bid-cluster
             - name: MONGO_URI
               value: "mongodb://file-mongo-srv:27017/file"
             - name: NODE_ENV
-              value: "production"
+              value: "development"
             - name: BODY_SIZE
-              value: "5gb"
+              value: "26mb"
             - name: REQUEST_RATE_WINDOW
               value: "3600000" # 1 hour
             - name: MAX_REQUEST
@@ -32,6 +40,8 @@ spec:
               value: "864000" # 10 day in seconds
             - name: BUCKET_NAME
               value: "gogreen-files-bucket"
+            - name: FILE_URL_EXPIRES_TIME
+              value: "86400"
             - name: BUCKET_REGION
               value: "ap-south-1"
             - name: ACCESS_KEY
@@ -50,7 +60,7 @@ spec:
                   name: jwt-secret
                   key: JWT_KEY
             - name: ALLOWED_ORIGINS
-              value: "https://www.gogreen.rizsoft.online, https://www.gogreen.com"
+              value: "https://gogreen.rizsoft.online, https://gogreen.com, https://absolutely-sharp-llama.ngrok-free.app"
 ---
 apiVersion: v1
 kind: Service

@@ -1,11 +1,27 @@
 <resources>
     <string name="app_name">Go Green</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string-array name="project_timeline">
-        <item>Less then 1 month</item>
+        <item>Less than 1 month</item>
         <item>1 to 3 months</item>
         <item>3 to 6 months</item>
-        <item>More then 6 months</item>
+        <item>More than 6 months</item>
     </string-array>
+    <string-array name="languages">
+        <item>Arabic</item>
+        <item>Blouchi</item>
+        <item>English</item>
+        <item>Punjabi</item>
+        <item>Pashto</item>
+        <item>Sindhi</item>
+        <item>Turkish</item>
+        <item>Urdu</item>
+    </string-array>
+    <string-array name="languages_experiences">
+        <item>Beginner</item>
+        <item>Intermediate</item>
+        <item>Fluent</item>
+        <item>Native speaker</item>
+    </string-array>
+    <string name="currency">Rs</string>
+    <string name="currency_with_value">%s</string>
 </resources>

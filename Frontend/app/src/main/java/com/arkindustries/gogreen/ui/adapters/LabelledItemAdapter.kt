@@ -8,18 +8,19 @@ import com.arkindustries.gogreen.databinding.LabledListItemBinding
 import com.arkindustries.gogreen.ui.models.LabelledItem
 
 class LabelledItemAdapter<T>(
-    private var dataList: List<LabelledItem<T>> = emptyList(),
     private val listener: OnItemClickListener<T>
-) : RecyclerView.Adapter<LabelledItemAdapter<T>.ViewHolder>() {
+) : RecyclerView.Adapter<LabelledItemAdapter<T>.LabelledItemViewHolder>() {
+    private var dataList = mutableListOf<LabelledItem<T>>()
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LabelledItemViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         val binding = LabledListItemBinding.inflate(inflater, parent, false)
-        return ViewHolder(binding)
+        return LabelledItemViewHolder(binding)
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(dataList[position])
+    override fun onBindViewHolder(holder: LabelledItemViewHolder, position: Int) {
+        val item = dataList[position]
+        holder.bind(item)
     }
 
     override fun getItemCount(): Int {
@@ -29,25 +30,25 @@ class LabelledItemAdapter<T>(
     fun updateData(newData: List<LabelledItem<T>>) {
         val diffCallback = DiffCallback(dataList, newData)
         val diffResult = DiffUtil.calculateDiff(diffCallback)
-        dataList = newData
+        dataList.clear()
+        dataList.addAll(newData)
         diffResult.dispatchUpdatesTo(this)
     }
 
-    inner class ViewHolder(private val binding: LabledListItemBinding) :
-        RecyclerView.ViewHolder(binding.root) {
-        init {
-            binding.root.setOnClickListener {
-                val position = bindingAdapterPosition
-                if (position != RecyclerView.NO_POSITION) {
-                    var item = dataList[position]
-                    item.isSelected.set(!item.isSelected.get()!!)
-                    listener.onItemClick(item)
-                }
-            }
-        }
+    fun appendList(newData: List<LabelledItem<T>>) {
+        val oldSize = dataList.size
+        dataList.addAll(newData)
+        notifyItemRangeInserted(oldSize, newData.size)
+    }
 
+    inner class LabelledItemViewHolder(private val binding: LabledListItemBinding) :
+        RecyclerView.ViewHolder(binding.root) {
         fun bind(item: LabelledItem<T>) {
             binding.item = item
+            binding.root.setOnClickListener {
+                item.isSelected.set(!item.isSelected.get()!!)
+                listener.onItemClick(item)
+            }
             binding.executePendingBindings()
         }
     }

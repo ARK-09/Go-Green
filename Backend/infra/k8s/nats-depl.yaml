@@ -17,19 +17,19 @@ spec:
           image: nats-streaming:0.23.2
           args:
             [
-              '-p',
-              '4222',
-              '-m',
-              '8222',
-              '-hbi',
-              '5s',
-              '-hbt',
-              '5s',
-              '-hbf',
-              '2',
-              '-SD',
-              '-cid',
-              'gogreen',
+              "-p",
+              "4222",
+              "-m",
+              "8222",
+              "-hbi",
+              "5s",
+              "-hbt",
+              "5s",
+              "-hbf",
+              "2",
+              "-SD",
+              "-cid",
+              "builders-bid-cluster",
             ]
 ---
 apiVersion: v1

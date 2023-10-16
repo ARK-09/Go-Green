@@ -5,107 +5,97 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.RatingBar
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
+import com.arkindustries.gogreen.AppContext
 import com.arkindustries.gogreen.api.RetrofitClient
-import com.arkindustries.gogreen.api.response.Skill
-import com.arkindustries.gogreen.api.services.SkillService
+import com.arkindustries.gogreen.api.request.ReviewRequest
+import com.arkindustries.gogreen.api.services.FileService
+import com.arkindustries.gogreen.api.services.ProposalService
 import com.arkindustries.gogreen.database.AppDatabase
-import com.arkindustries.gogreen.database.entites.SkillEntity
-import com.arkindustries.gogreen.databinding.FragmentAddSkillsBinding
-import com.arkindustries.gogreen.ui.adapters.LabelledItemAdapter
-import com.arkindustries.gogreen.ui.models.LabelledItem
-import com.arkindustries.gogreen.ui.repositories.SkillRepository
-import com.arkindustries.gogreen.ui.viewmodels.SkillViewModel
-import com.arkindustries.gogreen.ui.viewmodels.factory.SkillViewModelFactory
-import com.google.android.material.snackbar.Snackbar
+import com.arkindustries.gogreen.database.dao.AttachmentDao
+import com.arkindustries.gogreen.database.dao.ProposalDao
+import com.arkindustries.gogreen.databinding.FragmentFeedbackBinding
+import com.arkindustries.gogreen.ui.repositories.FileRepository
+import com.arkindustries.gogreen.ui.repositories.ProposalRepository
+import com.arkindustries.gogreen.ui.viewmodels.ProposalViewModel
+import com.arkindustries.gogreen.ui.viewmodels.factory.ProposalViewModelFactory
 
-class AddSkillsFragment : DialogFragment() {
-    private lateinit var addSkillsBinding: FragmentAddSkillsBinding
+class FeedbackFragment : DialogFragment() {
+    private lateinit var fragmentFeedbackBinding: FragmentFeedbackBinding
+    private lateinit var fileService: FileService
+    private lateinit var attachmentDao: AttachmentDao
+    private lateinit var fileRepository: FileRepository
+    private lateinit var proposalService: ProposalService
+    private lateinit var proposalDao: ProposalDao
+    private lateinit var proposalRepository: ProposalRepository
+    private lateinit var proposalViewModel: ProposalViewModel
     private lateinit var appDatabase: AppDatabase
-    private lateinit var skillService: SkillService
-    private lateinit var skillRepository: SkillRepository
-    private lateinit var skillsViewModel: SkillViewModel
-    private lateinit var skillsAdapter: LabelledItemAdapter<SkillEntity>
-    private var skills = mutableListOf<Skill>()
+    private var isUserClient: Boolean = false
 
-    interface OnSkillsSelectListener {
-        fun onSkillsSelect(skills: List<Skill>)
+    interface OnFeedbackListener {
+        fun onFeedBack(feedback: ReviewRequest)
     }
 
-    private lateinit var skillsSelectListener: OnSkillsSelectListener
-
+    private lateinit var onFeedbackListener: OnFeedbackListener
     override fun onAttach(context: Context) {
         super.onAttach(context)
         try {
-            skillsSelectListener = context as OnSkillsSelectListener
+            onFeedbackListener = context as OnFeedbackListener
         } catch (e: ClassCastException) {
-            throw ClassCastException("$context must implement OnSkillsSelectListener")
+            throw ClassCastException("$context must implement onFeedbackListener")
         }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        isUserClient = AppContext.getInstance().currentUser.userType == "client"
+
+        appDatabase = AppDatabase.getInstance(requireContext())
+        fileService = RetrofitClient.createFileService(requireContext())
+        attachmentDao = appDatabase.attachmentDao()
+        fileRepository = FileRepository(fileService, attachmentDao)
+        proposalDao = appDatabase.proposalDao()
+        proposalRepository = ProposalRepository(proposalDao, proposalService)
+        proposalViewModel =
+            ViewModelProvider(
+                this,
+                ProposalViewModelFactory(
+                    proposalRepository,
+                    fileRepository
+                )
+            )[ProposalViewModel::class.java]
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        addSkillsBinding = FragmentAddSkillsBinding.inflate(layoutInflater, container, false)
-        return addSkillsBinding.root
+        fragmentFeedbackBinding = FragmentFeedbackBinding.inflate(layoutInflater, container, false)
+        return fragmentFeedbackBinding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        appDatabase = AppDatabase.getInstance(requireContext())
-        skillService = RetrofitClient.createSkillService(requireContext())
-        skillRepository = SkillRepository(skillService, appDatabase.skillDao())
-
-        skillsViewModel = ViewModelProvider(
-            this,
-            SkillViewModelFactory(skillRepository)
-        )[SkillViewModel::class.java]
-
-        val skillItemClickListener =
-            object : LabelledItemAdapter.OnItemClickListener<SkillEntity> {
-                override fun onItemClick(item: LabelledItem<SkillEntity>) {
-                    val isSelected = item.isSelected.get() ?: false
-
-                    if (isSelected) {
-                        skills.add(Skill(item.id, item.title))
-                    } else {
-                        skills.remove(Skill(item.id, item.title))
-                    }
-                }
-
-            }
-
-        addSkillsBinding.done.setOnClickListener {
-            skillsSelectListener.onSkillsSelect(skills)
+        if (!isUserClient) {
+            fragmentFeedbackBinding.feedbackLabel.text.replace(Regex("talent service"), "client")
         }
 
-        addSkillsBinding.cancel.setOnClickListener {
+        fragmentFeedbackBinding.ratingBar.setOnRatingBarChangeListener { _: RatingBar, rating: Float, _: Boolean ->
+            fragmentFeedbackBinding.ratingTv.text = rating.toString()
+        }
+
+        fragmentFeedbackBinding.done.setOnClickListener {
+            val rating = fragmentFeedbackBinding.ratingBar.rating
+            val feedback = fragmentFeedbackBinding.feedbackTi.editText?.text.toString()
+            onFeedbackListener.onFeedBack(ReviewRequest(feedback, rating.toDouble()))
+        }
+
+        fragmentFeedbackBinding.cancel.setOnClickListener {
             dismiss()
-        }
-
-        skillsAdapter = LabelledItemAdapter(listener = skillItemClickListener)
-        skillsViewModel.getAllSkills()
-
-        skillsObserver ()
-        skillsErrorObserver ()
-    }
-
-    private fun skillsObserver () {
-        skillsViewModel.skills.observe(viewLifecycleOwner) {
-            val labelledItems = it.map { skillEntity ->
-                return@map LabelledItem<SkillEntity> (skillEntity.skillId, skillEntity.title)
-            }
-            skillsAdapter.updateData(labelledItems)
-        }
-    }
-
-    private fun skillsErrorObserver () {
-        skillsViewModel.error.observe(viewLifecycleOwner) {
-            Snackbar.make(addSkillsBinding.root, it.message!!, Snackbar.LENGTH_SHORT).show()
-            childFragmentManager.popBackStack()
         }
     }
 }

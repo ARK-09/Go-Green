@@ -1,0 +1,5 @@
+name: file
+packages:
+  - path: src
+language: javascript
+appmap_dir: tmp/appmap

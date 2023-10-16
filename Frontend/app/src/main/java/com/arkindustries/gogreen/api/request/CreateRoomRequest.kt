@@ -1,4 +1,6 @@
 package com.arkindustries.gogreen.api.request
 
-class CreateRoomRequest {
-}
+data class CreateRoomRequest(
+    val name: String,
+    val members: List<String>
+)

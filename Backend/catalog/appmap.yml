@@ -1,0 +1,5 @@
+name: catalog
+packages:
+  - path: src
+language: javascript
+appmap_dir: tmp/appmap

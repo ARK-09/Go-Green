@@ -1,12 +1,13 @@
 const mongoose = require("mongoose");
 
 const proposalSchema = new mongoose.Schema({
-  refId: {
+  doc: {
     type: mongoose.Schema.Types.ObjectId,
     required: [
       true,
       "Please provide a valid reference ID. (jobId or serviceId)",
     ],
+    refPath: "type",
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,
@@ -58,7 +59,6 @@ const proposalSchema = new mongoose.Schema({
         },
       },
       originalName: String,
-      url: String,
       createdDate: { type: Date, default: Date.now },
       _id: false,
     },
@@ -85,8 +85,12 @@ const proposalSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ["job", "service"],
+    enum: ["Jobs", "Services"],
     required: [true, "Please provide a valid type."],
+  },
+  createdDate: {
+    type: Date,
+    default: Date.now,
   },
 });
 

@@ -43,13 +43,19 @@
                         app:layout_constraintTop_toTopOf="parent"
                         tools:text="Maaz Mushtaq" />
 
-                    <com.google.android.material.button.MaterialButton
+                    <com.google.android.material.chip.Chip
                         android:id="@+id/proposal_action_btn"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        app:cornerRadius="50dp"
-                        android:text="Interview"
-                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:fontFamily="@font/inter_medium"
+                        android:textColor="@color/white"
+                        app:chipBackgroundColor="@color/primary"
+                        android:textStyle="bold"
+                        android:text="Edit"
+                        android:textAlignment="center"
+                        android:minWidth="70dp"
+                        app:chipMinHeight="35dp"
+                        app:chipStartPadding="8dp"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
@@ -257,7 +263,6 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/inter_medium"
-                            android:text='@{jobWithCategoriesAndSkillsAndAttachments != null ? String.valueOf(jobWithCategoriesAndSkillsAndAttachments.job.noOfProposals)+" to 50" : "0 to 50"}'
                             android:textAlignment="center"
                             android:textColor="@color/black"
                             android:textStyle="normal|bold"
@@ -314,7 +319,7 @@
                     app:layout_constraintTop_toBottomOf="@+id/proposal_cover_letter" />
 
                 <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/job_attachments"
+                    android:id="@+id/proposal_attachments"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
@@ -330,11 +335,11 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:text="No attachment found for the job"
+                    android:text="No attachment found for the proposal"
                     android:visibility="gone"
-                    app:layout_constraintEnd_toEndOf="@+id/job_attachments"
-                    app:layout_constraintStart_toStartOf="@+id/job_attachments"
-                    app:layout_constraintTop_toTopOf="@+id/job_attachments" />
+                    app:layout_constraintEnd_toEndOf="@+id/proposal_attachments"
+                    app:layout_constraintStart_toStartOf="@+id/proposal_attachments"
+                    app:layout_constraintTop_toTopOf="@+id/proposal_attachments" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -344,7 +349,7 @@
                 android:layout_height="0dp"
                 android:background="#FFFFFF"
                 android:orientation="vertical"
-                android:visibility="gone"
+                android:visibility="visible"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"

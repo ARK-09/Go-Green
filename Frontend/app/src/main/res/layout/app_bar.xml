@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.appbar.AppBarLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/appbar"
+    app:elevation="0dp"
     android:background="@color/white"
     android:layout_width="match_parent"
     android:layout_height="?attr/actionBarSize">
@@ -26,6 +28,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
+            app:tint="@color/black"
             android:background="@android:color/transparent"
             android:src="@drawable/ic_fires_humburger_menu" />
 
@@ -37,6 +40,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
             android:background="@android:color/transparent"
-            android:src="@drawable/ic_notification" />
+            android:src="@drawable/ic_notification"
+            app:tint="@color/black" />
     </androidx.appcompat.widget.Toolbar>
 </com.google.android.material.appbar.AppBarLayout>

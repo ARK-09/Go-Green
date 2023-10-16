@@ -2,14 +2,14 @@ package com.arkindustries.gogreen.ui.viewmodels.factory
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.arkindustries.gogreen.ui.repositories.CategoryRepository
-import com.arkindustries.gogreen.ui.viewmodels.CategoryViewModel
+import com.arkindustries.gogreen.ui.repositories.ContractRepository
+import com.arkindustries.gogreen.ui.viewmodels.ContractViewModel
 
-class CategoryViewModelFactory(private val categoryRepository: CategoryRepository) : ViewModelProvider.Factory {
+class ContractViewModelFactory(private val contractRepository: ContractRepository) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(CategoryViewModel::class.java)) {
-            return CategoryViewModel (categoryRepository) as T
+        if (modelClass.isAssignableFrom(ContractViewModel::class.java)) {
+            return ContractViewModel (contractRepository) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

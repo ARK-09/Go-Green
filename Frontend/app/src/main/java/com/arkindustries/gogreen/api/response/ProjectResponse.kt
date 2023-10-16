@@ -1,13 +1,11 @@
-package com.arkindustries.gogreen.api.request
-
-import com.arkindustries.gogreen.api.response.AttachmentResponse
+package com.arkindustries.gogreen.api.response
 
 data class ProjectResponse(
     val project: Project
 )
 
 data class Project(
-    val id: String,
+    val _id: String,
     val title: String,
     val description: String,
     val startDate: String,

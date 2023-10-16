@@ -32,7 +32,7 @@
                 android:layout_width="45dp"
                 android:layout_height="45dp"
                 android:scaleType="centerCrop"
-                android:src="@drawable/person" />
+                android:src="@drawable/ic_default_user" />
         </androidx.cardview.widget.CardView>
 
         <ImageView

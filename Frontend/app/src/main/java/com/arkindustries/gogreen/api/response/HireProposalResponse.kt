@@ -1,5 +1,5 @@
 package com.arkindustries.gogreen.api.response
 
-data class CreateInterviewResponse(
+data class HireProposalResponse(
     val message: String
 )

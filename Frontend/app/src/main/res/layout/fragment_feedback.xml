@@ -7,55 +7,109 @@
     tools:context=".ui.views.AddSkillsFragment">
 
     <TextView
-        android:id="@+id/textView12"
-        android:layout_width="0dp"
+        android:id="@+id/textView19"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
-        android:text="Add Skills"
+        android:layout_marginTop="16dp"
+        android:fontFamily="@font/inter"
+        android:text="Overall Rating"
         android:textColor="@color/black"
         android:textSize="17sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/skills_rv"
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/rating_tv"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_columnWeight="1"
         android:layout_marginTop="8dp"
-        android:maxHeight="150dp"
-        android:padding="8dp"
-        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+        android:fontFamily="@font/inter_medium"
+        android:text="3.9"
+        android:textColor="@color/black"
+        android:textSize="45sp"
+        app:layout_constraintEnd_toEndOf="@+id/textView19"
+        app:layout_constraintStart_toStartOf="@+id/textView19"
+        app:layout_constraintTop_toBottomOf="@+id/textView19" />
+
+    <RatingBar
+        android:id="@+id/ratingBar"
+        style="@style/Widget.AppCompat.RatingBar.Indicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:numStars="5"
+        android:progressTint="@color/primary"
+        android:stepSize="1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView12"
-        app:spanCount="3"
-        tools:listitem="@layout/labled_list_item" >
+        app:layout_constraintTop_toBottomOf="@+id/rating_tv" />
 
-    </androidx.recyclerview.widget.RecyclerView>
+    <TextView
+        android:id="@+id/feedback_label"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:fontFamily="@font/inter"
+        android:text="Kindly rate the talent service. Your feedback is important."
+        android:textColor="@color/black"
+        app:layout_constraintEnd_toEndOf="@+id/feedback_ti"
+        app:layout_constraintStart_toStartOf="@+id/feedback_ti"
+        app:layout_constraintTop_toBottomOf="@+id/ratingBar" />
 
-    <Button
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/feedback_ti"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="32dp"
+        app:boxBackgroundColor="@android:color/transparent"
+        app:boxCornerRadiusBottomEnd="9dp"
+        app:boxCornerRadiusBottomStart="9dp"
+        app:boxCornerRadiusTopEnd="9dp"
+        app:boxCornerRadiusTopStart="9dp"
+        app:boxStrokeColor="@color/primary"
+        app:boxStrokeWidth="1dp"
+        app:boxStrokeWidthFocused="1dp"
+        app:errorEnabled="true"
+        app:helperTextTextColor="@color/text_primary"
+        app:hintTextColor="@color/text_primary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/feedback_label">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fontFamily="@font/inter"
+            android:gravity="top|left"
+            android:inputType="textMultiLine"
+            android:minLines="5"
+            android:textColor="@color/text_primary"
+            android:textColorHint="@color/text_primary"
+            android:textCursorDrawable="@null" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/done"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:text="Done"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/skills_rv" />
+        app:cornerRadius="3dp"
+        app:layout_constraintEnd_toEndOf="@+id/feedback_ti"
+        app:layout_constraintTop_toBottomOf="@+id/feedback_ti" />
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/cancel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:text="Cancel"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:cornerRadius="3dp"
         app:layout_constraintEnd_toStartOf="@+id/done"
-        app:layout_constraintTop_toBottomOf="@+id/skills_rv" />
+        app:layout_constraintTop_toTopOf="@+id/done" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

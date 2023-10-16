@@ -3,12 +3,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <data>
-        <variable
-            name="jobWithCategoriesAndSkillsAndAttachments"
-            type="com.arkindustries.gogreen.database.entites.JobWithCategoriesAndSkillsAndAttachments" />
-    </data>
-
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -28,60 +22,125 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/job_location"
-                    android:layout_width="wrap_content"
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/constraintLayout4"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:fontFamily="@font/inter_medium"
-                    android:textColor="@color/black"
-                    android:textStyle="bold"
-                    app:chipEndPadding="8dp"
-                    app:chipIcon="@drawable/ic_location"
-                    app:chipIconTint="@color/black"
-                    app:chipMinHeight="35dp"
-                    app:chipStartPadding="8dp"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:location="@{jobWithCategoriesAndSkillsAndAttachments.job.location ?? null}"
-                    tools:text="Lahore, Pakistan" />
-
-                <TextView
-                    android:id="@+id/job_title"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:fontFamily="@font/inter_medium"
-                    android:text='@{jobWithCategoriesAndSkillsAndAttachments.job.title ?? " "}'
-                    android:textColor="@color/black"
-                    android:textSize="19sp"
-                    android:textStyle="bold"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="@+id/job_location"
-                    app:layout_constraintTop_toBottomOf="@+id/job_location"
-                    tools:text="Revamp Our E-commerce Website with a Fresh &amp; Clean UI Design" />
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
 
-                <TextView
-                    android:id="@+id/textView14"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:fontFamily="@font/inter"
-                    android:text="Posted"
-                    android:textColor="@color/text_secondary_secondary"
-                    app:layout_constraintStart_toStartOf="@+id/job_title"
-                    app:layout_constraintTop_toBottomOf="@+id/job_title" />
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/user_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:chipIcon="@drawable/ic_default_user"
+                        app:chipStartPadding="8dp"
+                        android:maxEms="15"
+                        android:ellipsize="end"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:text="Maaz Mushtaq" />
 
-                <TextView
-                    android:id="@+id/job_date_time"
-                    android:layout_width="wrap_content"
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/proposal_action_btn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/inter_medium"
+                        android:textColor="@color/white"
+                        app:chipBackgroundColor="@color/primary"
+                        android:textStyle="bold"
+                        android:text="Edit"
+                        android:textAlignment="center"
+                        android:minWidth="70dp"
+                        app:chipMinHeight="35dp"
+                        app:chipStartPadding="8dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/materialCardView"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="3dp"
-                    android:fontFamily="@font/inter"
-                    android:textColor="@color/text_secondary_secondary"
-                    app:layout_constraintBaseline_toBaselineOf="@+id/textView14"
-                    app:layout_constraintStart_toEndOf="@+id/textView14"
-                    app:timeAgo="@{jobWithCategoriesAndSkillsAndAttachments != null ? jobWithCategoriesAndSkillsAndAttachments.job.createdDate : null}"
-                    tools:text="1 hour ago" />
+                    android:layout_marginTop="16dp"
+                    app:cardBackgroundColor="#40DAE5DD"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="0dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/constraintLayout4"
+                    app:strokeColor="#D5D5D5"
+                    app:strokeWidth="1dp">
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:id="@+id/job_title_tv"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/montserrat_medium"
+                            android:textColor="@color/black"
+                            android:textSize="17sp"
+                            android:textStyle="bold"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            tools:text="Revamp Our E-commerce Website with a Fresh &amp; Clean UI Design" />
+
+                        <TextView
+                            android:id="@+id/job_date_time_label"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:fontFamily="@font/montserrat"
+                            android:text="Posted"
+                            android:textColor="@color/text_secondary_secondary"
+                            app:layout_constraintStart_toStartOf="@+id/job_title_tv"
+                            app:layout_constraintTop_toBottomOf="@+id/job_title_tv" />
+
+                        <TextView
+                            android:id="@+id/job_date_time_tv"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="3dp"
+                            android:fontFamily="@font/montserrat"
+                            android:textColor="@color/text_secondary_secondary"
+                            app:layout_constraintBaseline_toBaselineOf="@+id/job_date_time_label"
+                            app:layout_constraintStart_toEndOf="@+id/job_date_time_label"
+                            tools:text="23 minutes ago" />
+
+                        <TextView
+                            android:id="@+id/separator"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginBottom="8dp"
+                            android:fontFamily="@font/montserrat"
+                            android:text="."
+                            android:textAlignment="center"
+                            android:textSize="17sp"
+                            android:textStyle="bold"
+                            app:layout_constraintBottom_toBottomOf="@+id/job_date_time_tv"
+                            app:layout_constraintStart_toEndOf="@+id/job_date_time_tv"
+                            app:layout_constraintTop_toTopOf="@+id/job_date_time_tv" />
+
+                        <TextView
+                            android:id="@+id/job_location_tv"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:fontFamily="@font/montserrat"
+                            android:textColor="@color/text_secondary_secondary"
+                            app:layout_constraintBaseline_toBaselineOf="@+id/job_date_time_tv"
+                            app:layout_constraintStart_toEndOf="@+id/separator"
+                            tools:text="Lahore, Pakistan" />
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+                </com.google.android.material.card.MaterialCardView>
 
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/materialCardView2"
@@ -94,7 +153,7 @@
                     app:layout_constraintHorizontal_bias="0.5"
                     app:layout_constraintHorizontal_chainStyle="spread_inside"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/textView14"
+                    app:layout_constraintTop_toBottomOf="@+id/materialCardView"
                     app:strokeColor="#CFCFCF"
                     app:strokeWidth="1dp">
 
@@ -106,11 +165,10 @@
                         android:textAlignment="center">
 
                         <TextView
-                            android:id="@+id/job_budget"
+                            android:id="@+id/proposal_bid_amount"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/inter_medium"
-                            android:text='@{String.format("%s%.2f", @string/currency+" ", (jobWithCategoriesAndSkillsAndAttachments != null ? jobWithCategoriesAndSkillsAndAttachments.job.budget : 0.0f))}'
                             android:textAlignment="center"
                             android:textColor="@color/black"
                             android:textStyle="normal|bold"
@@ -121,12 +179,11 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/inter"
-                            android:text='@{jobWithCategoriesAndSkillsAndAttachments != null ? jobWithCategoriesAndSkillsAndAttachments.job.paymentType.toUpperCase() : "Fixed".toUpperCase()}'
+                            android:text='Bid Amount'
                             android:textAlignment="center"
                             android:textColor="@color/text_secondary_secondary"
                             android:textSize="13sp"
-                            android:textStyle="normal"
-                            tools:text="Fixed" />
+                            android:textStyle="normal" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
@@ -152,7 +209,7 @@
                         android:textAlignment="center">
 
                         <TextView
-                            android:id="@+id/job_duration"
+                            android:id="@+id/proposed_proposal_duration"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:ellipsize="marquee"
@@ -165,7 +222,6 @@
                             android:maxLength="17"
                             android:scrollHorizontally="true"
                             android:singleLine="true"
-                            android:text='@{jobWithCategoriesAndSkillsAndAttachments.job.expectedDuration ?? " "}'
                             android:textColor="@color/black"
                             android:textStyle="normal|bold"
                             tools:text="Less then 1 month 1 month" />
@@ -174,7 +230,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/inter"
-                            android:text="Duration"
+                            android:text="Proposed Duration"
                             android:textAlignment="center"
                             android:textColor="@color/text_secondary_secondary"
                             android:textSize="13sp" />
@@ -203,21 +259,20 @@
                         android:textAlignment="center">
 
                         <TextView
-                            android:id="@+id/job_proposal_count"
+                            android:id="@+id/proposal_status"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/inter_medium"
-                            android:text='@{jobWithCategoriesAndSkillsAndAttachments != null ? String.valueOf(jobWithCategoriesAndSkillsAndAttachments.job.noOfProposals)+" to 50" : "0 to 50"}'
                             android:textAlignment="center"
                             android:textColor="@color/black"
                             android:textStyle="normal|bold"
-                            tools:text="10 to 50" />
+                            tools:text="Submitted" />
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/inter"
-                            android:text="Proposals"
+                            android:text="Status"
                             android:textAlignment="center"
                             android:textColor="@color/text_secondary_secondary"
                             android:textSize="13sp" />
@@ -230,7 +285,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:fontFamily="@font/inter_medium"
-                    android:text="Job Description"
+                    android:text="Cover Letter"
                     android:textColor="@color/black"
                     android:textSize="17sp"
                     android:textStyle="normal|bold"
@@ -238,29 +293,17 @@
                     app:layout_constraintTop_toBottomOf="@+id/materialCardView3" />
 
                 <TextView
-                    android:id="@+id/job_description"
+                    android:id="@+id/proposal_cover_letter"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:fontFamily="@font/inter"
                     android:justificationMode="inter_word"
-                    android:text='@{jobWithCategoriesAndSkillsAndAttachments.job.description ?? ""}'
                     android:textColor="#595959"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="@+id/textView24"
                     app:layout_constraintTop_toBottomOf="@+id/textView24"
                     tools:text="Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum." />
-
-                <com.google.android.material.chip.ChipGroup
-                    android:id="@+id/job_skills"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    app:chipSpacingHorizontal="5dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="@+id/job_description"
-                    app:layout_constraintTop_toBottomOf="@+id/job_description"
-                    app:populateSkills="@{jobWithCategoriesAndSkillsAndAttachments != null ? jobWithCategoriesAndSkillsAndAttachments.skills : null}" />
 
                 <TextView
                     android:id="@+id/textView26"
@@ -272,11 +315,11 @@
                     android:textColor="@color/black"
                     android:textSize="17sp"
                     android:textStyle="normal|bold"
-                    app:layout_constraintStart_toStartOf="@+id/job_skills"
-                    app:layout_constraintTop_toBottomOf="@+id/job_skills" />
+                    app:layout_constraintStart_toStartOf="@+id/proposal_cover_letter"
+                    app:layout_constraintTop_toBottomOf="@+id/proposal_cover_letter" />
 
                 <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/job_attachments"
+                    android:id="@+id/proposal_attachments"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
@@ -285,7 +328,6 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="@+id/textView26"
                     app:layout_constraintTop_toBottomOf="@+id/textView26"
-                    app:submitViewJobAttachmentList='@{jobWithCategoriesAndSkillsAndAttachments != null ? jobWithCategoriesAndSkillsAndAttachments.attachments : null}'
                     tools:listitem="@layout/job_attachment_list_item" />
 
                 <TextView
@@ -293,25 +335,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:text="No attachment found for the job"
+                    android:text="No attachment found for the proposal"
                     android:visibility="gone"
-                    app:layout_constraintEnd_toEndOf="@+id/job_attachments"
-                    app:layout_constraintStart_toStartOf="@+id/job_attachments"
-                    app:layout_constraintTop_toTopOf="@+id/job_attachments" />
+                    app:layout_constraintEnd_toEndOf="@+id/proposal_attachments"
+                    app:layout_constraintStart_toStartOf="@+id/proposal_attachments"
+                    app:layout_constraintTop_toTopOf="@+id/proposal_attachments" />
 
-                <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-                    android:id="@+id/job_action_btn"
-                    android:layout_width="200dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
-                    android:fontFamily="@font/inter_medium"
-                    android:text="Apply"
-                    android:textAlignment="center"
-                    android:textColor="@color/white"
-                    android:textStyle="normal|bold"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <RelativeLayout

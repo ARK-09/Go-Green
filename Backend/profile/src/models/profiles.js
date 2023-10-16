@@ -41,17 +41,29 @@ const profilesSchema = new mongoose.Schema({
     default: "",
   },
   location: {
-    type: [
-      {
-        type: {
-          type: String,
-          default: "Point",
-          enum: ["Point"],
-        },
-        coordinates: [Number],
+    type: {
+      type: String,
+      default: "Point",
+      enum: {
+        values: ["Point"],
+        message:
+          "Please provide location type as 'Point' no other values are acceptable.",
       },
-    ],
-    required: [true, "Please provide your location."],
+    },
+    coordinates: {
+      type: [Number],
+      index: "2dsphere",
+      required: [
+        true,
+        "Please provide job location coordinates as [longitude, latitude].",
+      ],
+      validate: {
+        validator: (coords) => coords.length === 2,
+        message:
+          "Coordinates should contain exactly two elements: [longitude, latitude].",
+      },
+      default: [0.0, 0.0],
+    },
   },
   projects: [
     {
@@ -59,13 +71,31 @@ const profilesSchema = new mongoose.Schema({
       ref: "Projects",
     },
   ],
-  skills: [String],
-  userId: mongoose.Schema.Types.ObjectId,
+  skills: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Skills",
+    },
+  ],
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  },
+  rating: {
+    type: Number,
+    default: 5.0,
+  },
   active: {
     type: Boolean,
     default: true,
   },
+  createdDate: {
+    type: Date,
+    default: Date.now,
+  },
 });
+
+profilesSchema.index({ "location.coordinates": "2dsphere" });
 
 const ProfilesModel = mongoose.model("Profiles", profilesSchema);
 

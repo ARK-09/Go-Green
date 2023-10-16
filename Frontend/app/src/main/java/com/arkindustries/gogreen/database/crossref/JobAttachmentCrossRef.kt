@@ -2,8 +2,8 @@ package com.arkindustries.gogreen.database.crossref
 
 import androidx.room.Entity
 
-@Entity(primaryKeys = ["jobId", "skillId"])
-data class JobSkillCrossRef(
+@Entity(tableName = "job_attachment_cross_ref", primaryKeys = ["jobId", "attachmentId"])
+data class JobAttachmentCrossRef(
     val jobId: String,
-    val skillId: String
+    val attachmentId: String
 )

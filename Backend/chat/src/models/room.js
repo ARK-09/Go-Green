@@ -13,10 +13,18 @@ const roomSchema = new mongoose.Schema({
       _id: false,
     },
   ],
-  ownerId: {
+  owner: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,
+  },
+  lastMessage: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Messages",
+  },
+  createdDate: {
+    type: Date,
+    default: Date.now,
   },
 });
 
